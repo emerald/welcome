@@ -13,5 +13,4 @@
 #endif /* CCALL */
 
 CCALL( xrandom, RANDOM, "i" )
-
 CCALL( xsrandom, SRANDOM, "vi" )

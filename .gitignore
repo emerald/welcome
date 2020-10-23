@@ -1,0 +1,13 @@
+# Emerald
+*.x
+EC/bestCP
+EC/execCP
+EC/CP*
+EC/name*
+
+
+# C files
+*.o
+vm/src/vm.h.orig
+vm/src/vm_i.h.orig
+ccalls/xsed

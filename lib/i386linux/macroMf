@@ -10,7 +10,7 @@ ARCH = `arch`
 CC = cc
 
 # definitions to enable common extensions in headers and libraries
-XCPFLAGS =
+XCPFLAGS = -Di386linux -DDISTRIBUTED -DUSEDISTGC
 
 XLIB =
 
@@ -20,7 +20,7 @@ CPP = cc -E
 # dependency generator
 DEPEND = cc -MM
 
-# 
+#
 CFLAGSOPT = -g -O3 -m32
 OPTCOPT   = $(CFLAGSOPT)
 OPTVMOPT  = $(CFLAGSOPT)

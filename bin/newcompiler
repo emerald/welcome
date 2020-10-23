@@ -1,0 +1,7 @@
+#!/bin/sh
+cd $EMERALDROOT/EC
+emmake fffs
+newversion
+useversion
+emmake bestCP
+useversion best
