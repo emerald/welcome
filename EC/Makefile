@@ -41,8 +41,8 @@ tokNames.m parsedef.m parse.m:	em_ecomp.y
 	chmod -w parse.m parsedef.m tokNames.m
 
 reset:
-	rm -f CP CPIndex *.x
-	rm -f name.idb name name.ats name.oid name.opd
+	rm -f CP* CPIndex* *.x
+	rm -f name*
 
 dolinks:
 	rm -f /tmp/CP /tmp/CPIndex /tmp/name /tmp/name.ats /tmp/name.oid /tmp/name.opd /tmp/name.idb
@@ -83,7 +83,7 @@ bestCP:	execCP
 	echo source xxinput | $(EMX) -O4m -v execCP
 	rm xxinput
 
-XCP:	
+XCP:
 	echo >  xxinput  unset perfile
 	echo >> xxinput  unset exporttree
 	echo >> xxinput  set dotypecheck
