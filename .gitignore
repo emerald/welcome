@@ -2,7 +2,9 @@
 *.x
 EC/bestCP
 EC/execCP
-EC/CP*
+EC/CP
+EC/CP_*
+EC/CPIndex*
 EC/name*
 
 
