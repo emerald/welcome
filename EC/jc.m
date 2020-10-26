@@ -245,12 +245,12 @@ const driver <- object driver
     end initially
     
     recovery
-    primitive "SYS" "GETSTDIN" 0 [ins] <- []
-    primitive "SYS" "GETSTDOUT" 0 [outs] <- []
-    nextoid.reset
-end recovery
-
-process
-    self.doit
-end process
+        primitive "SYS" "GETSTDIN" 0 [ins] <- []
+        primitive "SYS" "GETSTDOUT" 0 [outs] <- []
+        nextoid.reset
+    end recovery
+    
+    process
+        self.doit
+    end process
 end driver

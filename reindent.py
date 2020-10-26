@@ -6,7 +6,7 @@ if len(argv) < 2:
 
 keywords = ["if", "else", "elseif", "failure", "unavailable", "object",
             "typeobject", "class", "for", "loop", "op", "operation", "function",
-            "begin", "process", "initially", "enumeration", "record"]
+            "begin", "process", "initially", "enumeration", "record", "recovery"]
 
 numSpaces = 4
 spaces = numSpaces * " "
