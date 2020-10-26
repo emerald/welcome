@@ -6,12 +6,12 @@ const CP <- class CP  [inputfilename : String, perfile : Boolean]
     var cpfilename : String
     var inf : InStream
     var cpf : OutStream
-
+    
     export operation CP [x : CPAble]
         var foo : Any
         assert q.upperbound < q.lowerbound
         q.slideTo[start]
-
+        
         x.getIndex[start, q]
         start <- q.upperbound + 1
         loop
@@ -19,7 +19,7 @@ const CP <- class CP  [inputfilename : String, perfile : Boolean]
             q.removeLower.cpoint[cpf]
         end loop
     end CP
-
+    
     export operation finish
         if !perfile then
             var outf : OutStream
@@ -40,7 +40,7 @@ const CP <- class CP  [inputfilename : String, perfile : Boolean]
         end if
         cpf.close
     end finish
-
+    
     initially
         var mode : String
         if perfile then
@@ -90,7 +90,7 @@ const CP <- class CP  [inputfilename : String, perfile : Boolean]
             cpf.putchar['\n']
         end if
     end initially
-
+    
     operation build [base : String, delim : Character, rest : String] -> [ans : String]
         var i : Integer <- base.length - 1
         loop
@@ -104,7 +104,7 @@ const CP <- class CP  [inputfilename : String, perfile : Boolean]
             ans <- base[0, i+1] || rest
         end if
     end build
-
+    
 end CP
 
 export CP
