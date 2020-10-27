@@ -7,6 +7,7 @@
 | <constantDeclarationS> <constantDeclaration>
 ;
 <empty> ::=
+' '
 ;
 <environmentExport> ::=
 'KEXPORT' <symbolReferenceS> 'KTO' 'TSTRINGLITERAL'
@@ -47,7 +48,7 @@
 <symbolReference>
 | <symbolReferenceS> 'TCOMMA' <symbolReference>
 ;
-symbolReferenceOrLiteral::=
+<symbolReferenceOrLiteral> ::=
 <symbolReference>
 | 'TINTEGERLITERAL'
 | 'TCHARACTERLITERAL'
@@ -79,13 +80,13 @@ symbolReferenceOrLiteral::=
 <parameter>
 | <parameterS> 'TCOMMA' <parameter>
 ;
-omove::=
+<omove> ::=
 'KMOVE'
-|
+?
 ;
-oattached::=
+<oattached> ::=
 'KATTACHED'
-|
+?
 ;
 <parameter> ::=
 <omove> <oattached> <symbolDefinition> 'TCOLON' <expression>
@@ -109,8 +110,8 @@ oattached::=
 | 'KSUCHTHAT' 'TIDENTIFIER' 'OCONFORMSTO' <typeObject>
 | 'KFORALL' 'TIDENTIFIER'
 ;
-builtin::=
-| 'KBUILTIN' 'TINTEGERLITERAL'
+<builtin> ::=
+('KBUILTIN' 'TINTEGERLITERAL')?
 ;
 <object> ::=
 'KOBJECT' <symbolDefinition> <builtin> <declarationS> <operationDefinitionS> 'KEND' <symbolReference>
@@ -478,4 +479,3 @@ builtin::=
 <symbolDefinition> ::=
 'TIDENTIFIER'
 ;
-
