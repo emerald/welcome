@@ -121,7 +121,6 @@ closure =
 creators =
 		empty
 	|	creators KCLASS constantDeclaration
-	.
 	|	creators KCLASS operationDefinition
 	.
 obase =
@@ -350,7 +349,7 @@ expression =
 	|	expression ODIVIDE expression
 	|	expression OMOD expression
 	|	expression TOPERATOR expression
-	|	negate expression %prec ONEGATE
+	|	negate expression
 	|	KLOCATE expression
 	|	KAWAITING expression
 	|	KCODEOF expression

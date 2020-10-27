@@ -16,9 +16,11 @@ with open("grammar.y") as file:
                 line = line[ : line.find("{")]
 
 
-        line = line.replace(":", "=")
-        line = line.replace(";", ".")
-        # if line != "\s++":
+        line = line.replace(":", "::=")
+        line = " ".join([f"'{w}'" if w.isupper()  \
+            else f"<{w}>" if not (";" in w or "|" in w or "::=" in w)  \
+            else w for w in line.strip().split()])
+
         if line.strip():
-            print(line, end="")
+            print(line)
     print()

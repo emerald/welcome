@@ -233,7 +233,6 @@ creators :
 		{ $$ <- nil }
 	|	creators KCLASS constantDeclaration
 		{ if $1 == nil then $$ <- seq.pair[seq.singleton[$3], seq.create[env$ln]] else $$ <- $1 $$[0].rcons[$3] end if }
-	;
 	|	creators KCLASS operationDefinition
 		{ if $1 == nil then $$ <- seq.pair[seq.create[env$ln], seq.singleton[$3]] else $$ <- $1 $$[1].rcons[$3] end if }
 	;
@@ -650,7 +649,7 @@ expression :
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
 	|	expression TOPERATOR expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	negate expression %prec ONEGATE
+	|	negate expression
 		{
 		  const x : Tree <- $2
 		  const s <- nameof x
@@ -688,7 +687,6 @@ expression :
 expressionZero :
 		alpha { $$ <- $1 }
 	;
-/* alphas are any invocation expression */
 alpha :
 		beta { $$ <- $1 }
 	|	KNEW primary
@@ -700,8 +698,7 @@ alpha :
 	|	alpha TDOTQUESTION operationNameReference
 		{ $$ <- questinvoc.create[env$ln, $1, (view $3 as hasIdent)$id, nil] }
 	;
-/* betas are subscriptable */
-beta:
+beta :
 		primary { $$ <- $1 }
 	|	KNEW primary neArgumentClause
 		{ $$ <- newExp.create[env$ln, $2, $3] }
