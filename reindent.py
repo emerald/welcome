@@ -31,9 +31,14 @@ def custom_split(s):
 
         if isString:
             theString += res[i] + " "
-
         i += 1
-    return res
+
+    for i in range(len(res)):
+        if "%" in res[i] and not '"' in res[i]:
+            res[i] = res[i][0:res[i].find("%")]
+            break
+
+    return res[0:i+1]
 
 for fn in argv[1:]:
 
