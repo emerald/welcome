@@ -1,5 +1,5 @@
 <compilation> ::=
-<constantDeclarationS> 'TEOF'
+<constantDeclarationS> 'EOF'
 ;
 <constantDeclarationS> ::=
 <empty>
@@ -10,25 +10,25 @@
 ' '
 ;
 <environmentExport> ::=
-'KEXPORT' <symbolReferenceS> 'KTO' 'TSTRINGLITERAL'
+'export' <symbolReferenceS> 'to' 'STR LIT'
 |
-'KEXPORT' <symbolReferenceS>
+'export' <symbolReferenceS>
 ;
 <typeClauseOpt> ::=
 <empty>
 | <typeClause>
 ;
 <typeClause> ::=
-'TCOLON' <typeDefinition>
+':' <typeDefinition>
 ;
 <typeDefinition> ::=
 <expression>
 ;
 <abstractType> ::=
-'KTYPEOBJECT' <symbolDefinition> <builtin> <operationSignatureS> 'KEND' <symbolReference>
+'typeobject' <symbolDefinition> <builtin> <operationSignatureS> 'end' <symbolReference>
 ;
 <record> ::=
-'KRECORD' <symbolDefinition> <recordFieldS> 'KEND' <symbolReference>
+'record' <symbolDefinition> <recordFieldS> 'end' <symbolReference>
 ;
 <recordFieldS> ::=
 <recordField>
@@ -38,64 +38,64 @@
 <attached> <ovar> <symbolDefinitionS> <typeClause>
 ;
 <enumeration> ::=
-'KENUMERATION' <symbolDefinition> <symbolDefinitionS> 'KEND' <symbolReference>
+'enumeration' <symbolDefinition> <symbolDefinitionS> 'end' <symbolReference>
 ;
 <symbolDefinitionS> ::=
 <symbolDefinition>
-| <symbolDefinitionS> 'TCOMMA' <symbolDefinition>
+| <symbolDefinitionS> ',' <symbolDefinition>
 ;
 <symbolReferenceS> ::=
 <symbolReference>
-| <symbolReferenceS> 'TCOMMA' <symbolReference>
+| <symbolReferenceS> ',' <symbolReference>
 ;
-<symbolReferenceOrLiteral> ::=
+<symbolRefOrLit> ::=
 <symbolReference>
-| 'TINTEGERLITERAL'
-| 'TCHARACTERLITERAL'
-| 'TSTRINGLITERAL'
+| 'INT LIT'
+| 'CHAR LIT'
+| 'STR LIT'
 ;
-<symbolReferenceOrLiteralS> ::=
-<symbolReferenceOrLiteral>
-| <symbolReferenceOrLiteralS> 'TCOMMA' <symbolReferenceOrLiteral>
+<symbolRefOrLitS> ::=
+<symbolRefOrLit>
+| <symbolRefOrLitS> ',' <symbolRefOrLit>
 ;
 <operationSignatureS> ::=
 <empty>
 | <operationSignatureS> <operationSignature>
 ;
 <operationSignature> ::=
-'KFUNCTION' <operationNameDefinition> <parameterClause> <returnClause> <whereClause>
+'function' <opNameDefinition> <parameterClause> <returnClause> <whereClause>
 |
-<operationWord> <operationNameDefinition> <parameterClause> <returnClause> <whereClause>
+<operationWord> <opNameDefinition> <parameterClause> <returnClause> <whereClause>
 ;
 <operationWord> ::=
-'KOPERATION'
-| 'KOP'
+'operation'
+| 'op'
 ;
 <parameterClause> ::=
 <empty>
-| 'TLSQUARE' 'TRSQUARE'
-| 'TLSQUARE' <parameterS> 'TRSQUARE'
+| '[' ']'
+| '[' <parameterS> ']'
 ;
 <parameterS> ::=
 <parameter>
-| <parameterS> 'TCOMMA' <parameter>
+| <parameterS> ',' <parameter>
 ;
 <omove> ::=
-'KMOVE'
+'move'
 ?
 ;
 <oattached> ::=
-'KATTACHED'
+'attached'
 ?
 ;
 <parameter> ::=
-<omove> <oattached> <symbolDefinition> 'TCOLON' <expression>
+<omove> <oattached> <symbolDefinition> ':' <expression>
 | <omove> <oattached> <expression>
 ;
 <returnClause> ::=
 <empty>
-| 'ORETURNS' 'TLSQUARE' 'TRSQUARE'
-| 'ORETURNS' 'TLSQUARE' <parameterS> 'TRSQUARE'
+| '->' '[' ']'
+| '->' '[' <parameterS> ']'
 ;
 <whereClause> ::=
 <empty>
@@ -106,37 +106,40 @@
 | <whereWidgitS> <whereWidgit>
 ;
 <whereWidgit> ::=
-'KWHERE' 'TIDENTIFIER' 'OASSIGN' <expression>
-| 'KSUCHTHAT' 'TIDENTIFIER' 'OCONFORMSTO' <typeObject>
-| 'KFORALL' 'TIDENTIFIER'
+'where' 'IDENTIFIER' '<-' <expression>
+| 'suchthat' 'IDENTIFIER' '*>' <typeObject>
+| 'forall' 'IDENTIFIER'
 ;
 <builtin> ::=
-('KBUILTIN' 'TINTEGERLITERAL')?
+('builtin' 'INT LIT')?
 ;
 <object> ::=
-'KOBJECT' <symbolDefinition> <builtin> <declarationS> <operationDefinitionS> 'KEND' <symbolReference>
+'object' <symbolDefinition> <builtin> <declarationS> ||
+<operationDefinitionS> 'end' <symbolReference>
 ;
 <closure> ::=
-'KCLOSURE' <symbolDefinition> <builtin> <parameterClause> <declarationS> <operationDefinitionS> 'KEND' <symbolReference>
+'closure' <symbolDefinition> <builtin> <parameterClause> ||
+<declarationS> <operationDefinitionS> 'end' <symbolReference>
 ;
 <creators> ::=
 <empty>
-| <creators> 'KCLASS' <constantDeclaration>
-| <creators> 'KCLASS' <operationDefinition>
+| <creators> 'class' <constantDeclaration>
+| <creators> 'class' <operationDefinition>
 ;
 <obase> ::=
 <empty>
-| 'TLPAREN' <symbolReference> 'TRPAREN'
+| '(' <symbolReference> ')'
 ;
 <class> ::=
-'KCLASS' <symbolDefinition> <obase> <parameterClause> <builtin> <creators> <declarationS> <operationDefinitionS> 'KEND' <symbolReference>
+'class' <symbolDefinition> <obase> <parameterClause> <builtin> ||
+<creators> <declarationS> <operationDefinitionS> 'end' <symbolReference>
 ;
 <declarationS> ::=
 <empty>
 | <declarationS> <declaration>
 ;
 <attached> ::=
-'KATTACHED'
+'attached'
 | <empty>
 ;
 <declaration> ::=
@@ -149,27 +152,27 @@
 | <externalDeclaration>
 ;
 <constantDefOp> ::=
-'OASSIGN'
+'<-'
 ;
 <fieldDeclaration> ::=
-'KFIELD' <symbolDefinition> <typeClause> <initializerOpt>
-| 'KCONST' 'KFIELD' <symbolDefinition> <typeClause> <initializerOpt>
+'field' <symbolDefinition> <typeClause> <initializerOpt>
+| 'const' 'field' <symbolDefinition> <typeClause> <initializerOpt>
 ;
 <constantDeclaration> ::=
-'KCONST' <symbolDefinition> <typeClauseOpt> <constantDefOp> <expression>
+'const' <symbolDefinition> <typeClauseOpt> <constantDefOp> <expression>
 ;
 <externalDeclaration> ::=
-'KEXTERNAL' <symbolDefinition> <typeClause>
+'external' <symbolDefinition> <typeClause>
 ;
 <initializerOpt> ::=
 <empty>
-| 'OASSIGN' <expression>
+| '<-' <expression>
 ;
 <initializer> ::=
-'OASSIGN' <expression>
+'<-' <expression>
 ;
 <variableDeclaration> ::=
-'KVAR' <symbolDefinitionS> <typeClause> <initializerOpt>
+'var' <symbolDefinitionS> <typeClause> <initializerOpt>
 ;
 <operationDefinitionS> ::=
 <empty>
@@ -180,36 +183,36 @@
 ;
 <operationDefinition> ::=
 <operationDefinitionRest>
-| 'KEXPORT' <operationDefinitionRest>
+| 'export' <operationDefinitionRest>
 ;
 <operationDefinitionRest> ::=
-<operationSignature> <blockBody> 'KEND' <operationNameReference>
+<operationSignature> <blockBody> 'end' <operationNameRef>
 ;
 <blockBody> ::=
-<declarationsAndStatements> <unavailableHandler> <failureHandler>
+<declAndStmts> <unavailableHandler> <failureHandler>
 ;
 <initiallyDefinition> ::=
-'KINITIALLY' <blockBody> 'KEND' 'KINITIALLY'
+'inITIALLY' <blockBody> 'end' 'inITIALLY'
 ;
 <recoveryDefinition> ::=
-'KRECOVERY' <blockBody> 'KEND' 'KRECOVERY'
+'recovery' <blockBody> 'end' 'recovery'
 ;
 <processDefinition> ::=
-'KPROCESS' <blockBody> 'KEND' 'KPROCESS'
+'process' <blockBody> 'end' 'process'
 ;
-<declarationsAndStatements> ::=
+<declAndStmts> ::=
 <empty>
-| <declarationsAndStatements> <declaration>
-| <declarationsAndStatements> <statement>
+| <declAndStmts> <declaration>
+| <declAndStmts> <statement>
 ;
-<acceptStatement> ::= 'KACCEPT' <expression>
+<acceptStatement> ::= 'accept' <expression>
 ;
 <statement> ::=
 <ifStatement>
 | <loopStatement>
 | <forStatement>
 | <exitStatement>
-| <assignmentOrInvocationStatement>
+| <assignOrInvocStmt>
 | <assertStatement>
 | <moveStatement>
 | <compoundStatement>
@@ -223,247 +226,254 @@
 ;
 <optDeclaration> ::=
 <empty>
-| 'TLSQUARE' <symbolDefinition> 'TRSQUARE'
+| '[' <symbolDefinition> ']'
 ;
 <unavailableHandler> ::=
 <empty>
-| 'KUNAVAILABLE' <optDeclaration> <blockBody> 'KEND' 'KUNAVAILABLE'
+| 'unavailable' <optDeclaration> <blockBody> 'end' 'unavailable'
 ;
 <failureHandler> ::=
 <empty>
-| 'KFAILURE' <blockBody> 'KEND' 'KFAILURE'
+| 'failure' <blockBody> 'end' 'failure'
 ;
 <ifClauseS> ::=
 <ifClause>
-| <ifClauseS> 'KELSEIF' <ifClause>
+| <ifClauseS> 'elseif' <ifClause>
 ;
 <ifClause> ::=
-<expression> 'KTHEN' <declarationsAndStatements>
+<expression> 'then' <declAndStmts>
 ;
 <elseClause> ::=
 <empty>
-| 'KELSE' <declarationsAndStatements>
+| 'else' <declAndStmts>
 ;
 <ifStatement> ::=
-'KIF' <ifClauseS> <elseClause> 'KEND' 'KIF'
+'if' <ifClauseS> <elseClause> 'end' 'if'
 ;
 <forStatement> ::=
-'KFOR' 'TLPAREN' <assignmentOrInvocationStatement> 'TCOLON' <expression> 'TCOLON' <assignmentOrInvocationStatement> 'TRPAREN' <declarationsAndStatements> 'KEND' 'KFOR'
-| 'KFOR' <symbolDefinition> <typeClause> <initializer> 'KWHILE' <expression> 'KBY' <assignmentOrInvocationStatement> <declarationsAndStatements> 'KEND' 'KFOR'
-| 'KFOR' <symbolDefinition> 'KIN' <expression> <declarationsAndStatements> 'KEND' 'KFOR'
+'for' '(' <assignOrInvocStmt> ':' ||
+<expression> ':' <assignOrInvocStmt> ')' ||
+<declAndStmts> 'end' 'for'
+| 'for' <symbolDefinition> <typeClause> <initializer> 'while' ||
+<expression> 'by' <assignOrInvocStmt> ||
+<declAndStmts> 'end' 'for'
+| 'for' <symbolDefinition> 'in' <expression> ||
+<declAndStmts> 'end' 'for'
 ;
 <loopStatement> ::=
-'KLOOP' <declarationsAndStatements> 'KEND' 'KLOOP'
+'loop' <declAndStmts> 'end' 'loop'
 ;
 <exitStatement> ::=
-'KEXIT' <whenClause>
+'exit' <whenClause>
 ;
 <whenClause> ::=
 <empty>
-| 'KWHEN' <expression>
+| 'when' <expression>
 ;
 <alphaS> ::=
 <alpha>
-| <alphaS> 'TCOMMA' <alpha>
+| <alphaS> ',' <alpha>
 ;
-<assignmentOrInvocationStatement> ::=
+<assignOrInvocStmt> ::=
 <alpha>
-| <alphaS> 'OASSIGN' <expressionS>
+| <alphaS> '<-' <expressionS>
 ;
 <assertStatement> ::=
-'KASSERT' <expression>
+'assert' <expression>
 ;
 <moveStatement> ::=
-'KMOVE' <expression> 'KTO' <expression>
-| 'KFIX' <expression> 'KAT' <expression>
-| 'KREFIX' <expression> 'KAT' <expression>
-| 'KUNFIX' <expression>
+'move' <expression> 'to' <expression>
+| 'fix' <expression> 'at' <expression>
+| 'refix' <expression> 'at' <expression>
+| 'unfix' <expression>
 ;
 <compoundStatement> ::=
-'KBEGIN' <blockBody> 'KEND'
+'begin' <blockBody> 'end'
 ;
 <returnStatement> ::=
-'KRETURN'
+'return'
 ;
 <returnAndFailStatement> ::=
-'KRETURNANDFAIL'
+'returnandfail'
 ;
 <primitiveImplementation> ::=
 <empty>
-| <primitiveImplementation> 'TINTEGERLITERAL'
-| <primitiveImplementation> 'TSTRINGLITERAL'
+| <primitiveImplementation> 'INT LIT'
+| <primitiveImplementation> 'STR LIT'
 ;
 <oself> ::=
 <empty>
-| 'KSELF'
+| 'self'
 ;
 <ovar> ::=
 <empty>
-| 'KVAR'
+| 'var'
 ;
 <primitiveStatement> ::=
-'KPRIMITIVE' <oself> <ovar> <primitiveImplementation> 'TLSQUARE' <symbolReferenceSopt> 'TRSQUARE' 'OASSIGN' 'TLSQUARE' <symbolReferenceOrLiteralSopt> 'TRSQUARE'
+'primitive' <oself> <ovar> <primitiveImplementation> ||
+'[' <symbolReferenceSopt> ']' '<-' ||
+'[' <symbolRefOrLitSopt> ']'
 ;
 <symbolReferenceSopt> ::=
 <empty>
 | <symbolReferenceS>
 ;
-<symbolReferenceOrLiteralSopt> ::=
+<symbolRefOrLitSopt> ::=
 <empty>
-| <symbolReferenceOrLiteralS>
+| <symbolRefOrLitS>
 ;
 <waitStatement> ::=
-'KWAIT' <expression>
+'wait' <expression>
 ;
 <signalStatement> ::=
-'KSIGNAL' <expression>
+'signal' <expression>
 ;
 <expressionS> ::=
 <expression>
-| <expressionS> 'TCOMMA' <expression>
+| <expressionS> ',' <expression>
 ;
 <negate> ::=
-'ONEGATE'
-| 'OMINUS'
+'~'
+| '-'
 ;
 <expression> ::=
 <expressionZero>
-| <expression> 'OOR' <expression>
+| <expression> '|' <expression>
 | <expression> 'KOR' <expression>
-| <expression> 'OAND' <expression>
+| <expression> '&' <expression>
 | <expression> 'KAND' <expression>
-| 'ONOT' <expression>
-| <expression> 'OIDENTITY' <expression>
-| <expression> 'ONOTIDENTITY' <expression>
-| <expression> 'OEQUAL' <expression>
-| <expression> 'ONOTEQUAL' <expression>
-| <expression> 'OGREATER' <expression>
-| <expression> 'OLESS' <expression>
-| <expression> 'OGREATEREQUAL' <expression>
-| <expression> 'OLESSEQUAL' <expression>
-| <expression> 'OCONFORMSTO' <expression>
-| 'KVIEW' <expression> 'KAS' <expression>
-| 'KRESTRICT' <expression> 'KTO' <expression>
-| <expression> 'OPLUS' <expression>
-| <expression> 'OMINUS' <expression>
-| <expression> 'OTIMES' <expression>
-| <expression> 'ODIVIDE' <expression>
-| <expression> 'OMOD' <expression>
-| <expression> 'TOPERATOR' <expression>
+| '!' <expression>
+| <expression> '==' <expression>
+| <expression> '!==' <expression>
+| <expression> '=' <expression>
+| <expression> '!=' <expression>
+| <expression> '>' <expression>
+| <expression> '<' <expression>
+| <expression> '>=' <expression>
+| <expression> '<=' <expression>
+| <expression> '*>' <expression>
+| 'view' <expression> 'as' <expression>
+| 'restrict' <expression> 'to' <expression>
+| <expression> '+' <expression>
+| <expression> '-' <expression>
+| <expression> '*' <expression>
+| <expression> '/' <expression>
+| <expression> '#' <expression>
+| <expression> 'OPERATOR' <expression>
 | <negate> <expression>
-| 'KLOCATE' <expression>
-| 'KAWAITING' <expression>
-| 'KCODEOF' <expression>
-| 'KNAMEOF' <expression>
-| 'KTYPEOF' <expression>
-| 'KSYNTACTICTYPEOF' <expression>
-| 'KISLOCAL' <expression>
-| 'KISFIXED' <expression>
+| 'locate' <expression>
+| 'awaiting' <expression>
+| 'codeof' <expression>
+| 'nameof' <expression>
+| 'typeof' <expression>
+| 'syntactictypeof' <expression>
+| 'islocal' <expression>
+| 'isfixed' <expression>
 ;
 <expressionZero> ::=
 <alpha>
 ;
 <alpha> ::=
 <beta>
-| 'KNEW' <primary>
-| <alpha> 'TDOT' <operationNameReference>
-| <alpha> 'TDOTSTAR' <primary>
-| <alpha> 'TDOTQUESTION' <operationNameReference>
+| 'new' <primary>
+| <alpha> '.' <operationNameRef>
+| <alpha> '.*' <primary>
+| <alpha> '.?' <operationNameRef>
 ;
 <beta> ::=
 <primary>
-| 'KNEW' <primary> <neArgumentClause>
-| <beta> 'TLSQUARE' <argumentS> 'TRSQUARE'
-| <alpha> 'TDOLLAR' 'TIDENTIFIER'
-| <alpha> 'TDOT' <operationNameReference> <neArgumentClause>
-| <alpha> 'TDOTSTAR' <primary> <neArgumentClause>
-| <alpha> 'TDOTQUESTION' <operationNameReference> <neArgumentClause>
+| 'new' <primary> <neArgumentClause>
+| <beta> '[' <argumentS> ']'
+| <alpha> '$' 'IDENTIFIER'
+| <alpha> '.' <operationNameRef> <neArgumentClause>
+| <alpha> '.*' <primary> <neArgumentClause>
+| <alpha> '.?' <operationNameRef> <neArgumentClause>
 ;
 <primary> ::=
 <literal>
 | <symbolReference>
-| 'TLPAREN' <expression> 'TRPAREN'
+| '(' <expression> ')'
 ;
-<operationNameDefinition> ::=
+<opNameDefinition> ::=
 <operationName>
 | <operatorName>
 | <definableOperatorName>
 ;
 <operatorName> ::=
-'TOPERATOR'
+'OPERATOR'
 ;
 <operationName> ::=
-'TIDENTIFIER'
+'IDENTIFIER'
 ;
 <definableOperatorName> ::=
-'OOR'
-| 'OAND'
-| 'OEQUAL'
-| 'ONOTEQUAL'
-| 'OGREATER'
-| 'OLESS'
-| 'OGREATEREQUAL'
-| 'OLESSEQUAL'
-| 'ONEGATE'
-| 'ONOT'
-| 'OPLUS'
-| 'OMINUS'
-| 'OTIMES'
-| 'ODIVIDE'
-| 'OMOD'
+'|'
+| '&'
+| '='
+| '!='
+| '>'
+| '<'
+| '>='
+| '<='
+| '~'
+| '!'
+| '+'
+| '-'
+| '*'
+| '/'
+| '#'
 ;
-<nondefinableOperatorName> ::=
-'OIDENTITY'
-| 'ONOTIDENTITY'
-| 'OCONFORMSTO'
+<nondefinableOpName> ::=
+'=='
+| '!=='
+| '*>'
 ;
-<operationNameReference> ::=
+<operationNameRef> ::=
 <operatorName>
 | <definableOperatorName>
-| <nondefinableOperatorName>
+| <nondefinableOpName>
 | <operationName>
 ;
 <neArgumentClause> ::=
-'TLSQUARE' 'TRSQUARE'
-| 'TLSQUARE' <argumentS> 'TRSQUARE'
+'[' ']'
+| '[' <argumentS> ']'
 ;
 <argumentS> ::=
 <argument>
-| <argumentS> 'TCOMMA' <argument>
+| <argumentS> ',' <argument>
 ;
 <argument> ::=
 <expression>
-| 'KMOVE' <expression>
-| 'KVISIT' <expression>
+| 'move' <expression>
+| 'visit' <expression>
 ;
 <literal> ::=
-'TSTRINGLITERAL'
-| 'TCHARACTERLITERAL'
-| 'TINTEGERLITERAL'
-| 'TREALLITERAL'
-| 'KTRUE'
-| 'KFALSE'
-| 'KSELF'
-| 'KNIL'
+'STR LIT'
+| 'CHAR LIT'
+| 'INT LIT'
+| 'REAL LIT'
+| 'true'
+| 'false'
+| 'self'
+| 'nil'
 | <typeLiteral>
 | <vectorLiteral>
 ;
 <vectorLiteral> ::=
-'TLCURLY' <expressionSOpt> <typeClauseOpt> 'TRCURLY'
+'{' <expressionSOpt> <typeClauseOpt> '}'
 ;
 <expressionSOpt> ::=
 <empty>
 | <expressionS>
-| <expressionS> 'TCOMMA'
+| <expressionS> ','
 ;
 <typeObject> ::=
 <abstractType>
-| 'KIMMUTABLE' <abstractType>
+| 'immutable' <abstractType>
 ;
 <typeLiteral> ::=
 <typeRest>
-| 'KIMMUTABLE' <typeRest>
-| 'KMONITOR' <typeRest>
+| 'immutable' <typeRest>
+| 'monitor' <typeRest>
 ;
 <typeRest> ::=
 <abstractType>
@@ -474,8 +484,8 @@
 | <class>
 ;
 <symbolReference> ::=
-'TIDENTIFIER'
+'IDENTIFIER'
 ;
 <symbolDefinition> ::=
-'TIDENTIFIER'
+'IDENTIFIER'
 ;
