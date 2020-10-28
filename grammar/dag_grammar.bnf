@@ -192,7 +192,7 @@
 <declAndStmts> <unavailableHandler> <failureHandler>
 ;
 <initiallyDefinition> ::=
-'inITIALLY' <blockBody> 'end' 'inITIALLY'
+'initially' <blockBody> 'end' 'initially'
 ;
 <recoveryDefinition> ::=
 'recovery' <blockBody> 'end' 'recovery'
@@ -215,7 +215,7 @@
 | <assignOrInvocStmt>
 | <assertStatement>
 | <moveStatement>
-| <compoundStatement>
+| <compoundStatement >
 | <primitiveStatement>
 | <waitStatement>
 | <signalStatement>
@@ -251,14 +251,12 @@
 'if' <ifClauseS> <elseClause> 'end' 'if'
 ;
 <forStatement> ::=
-'for' '(' <assignOrInvocStmt> ':' ||
-<expression> ':' <assignOrInvocStmt> ')' ||
-<declAndStmts> 'end' 'for'
-| 'for' <symbolDefinition> <typeClause> <initializer> 'while' ||
-<expression> 'by' <assignOrInvocStmt> ||
-<declAndStmts> 'end' 'for'
-| 'for' <symbolDefinition> 'in' <expression> ||
-<declAndStmts> 'end' 'for'
+'for' || ( '(' <assignOrInvocStmt> ':' <expression> ':' <assignOrInvocStmt> ')'
+            |  <symbolDefinition> (
+                <typeClause> <initializer> 'while' <expression> 'by' <assignOrInvocStmt>
+                | 'in' <expression>
+            ))
+ || <declAndStmts> 'end' 'for'
 ;
 <loopStatement> ::=
 'loop' <declAndStmts> 'end' 'loop'
@@ -287,7 +285,7 @@
 | 'refix' <expression> 'at' <expression>
 | 'unfix' <expression>
 ;
-<compoundStatement> ::=
+<compoundStatement > ::=
 'begin' <blockBody> 'end'
 ;
 <returnStatement> ::=
