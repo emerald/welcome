@@ -11,6 +11,12 @@ keywords = ["if", "else", "elseif", "failure", "unavailable", "object",
 numSpaces = 4
 spaces = numSpaces * " "
 
+def check_if_duplicates(lst):
+    ''' Check if given list contains any duplicates '''
+    if len(lst) == len(set(lst)):
+        return False
+    return True
+
 def custom_split(s):
     res = s.split()
     isString = False
@@ -56,7 +62,7 @@ for fn in argv[1:]:
             if words and "%" in words[0]:
                 f.write((spaces * i) + line)
             # one-liner ifs
-            elif len(list(filter(lambda x: x in keywords, words))) >= 2:
+            elif check_if_duplicates(list(filter(lambda x: x in keywords, words))):
                 f.write((spaces * i) + line)
             elif "end" in words:
                 inTypeobject = False

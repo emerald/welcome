@@ -3,67 +3,67 @@ export Opsig
 
 const opsig <- class Opsig (Tree) [xxname : Ident, xxparams : Tree, xxresults : Tree, xxwhere : Tree]
     class export operation literal [ln : Integer, xxname : Ident, pn : Ident, pt : Tree, rn : Ident, rt : Tree] -> [r : OpSigType]
-    var pl, rl : Tree
-    if pn !== nil then
-        pl <- seq.singleton[param.create[ln, Sym.create[ln, pn], pt.copy[0]]]
-    end if
-    if rn !== nil then
-        rl <- seq.singleton[param.create[ln, Sym.create[ln, pn], pt.copy[0]]]
-    end if
-    r <- self.create[ln, xxname, pl, rl, nil]
-end literal
-
-field isFunction : Boolean <- false
-field mustBeCompilerExecuted : Boolean <- false
-field name : Ident <- xxname
-field params : Tree <- xxparams
-field results  : Tree <- xxresults
-field xwhere : Tree <- xxwhere
-field st : SymbolTable
-export function upperbound -> [r : Integer]
-    r <- 2
-end upperbound
-export function getElement [i : Integer] -> [r : Tree]
-    if i = 0 then
-        r <- params
-    elseif i = 1 then
-        r <- results
-    elseif i = 2 then
-        r <- xwhere
-    end if
-end getElement
-export operation setElement [i : Integer, r : Tree]
-    if i = 0 then
-        params <- r
-    elseif i = 1 then
-        results <- r
-    elseif i = 2 then
-        xwhere <- r
-    end if
-end setElement
-export operation copy [i : Integer] -> [r : Tree]
-    var nparams, nresults, nxwhere : Tree
-    if params !== nil then nparams <- params.copy[i] end if
-    if results !== nil then nresults <- results.copy[i] end if
-    if xwhere !== nil then nxwhere <- xwhere.copy[i] end if
-    const realr <- opsig.create[ln, name, nparams, nresults, nxwhere]
-    realr$isFunction <- isFunction
-    realr$mustBeCompilerExecuted <- mustBeCompilerExecuted
-    r <- realr
-end copy
-
-operation initTypeVariable [psym : Symbol]
-    if !psym$isTypeVariable then
-        psym$isTypeVariable <- true
-        if psym$value == nil then
-            const tcopy : Tree  <-
-            Environment$env$atlit.create[
-            self$ln,
-            Literal.StringL[0, "junk"],
-            sym.create[self$ln,
-            Environment$Env$ITable.Lookup["whocares", 999]],
-            seq.create[self$ln]
-            ]
+        var pl, rl : Tree
+        if pn !== nil then
+            pl <- seq.singleton[param.create[ln, Sym.create[ln, pn], pt.copy[0]]]
+        end if
+        if rn !== nil then
+            rl <- seq.singleton[param.create[ln, Sym.create[ln, pn], pt.copy[0]]]
+        end if
+        r <- self.create[ln, xxname, pl, rl, nil]
+    end literal
+    
+    field isFunction : Boolean <- false
+    field mustBeCompilerExecuted : Boolean <- false
+    field name : Ident <- xxname
+    field params : Tree <- xxparams
+    field results  : Tree <- xxresults
+    field xwhere : Tree <- xxwhere
+    field st : SymbolTable
+    export function upperbound -> [r : Integer]
+        r <- 2
+    end upperbound
+    export function getElement [i : Integer] -> [r : Tree]
+        if i = 0 then
+            r <- params
+        elseif i = 1 then
+            r <- results
+        elseif i = 2 then
+            r <- xwhere
+        end if
+    end getElement
+    export operation setElement [i : Integer, r : Tree]
+        if i = 0 then
+            params <- r
+        elseif i = 1 then
+            results <- r
+        elseif i = 2 then
+            xwhere <- r
+        end if
+    end setElement
+    export operation copy [i : Integer] -> [r : Tree]
+        var nparams, nresults, nxwhere : Tree
+        if params !== nil then nparams <- params.copy[i] end if
+        if results !== nil then nresults <- results.copy[i] end if
+        if xwhere !== nil then nxwhere <- xwhere.copy[i] end if
+        const realr <- opsig.create[ln, name, nparams, nresults, nxwhere]
+        realr$isFunction <- isFunction
+        realr$mustBeCompilerExecuted <- mustBeCompilerExecuted
+        r <- realr
+    end copy
+    
+    operation initTypeVariable [psym : Symbol]
+        if !psym$isTypeVariable then
+            psym$isTypeVariable <- true
+            if psym$value == nil then
+                const tcopy : Tree  <-
+                Environment$env$atlit.create[
+                self$ln,
+                Literal.StringL[0, "junk"],
+                sym.create[self$ln,
+                Environment$Env$ITable.Lookup["whocares", 999]],
+                seq.create[self$ln]
+                ]
             (view tcopy as typeobject t operation setIsTypeVariable[Boolean] end t)$isTypeVariable <- true
             psym$value <- tcopy
         end if
