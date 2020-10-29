@@ -330,76 +330,76 @@ const FormattedOutput <- immutable object FormattedOutput
                             var s : String
                             var limit : Integer
                             if c = 'S' and value !== nil then
-                            value <- (view value as typeobject t function asString->[String] end t).asString
-                        end if
-                        if value == nil then
-                            myThing.putChar['N']
-                            myThing.putChar['I']
-                            myThing.putChar['L']
-                        elseif typeof value *> String.getSignature then
-                            s <- view value as String
-                            if precision > 0 then
-                                limit <- precision
-                            else
-                                limit <- s.length
+                                value <- (view value as typeobject t function asString->[String] end t).asString
                             end if
-                            totalwidth <- limit
-                            % worry about padding on the left
-                            loop
-                                exit when leftjustify
-                                exit when totalwidth >= minwidth
-                                myThing.putChar[' ']
-                                minwidth <- minwidth - 1
-                            end loop
-                            i <- 0
-                            loop
-                                exit when i >= limit
-                                myThing.putChar[s[i]]
-                                i <- i + 1
-                            end loop
-                            % worry about padding on the right
-                            loop
-                                exit when !leftjustify
-                                exit when totalwidth >= minwidth
-                                myThing.putChar[' ']
-                                minwidth <- minwidth - 1
-                            end loop
+                            if value == nil then
+                                myThing.putChar['N']
+                                myThing.putChar['I']
+                                myThing.putChar['L']
+                            elseif typeof value *> String.getSignature then
+                                s <- view value as String
+                                if precision > 0 then
+                                    limit <- precision
+                                else
+                                    limit <- s.length
+                                end if
+                                totalwidth <- limit
+                                % worry about padding on the left
+                                loop
+                                    exit when leftjustify
+                                    exit when totalwidth >= minwidth
+                                    myThing.putChar[' ']
+                                    minwidth <- minwidth - 1
+                                end loop
+                                i <- 0
+                                loop
+                                    exit when i >= limit
+                                    myThing.putChar[s[i]]
+                                    i <- i + 1
+                                end loop
+                                % worry about padding on the right
+                                loop
+                                    exit when !leftjustify
+                                    exit when totalwidth >= minwidth
+                                    myThing.putChar[' ']
+                                    minwidth <- minwidth - 1
+                                end loop
+                            else
+                                returnAndFail
+                            end if
+                        elseif c = 'c' then
+                            % output a string
+                            var s : Character
+                            if value == nil then
+                                myThing.putChar['N']
+                                myThing.putChar['I']
+                                myThing.putChar['L']
+                            elseif typeof value *> Character.getSignature then
+                                s <- view value as Character
+                                myThing.putChar[s]
+                            else
+                                returnAndFail
+                            end if
                         else
-                            returnAndFail
-                        end if
-                    elseif c = 'c' then
-                        % output a string
-                        var s : Character
-                        if value == nil then
-                            myThing.putChar['N']
-                            myThing.putChar['I']
-                            myThing.putChar['L']
-                        elseif typeof value *> Character.getSignature then
-                            s <- view value as Character
-                            myThing.putChar[s]
-                        else
+                            % illegal formatting character
                             returnAndFail
                         end if
                     else
-                        % illegal formatting character
-                        returnAndFail
+                        myThing.putChar[c]
                     end if
-                else
-                    myThing.putChar[c]
-                end if
-                formatindex <- formatindex + 1
-            end loop
-        end printf
-    end anOutputFormatter
-end toStream
-export operation ToString -> [r : OutputFormatter]
-    const aThing <- OutThingToString.create
-    r <- self.toStream[aThing]
-end ToString
-export operation sprintf [ format : String, v : risa ] -> [r : String]
-    const aThing <- OutThingToString.create
-    const formatter <- self.toStream[aThing]
-    formatter.printf[format, v]
-    r <- aThing.fetch
-end sprintf
+                    formatindex <- formatindex + 1
+                end loop
+            end printf
+        end anOutputFormatter
+    end toStream
+    export operation ToString -> [r : OutputFormatter]
+        const aThing <- OutThingToString.create
+        r <- self.toStream[aThing]
+    end ToString
+    export operation sprintf [ format : String, v : risa ] -> [r : String]
+        const aThing <- OutThingToString.create
+        const formatter <- self.toStream[aThing]
+        formatter.printf[format, v]
+        r <- aThing.fetch
+    end sprintf
 end FormattedOutput

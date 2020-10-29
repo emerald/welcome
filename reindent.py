@@ -7,7 +7,7 @@ if len(argv) < 2:
 keywords = ["if", "else", "elseif", "failure", "unavailable", "object",
             "typeobject", "class", "for", "loop", "op", "operation", "function",
             "begin", "process", "initially", "enumeration", "record", "recovery"]
-
+specialKeys = ["object", "typeobject", "class", "op", "operation", "function" ]
 numSpaces = 4
 spaces = numSpaces * " "
 
@@ -63,6 +63,8 @@ for fn in argv[1:]:
                 f.write((spaces * i) + line)
             # one-liner ifs
             elif check_if_duplicates(list(filter(lambda x: x in keywords, words))):
+                f.write((spaces * i) + line)
+            elif "end" in words and any(w in words for w in specialKeys):
                 f.write((spaces * i) + line)
             elif "end" in words:
                 inTypeobject = False

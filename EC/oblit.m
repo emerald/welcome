@@ -457,567 +457,567 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                     
                     % Generate the template
                     if init !== nil then
-                    const hasBody <- typeobject t function getBody -> [Tree] end t
-                    const initst <- (view (view init as hasbody)$body as hasst)$st
-                    initst.writeTemplate[templ, 'L']
-                end if
-                
-                mybc.lineNumber[0]
-                
-                % Generate the prolog (allocate space for locals)
-                mybc.setLocalSize[st$localSize]
-                
-                % Generate the monitor creation, if necessary
-                if Environment$env$generateconcurrent and f.getBit[xisMonitored] and !f.getBit[xmonitorMayBeElided] then
-                    mybc.addCode["MONINIT"]
-                end if
-                
-                if Environment$env$generateconcurrent and f.getBit[xisSynchronized] then
-                    mybc.addCode["SYNCHINIT"]
-                end if
-                
-                % Generate the setq (parameter passing) code
-                if sq !== nil then
-                    
-                    % Count the actual parameters
-                    for i : Integer <- 0 while i <= sq.upperbound by i <- i + 1
-                        const s <- view sq[i] as Setq
-                        const p <- view s$param as Sym
-                        const inn  <- view s$inner as Sym
-                        const psym <- p$mysym
-                        const isym <- inn$mysym
-                        
-                        if s$isNotManifest then % or if it is a typevariable
-                            nparams <- nparams + 1
-                            % We should do initiallies just like we do invocations, then we don't need a
-                            % recursive interpreter (we can use the stack directly)
-                            %		if psym$base = 'A' then
-                            %		  psym$base <- 'L'
-                            %		  psym$offset <- ~8 - psym$offset
-                            %		end if
-                            if isym$isUsedOutsideInitially then
-                                mybc.pushSize[inn$mysym$size]
-                                p.generate[mybc]
-                                inn.generateLValue[mybc]
-                                mybc.popSize
-                            else
-                                isym$base   <- psym$base
-                                isym$offset <- psym$offset
-                            end if
-                        end if
-                    end for
-                end if
-                
-                ove$nargs <- nparams
-                
-                if self$decls !== nil then self$decls.generate[mybc] end if
-                if ops[0] !== nil then
-                    ops[0].generate[mybc]
-                end if
-                
-                % Generate the epilog (return and pop args)
-                mybc.lineNumber[self$ln]
-                mybc.defineLabel[returnlabel]
-                mybc.addCode["QUIT"]
-                mybc.addValue[nparams, 1]
-                
-                ove$code <- mybc.getString
-                ove$others <- mybc$others
-                begin
-                    const lninfo <- mybc.getLNInfo
-                    if lninfo !== nil then
-                        templ.addLineNumbers[lninfo]
+                        const hasBody <- typeobject t function getBody -> [Tree] end t
+                        const initst <- (view (view init as hasbody)$body as hasst)$st
+                        initst.writeTemplate[templ, 'L']
                     end if
+                    
+                    mybc.lineNumber[0]
+                    
+                    % Generate the prolog (allocate space for locals)
+                    mybc.setLocalSize[st$localSize]
+                    
+                    % Generate the monitor creation, if necessary
+                    if Environment$env$generateconcurrent and f.getBit[xisMonitored] and !f.getBit[xmonitorMayBeElided] then
+                        mybc.addCode["MONINIT"]
+                    end if
+                    
+                    if Environment$env$generateconcurrent and f.getBit[xisSynchronized] then
+                        mybc.addCode["SYNCHINIT"]
+                    end if
+                    
+                    % Generate the setq (parameter passing) code
+                    if sq !== nil then
+                        
+                        % Count the actual parameters
+                        for i : Integer <- 0 while i <= sq.upperbound by i <- i + 1
+                            const s <- view sq[i] as Setq
+                            const p <- view s$param as Sym
+                            const inn  <- view s$inner as Sym
+                            const psym <- p$mysym
+                            const isym <- inn$mysym
+                            
+                            if s$isNotManifest then % or if it is a typevariable
+                                nparams <- nparams + 1
+                                % We should do initiallies just like we do invocations, then we don't need a
+                                % recursive interpreter (we can use the stack directly)
+                                %		if psym$base = 'A' then
+                                %		  psym$base <- 'L'
+                                %		  psym$offset <- ~8 - psym$offset
+                                %		end if
+                                if isym$isUsedOutsideInitially then
+                                    mybc.pushSize[inn$mysym$size]
+                                    p.generate[mybc]
+                                    inn.generateLValue[mybc]
+                                    mybc.popSize
+                                else
+                                    isym$base   <- psym$base
+                                    isym$offset <- psym$offset
+                                end if
+                            end if
+                        end for
+                    end if
+                    
+                    ove$nargs <- nparams
+                    
+                    if self$decls !== nil then self$decls.generate[mybc] end if
+                    if ops[0] !== nil then
+                        ops[0].generate[mybc]
+                    end if
+                    
+                    % Generate the epilog (return and pop args)
+                    mybc.lineNumber[self$ln]
+                    mybc.defineLabel[returnlabel]
+                    mybc.addCode["QUIT"]
+                    mybc.addValue[nparams, 1]
+                    
+                    ove$code <- mybc.getString
+                    ove$others <- mybc$others
+                    begin
+                        const lninfo <- mybc.getLNInfo
+                        if lninfo !== nil then
+                            templ.addLineNumbers[lninfo]
+                        end if
+                    end
                 end
-            end
+            end if
+        elseif self$generateOnlyCT then
+            % we are generating a closure, so we just push the ConcreteType
+            const bc <- view ct as BCType
+            bc.fetchLiteral[self$codeOID]
+            bc.finishExpr[4, 0x1818, 0x1618]
+        elseif self$isExported then
+            self.generateSelf[ct]
+        else
+            const bc <- view ct as BCType
+            const sq <- self$xsetq
+            % We need to treat this as an expression, and do a creation
+            
+            bc.addCode["PUSHNIL"]
+            if sq !== nil then
+                bc.pushSize[8]
+                for i : Integer <- 0 while i <= sq.upperbound by i <- i + 1
+                    const s <- view sq[i] as Setq
+                    const o <- view s$outer as Sym
+                    if s$isNotManifest then	% or if it is a type variable
+                        o.generate[ct]
+                    end if
+                end for
+                bc.popSize
+            end if
+            
+            bc.fetchLiteral[self$codeOID]
+            if self$isVector then
+                bc.addCode["LDAB"]
+                bc.addValue[0, 1]
+                bc.addCode["CREATEVEC"]
+            else
+                bc.addCode["CREATE"]
+            end if
+            bc.finishExpr[4, self$codeOID, self.myatid]
         end if
-    elseif self$generateOnlyCT then
-        % we are generating a closure, so we just push the ConcreteType
-        const bc <- view ct as BCType
-        bc.fetchLiteral[self$codeOID]
-        bc.finishExpr[4, 0x1818, 0x1618]
-    elseif self$isExported then
-        self.generateSelf[ct]
-    else
-        const bc <- view ct as BCType
-        const sq <- self$xsetq
-        % We need to treat this as an expression, and do a creation
-        
-        bc.addCode["PUSHNIL"]
-        if sq !== nil then
-            bc.pushSize[8]
-            for i : Integer <- 0 while i <= sq.upperbound by i <- i + 1
-                const s <- view sq[i] as Setq
-                const o <- view s$outer as Sym
-                if s$isNotManifest then	% or if it is a type variable
-                    o.generate[ct]
+    end generate
+    
+    export operation generateSelf [xct : Printable]
+        const bc <- view xct as ByteCode
+        self.makeMeManifest
+        bc.fetchLiteral[self$id]
+        bc.finishExpr[4, codeoid, self.myatid]
+    end generateSelf
+    
+    export operation makeMeManifest
+        if self$id == nil then
+            self$id <- nextOID.nextOID
+        end if
+    end makeMeManifest
+    
+    export operation findThingsToGenerate[q : Any]
+        if ! self$queuedForGeneration then
+            const qt <- view q as aot
+            qt.addUpper[self]
+            if self$codeOID == nil then
+                self$codeOID <- nextOID.nextOID
+            end if
+            self$queuedForGeneration <- true
+            if myat !== nil then
+                myat.findThingsToGenerate[q]
+            end if
+            FTree.findThingsToGenerate[q, self]
+        end if
+    end findThingsToGenerate
+    
+    export operation areMyImportsManifestOrExported -> [badname : String]
+        if self$xsetq !== nil then
+            for i : Integer <- 0 while i <= self$xsetq.upperbound by i <- i + 1
+                const t <- self$xsetq[i]
+                const s <- view t as Setq
+                if s$isNotManifest then
+                    badname <- (view s$inner as Sym)$mysym$myident$name
+                    if Environment$env$explainNonManifests then
+                        Environment$env.printf["Oblit %s imports nonmanifest symbol %s\n",
+                        { (view name as Sym)$mysym$myident$name, badname } ]
+                    end if
                 end if
             end for
-            bc.popSize
         end if
-        
-        bc.fetchLiteral[self$codeOID]
-        if self$isVector then
-            bc.addCode["LDAB"]
-            bc.addValue[0, 1]
-            bc.addCode["CREATEVEC"]
+    end areMyImportsManifestOrExported
+    
+    export operation findManifests -> [changed : Boolean]
+        changed <- false
+        if self$isNotManifest then
+            % I'm already decided
         else
-            bc.addCode["CREATE"]
-        end if
-        bc.finishExpr[4, self$codeOID, self.myatid]
-    end if
-end generate
-
-export operation generateSelf [xct : Printable]
-    const bc <- view xct as ByteCode
-    self.makeMeManifest
-    bc.fetchLiteral[self$id]
-    bc.finishExpr[4, codeoid, self.myatid]
-end generateSelf
-
-export operation makeMeManifest
-    if self$id == nil then
-        self$id <- nextOID.nextOID
-    end if
-end makeMeManifest
-
-export operation findThingsToGenerate[q : Any]
-    if ! self$queuedForGeneration then
-        const qt <- view q as aot
-        qt.addUpper[self]
-        if self$codeOID == nil then
-            self$codeOID <- nextOID.nextOID
-        end if
-        self$queuedForGeneration <- true
-        if myat !== nil then
-            myat.findThingsToGenerate[q]
-        end if
-        FTree.findThingsToGenerate[q, self]
-    end if
-end findThingsToGenerate
-
-export operation areMyImportsManifestOrExported -> [badname : String]
-    if self$xsetq !== nil then
-        for i : Integer <- 0 while i <= self$xsetq.upperbound by i <- i + 1
-            const t <- self$xsetq[i]
-            const s <- view t as Setq
-            if s$isNotManifest then
-                badname <- (view s$inner as Sym)$mysym$myident$name
-                if Environment$env$explainNonManifests then
-                    Environment$env.printf["Oblit %s imports nonmanifest symbol %s\n",
-                    { (view name as Sym)$mysym$myident$name, badname } ]
-                end if
-            end if
-        end for
-    end if
-end areMyImportsManifestOrExported
-
-export operation findManifests -> [changed : Boolean]
-    changed <- false
-    if self$isNotManifest then
-        % I'm already decided
-    else
-        if ! self$isImmutable then
-            self$isNotManifest <- true
-            self$name$isNotManifest <- true
-            changed <- true
-        elseif self$st$depth > 2 and (codeoid != nil and codeoid < 0x1a00 or self$isVector) then
-            self$isNotManifest <- true
-            self$name$isNotManifest <- true
-            changed <- true
-        else
-            if self.areMyImportsManifestOrExported !== nil then
+            if ! self$isImmutable then
                 self$isNotManifest <- true
                 self$name$isNotManifest <- true
                 changed <- true
-            end if
-        end if
-    end if
-    if myat !== nil then changed <- myat.findManifests | changed end if
-    changed <- FTree.findManifests[self] | changed
-end findManifests
-
-export operation execute -> [r : Tree]
-    if !self$isNotManifest then
-        r <- self
-    end if
-end execute
-
-export function asType -> [r : Tree]
-    %   assert !self$isNotManifest
-    if self$isImmutable then
-        var s : Tree
-        s <- self.findInvocResult[OpName.Literal["getsignature"], nil, 1]
-        if s !== nil then
-            r <- s.execute
-            if r == nil then
-                Environment$env.printf["oblit.astype: execute on %s failed\n",
-                { s.asString}]
-                s.print[Environment$env$stdout, 0]
+            elseif self$st$depth > 2 and (codeoid != nil and codeoid < 0x1a00 or self$isVector) then
+                self$isNotManifest <- true
+                self$name$isNotManifest <- true
+                changed <- true
             else
-                r <- r.asType
+                if self.areMyImportsManifestOrExported !== nil then
+                    self$isNotManifest <- true
+                    self$name$isNotManifest <- true
+                    changed <- true
+                end if
             end if
         end if
-    end if
-    if r == nil and self$id !== nil then
-        % We have explicitly exclude Array, Vector, and ImmutableVector from
-        % consideration here, as they are not types.
-        if 0x1000 <= id and id <= 0x1040 and id != 0x1002 and id != 0x100c and id != 0x1012 then
-            r <- builtinlit.create[self$ln, id + 0x600 - 0x1000]
+        if myat !== nil then changed <- myat.findManifests | changed end if
+        changed <- FTree.findManifests[self] | changed
+    end findManifests
+    
+    export operation execute -> [r : Tree]
+        if !self$isNotManifest then
+            r <- self
         end if
-    end if
-end asType
-
-export operation evaluateManifests
-    % If I am a closure, then ensure that my setq's are all manifest
-    if self$generateOnlyCT then
-        if self$xsetq !== nil then
-            const upb : Integer <- self$xsetq.upperbound
-            var   lwb : Integer <- 0
-            if self$xparam !== nil then lwb <- self$xparam.upperbound + 1 end if
-            for i : Integer <- lwb while i <= upb by i <- i + 1
-                begin
-                    const t <- self$xsetq[i]
-                    const s <- view t as Setq
-                    if s$isNotManifest then
-                        Environment$env.SemanticError[self$ln, "Import of non manifest symbol \"%s\" into closure", { (view s$outer as Sym)$id$name }]
-                    end if
-                end
+    end execute
+    
+    export function asType -> [r : Tree]
+        %   assert !self$isNotManifest
+        if self$isImmutable then
+            var s : Tree
+            s <- self.findInvocResult[OpName.Literal["getsignature"], nil, 1]
+            if s !== nil then
+                r <- s.execute
+                if r == nil then
+                    Environment$env.printf["oblit.astype: execute on %s failed\n",
+                    { s.asString}]
+                    s.print[Environment$env$stdout, 0]
+                else
+                    r <- r.asType
+                end if
+            end if
+        end if
+        if r == nil and self$id !== nil then
+            % We have explicitly exclude Array, Vector, and ImmutableVector from
+            % consideration here, as they are not types.
+            if 0x1000 <= id and id <= 0x1040 and id != 0x1002 and id != 0x100c and id != 0x1012 then
+                r <- builtinlit.create[self$ln, id + 0x600 - 0x1000]
+            end if
+        end if
+    end asType
+    
+    export operation evaluateManifests
+        % If I am a closure, then ensure that my setq's are all manifest
+        if self$generateOnlyCT then
+            if self$xsetq !== nil then
+                const upb : Integer <- self$xsetq.upperbound
+                var   lwb : Integer <- 0
+                if self$xparam !== nil then lwb <- self$xparam.upperbound + 1 end if
+                for i : Integer <- lwb while i <= upb by i <- i + 1
+                    begin
+                        const t <- self$xsetq[i]
+                        const s <- view t as Setq
+                        if s$isNotManifest then
+                            Environment$env.SemanticError[self$ln, "Import of non manifest symbol \"%s\" into closure", { (view s$outer as Sym)$id$name }]
+                        end if
+                    end
+                end for
+            end if
+        end if
+        if ! self$isNotManifest then
+            % I am in fact manifest, and need to be created now
+            const t <- view self$name as Sym
+            if t$mysym$value == nil then
+                t$mysym$value <- self
+            end if
+            self.makeMeManifest
+        end if
+        if self$codeOID == nil then
+            self$codeOID <- nextOID.nextOID
+        end if
+        if myat !== nil then myat.evaluateManifests end if
+        FTree.evaluateManifests[self]
+    end evaluateManifests
+    
+    export operation removeSugar [ob : Tree] -> [r : Oblit]
+        var foo : Tree
+        if !self$hasBeenDesugared then
+            self$hasBeenDesugared <- true
+            r <- self.iremoveSugar[]
+            foo <- FTree.removeSugar[r, self]
+            assert foo == r
+        else
+            r <- self
+        end if
+    end removeSugar
+    
+    export operation defineSymbols[pst : SymbolTable]
+        const nst <- SymbolTable.create[pst, CObLit]
+        const s <- nst.Define[ln, (view self$name as hasIdent)$id, SConst, false]
+        nst$mytree <- self
+        nst$kind <- SParam
+        s$isSelf <- true
+        s$value  <- self
+        self$st <- nst
+        for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
+            const idef <- view ops[i] as OpDef
+            const isig <- idef$sig
+            const opisname : String <- isig$name$name
+            const opisnargs : Integer <- isig$nargs
+            const opisnress : Integer <- isig$nress
+            for j : Integer <- i + 1 while j <= ops.upperbound by j <- j + 1
+                const jdef <- view ops[j] as OpDef
+                const jsig <- jdef$sig
+                const opjsname : String <- jsig$name$name
+                const opjsnargs : Integer <- jsig$nargs
+                const opjsnress : Integer <- jsig$nress
+                % TODO:  This should also check number of results when we properly
+                % overload on them
+                %
+                % i.e. and opisnress = opjsnress
+                if opisname = opjsname and opisnargs = opjsnargs then
+                    Environment$env.SemanticError[jsig$ln, "Operation %s[%d] is multiply defined", { opisname, opisnargs }]
+                end if
             end for
+        end for
+        if self$isImmutable then
+            if ops[1] !== nil then
+                Environment$env.SemanticError[ln,
+                "Immutable objects are not allowed recovery sections", nil]
+            end if
+            if ops[2] !== nil then
+                Environment$env.SemanticError[ln,
+                "Immutable objects are not allowed processes", nil]
+            end if
         end if
-    end if
-    if ! self$isNotManifest then
-        % I am in fact manifest, and need to be created now
-        const t <- view self$name as Sym
-        if t$mysym$value == nil then
-            t$mysym$value <- self
+        if self$isMonitored then
+            if ops[2] !== nil then
+                Environment$env.SemanticError[ln,
+                "Monitored objects are not allowed processes", nil]
+            end if
         end if
-        self.makeMeManifest
-    end if
-    if self$codeOID == nil then
-        self$codeOID <- nextOID.nextOID
-    end if
-    if myat !== nil then myat.evaluateManifests end if
-    FTree.evaluateManifests[self]
-end evaluateManifests
-
-export operation removeSugar [ob : Tree] -> [r : Oblit]
-    var foo : Tree
-    if !self$hasBeenDesugared then
-        self$hasBeenDesugared <- true
-        r <- self.iremoveSugar[]
-        foo <- FTree.removeSugar[r, self]
-        assert foo == r
-    else
-        r <- self
-    end if
-end removeSugar
-
-export operation defineSymbols[pst : SymbolTable]
-    const nst <- SymbolTable.create[pst, CObLit]
-    const s <- nst.Define[ln, (view self$name as hasIdent)$id, SConst, false]
-    nst$mytree <- self
-    nst$kind <- SParam
-    s$isSelf <- true
-    s$value  <- self
-    self$st <- nst
-    for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
-        const idef <- view ops[i] as OpDef
-        const isig <- idef$sig
-        const opisname : String <- isig$name$name
-        const opisnargs : Integer <- isig$nargs
-        const opisnress : Integer <- isig$nress
-        for j : Integer <- i + 1 while j <= ops.upperbound by j <- j + 1
-            const jdef <- view ops[j] as OpDef
-            const jsig <- jdef$sig
-            const opjsname : String <- jsig$name$name
-            const opjsnargs : Integer <- jsig$nargs
-            const opjsnress : Integer <- jsig$nress
-            % TODO:  This should also check number of results when we properly
-            % overload on them
-            %
-            % i.e. and opisnress = opjsnress
-            if opisname = opjsname and opisnargs = opjsnargs then
-                Environment$env.SemanticError[jsig$ln, "Operation %s[%d] is multiply defined", { opisname, opisnargs }]
+        FTree.defineSymbols[nst, self]
+        
+        % Go through and pretend that those symbol tables in the
+        % process and recovery are opdefs
+        
+        for i : Integer <- 1 while i < 3 by i <- i + 1
+            const theop <- ops[i]
+            if theop !== nil then
+                const hasBody <- typeobject t function getBody -> [Tree] end t
+                const thest <- (view (view theop as hasbody)$body as hasst)$st
+                thest$context <- COpDef
             end if
         end for
-    end for
-    if self$isImmutable then
-        if ops[1] !== nil then
-            Environment$env.SemanticError[ln,
-            "Immutable objects are not allowed recovery sections", nil]
-        end if
-        if ops[2] !== nil then
-            Environment$env.SemanticError[ln,
-            "Immutable objects are not allowed processes", nil]
-        end if
-    end if
-    if self$isMonitored then
-        if ops[2] !== nil then
-            Environment$env.SemanticError[ln,
-            "Monitored objects are not allowed processes", nil]
-        end if
-    end if
-    FTree.defineSymbols[nst, self]
+        
+    end defineSymbols
     
-    % Go through and pretend that those symbol tables in the
-    % process and recovery are opdefs
-    
-    for i : Integer <- 1 while i < 3 by i <- i + 1
-        const theop <- ops[i]
-        if theop !== nil then
-        const hasBody <- typeobject t function getBody -> [Tree] end t
-        const thest <- (view (view theop as hasbody)$body as hasst)$st
-        thest$context <- COpDef
-    end if
-end for
-
-end defineSymbols
-
-export operation checkBuiltinInstAT
-if id !== nil or codeOID !== nil then
-    const myinstct <- view self.getInstCT as Oblit
-    
-    Environment$env.pass["Check builtin inst AT\n", nil]
-    if myinstct !== nil then
-        const myinstid <- myinstct.getCodeOID
-        if myinstid !== nil and myinstid <= 0x2000 and
-            myinstid != 0x180c and myinstid != 0x1812 then	% It is a builtin
-            const myinstat <- self.getInstAT
-            Environment$env.pass[" Looking at a builtin %x\n", {myinstid}]
-            if myinstat !== nil then
-                const myinstctsat <- myinstct$myat
-                if myinstctsat !== nil then
-                    Environment$env.pass["  Found a %s as myinstct's at\n",
-                    {nameof myinstctsat}]
+    export operation checkBuiltinInstAT
+        if id !== nil or codeOID !== nil then
+            const myinstct <- view self.getInstCT as Oblit
+            
+            Environment$env.pass["Check builtin inst AT\n", nil]
+            if myinstct !== nil then
+                const myinstid <- myinstct.getCodeOID
+                if myinstid !== nil and myinstid <= 0x2000 and
+                    myinstid != 0x180c and myinstid != 0x1812 then	% It is a builtin
+                    const myinstat <- self.getInstAT
+                    Environment$env.pass[" Looking at a builtin %x\n", {myinstid}]
+                    if myinstat !== nil then
+                        const myinstctsat <- myinstct$myat
+                        if myinstctsat !== nil then
+                            Environment$env.pass["  Found a %s as myinstct's at\n",
+                            {nameof myinstctsat}]
+                        end if
+                        myinstct$myat <- myinstat
+                    end if
                 end if
-                myinstct$myat <- myinstat
             end if
         end if
-    end if
-end if
-end checkBuiltinInstAT
-
-export operation resolveSymbols [pst : SymbolTable, nexp : Integer]
-if self$generateOnlyCT and self$xparam !== nil then
-    const ps <- self$xparam
-    var asetq : Any
-    for i : Integer <- 0 while i <= ps.upperbound by i <- i + 1
-        const p <- view ps[i] as Param
-        const s <- view p$xsym as Sym
-        const sb <- s$mysym
-        asetq <- setq.build[sb, self]
-    end for
-end if
-FTree.resolveSymbols[self$st, self, 0]
-self.checkBuiltinInstAT
-end resolveSymbols
-
-export operation typeValue -> [r : Any]
-end typeValue
-
-export operation getAT -> [r : Tree]
-if self$myat == nil then
-    if self$generateOnlyCT then
-        self$myat <- builtinlit.create[self$ln, 0x18].getInstAT
-    else
-        const namehasid <- view self$name as hasIdent
-        const nameid <- namehasid$id
-        const newid <- Environment.getEnv.getITable.Lookup[nameid$name||"type", 999]
-        const sigs <- seq.create[self$ln]
-        var theOps : Tree <- self$ops
-        
-        Environment$env.tassignTypes["oblit.getAT on %s\n", {self$name.asString}]
-        if theops !== nil then
-            for i : Integer <- 3 while i <= theops.upperbound by i <- i + 1
-                const xop <- view theops[i] as OpDef
-                const xsig <- view xop$sig as OpSig
-                if xop$isExported then
-                    %	      Environment$env.pass["  op %d %s is exported\n",
-                    %		{i, xsig$name.asString}]
-                    
-                    % if use copy
-                    if Environment$env$doingIdsEarly then
-                        sigs.rcons[xsig.copy[0]]
-                    else
-                        sigs.rcons[xsig.copy[2]]
+    end checkBuiltinInstAT
+    
+    export operation resolveSymbols [pst : SymbolTable, nexp : Integer]
+        if self$generateOnlyCT and self$xparam !== nil then
+            const ps <- self$xparam
+            var asetq : Any
+            for i : Integer <- 0 while i <= ps.upperbound by i <- i + 1
+                const p <- view ps[i] as Param
+                const s <- view p$xsym as Sym
+                const sb <- s$mysym
+                asetq <- setq.build[sb, self]
+            end for
+        end if
+        FTree.resolveSymbols[self$st, self, 0]
+        self.checkBuiltinInstAT
+    end resolveSymbols
+    
+    export operation typeValue -> [r : Any]
+    end typeValue
+    
+    export operation getAT -> [r : Tree]
+        if self$myat == nil then
+            if self$generateOnlyCT then
+                self$myat <- builtinlit.create[self$ln, 0x18].getInstAT
+            else
+                const namehasid <- view self$name as hasIdent
+                const nameid <- namehasid$id
+                const newid <- Environment.getEnv.getITable.Lookup[nameid$name||"type", 999]
+                const sigs <- seq.create[self$ln]
+                var theOps : Tree <- self$ops
+                
+                Environment$env.tassignTypes["oblit.getAT on %s\n", {self$name.asString}]
+                if theops !== nil then
+                    for i : Integer <- 3 while i <= theops.upperbound by i <- i + 1
+                        const xop <- view theops[i] as OpDef
+                        const xsig <- view xop$sig as OpSig
+                        if xop$isExported then
+                            %	      Environment$env.pass["  op %d %s is exported\n",
+                            %		{i, xsig$name.asString}]
+                            
+                            % if use copy
+                            if Environment$env$doingIdsEarly then
+                                sigs.rcons[xsig.copy[0]]
+                            else
+                                sigs.rcons[xsig.copy[2]]
+                            end if
+                            % else
+                            %	      sigs.rcons[xsig]
+                            % end if
+                        else
+                            %	      Environment$env.pass["  op %d %s is not exported\n",
+                            %		{i, xsig$name.asString}]
+                        end if
+                    end for
+                end if
+                const newat <- atlit.create[ln, self$sfname.copy[0], Sym.create[ln, newid], sigs]
+                if id !== nil then
+                    if 0x1000 <= id and id <= 0x1040 then
+                        newat$id <- id + 0x200
                     end if
-                    % else
-                    %	      sigs.rcons[xsig]
-                    % end if
+                end if
+                if codeoid !== nil then
+                    if 0x1800 <= codeoid and codeoid <= 0x1840 then
+                        newat$id <- codeoid - 0x200
+                    end if
+                end if
+                if Environment$env$doingIdsEarly then
+                    const junk <- newat.removeSugar[nil]
+                    if st == nil then
+                        newat.defineSymbols[st]
+                        newat.resolveSymbols[st, 0]
+                    else
+                        newat.defineSymbols[st$outer]
+                        newat.resolveSymbols[st$outer, 0]
+                    end if
+                end if
+                newat.makeMeManifest
+                newat$isimmutable <- self$isimmutable
+                newat$isVector <- self$isVector
+                self$myat <- newat
+                const namesym <- (view self$name as Sym)$mysym
+                if namesym !== nil then
+                    namesym$ATInfo <- newat
+                    namesym$CTInfo <- self
+                end if
+            end if
+        end if
+        r <- self$myat
+    end getAT
+    
+    export operation getCT -> [r : Tree]
+        if self$generateOnlyCT then
+            r <- builtinlit.create[self$ln, 0x18].getInstCT
+        else
+            r <- self
+        end if
+    end getCT
+    
+    export function getInstCT -> [r : Tree]
+        if !self$knowinstct then
+            if self$generateOnlyCT then
+                % I don't know!!!!  nil will do for now
+            else
+                instct <- view self.findInvocResult[opname.literal["create"], nil, 1] as ObLit
+            end if
+            self$knowinstct <- true
+        end if
+        r <- instct
+    end getInstCT
+    
+    export function getInstAT -> [r : Tree]
+        if !self$knowinstat then
+            instat <- self.findInvocResult[opname.literal["getsignature"], nil, 1]
+            if instat !== nil then
+                instat <- instat.execute.asType
+            end if
+            self$knowinstat <- true
+        end if
+        r <- instat
+    end getInstAT
+    
+    export function getinstCTOID -> [r : Integer]
+        const x <- self$instCT
+        if x !== nil and nameof x = "anoblit" then
+            const y <- view x as hasIDs
+            r <- y$codeOID
+        end if
+    end getinstCTOID
+    
+    export function getinstATOID -> [r : Integer]
+        const x <- self$instAT
+        if x !== nil then
+            const xx <- view x as hasID
+            r <- xx$ID
+        end if
+    end getinstATOID
+    
+    export operation getATOID -> [oid : Integer]
+        const x <- view self.getAT as hasID
+        oid <- x$id
+    end getATOID
+    
+    export operation setATOID [oid : Integer]
+        const x <- view self.getAT as typeobject t
+            operation setID [Integer]
+        end t
+        if x == nil then
+            Environment$env.pass["Can't set atOID of %S to %#x", {self$name, oid}]
+        else
+            x$id <- oid
+        end if
+    end setATOID
+    
+    export operation setinstCTOID [oid : Integer]
+        const x <- view self$instCT as typeobject t
+            operation setCodeOID [Integer]
+        end t
+        if x == nil then
+            Environment$env.pass["Can't set instctoid of %s to %#x", {self$name.asString, oid}]
+        else
+            x$codeOID <- oid
+        end if
+    end setinstCTOID
+    
+    export operation setinstATOID [oid : Integer]
+        const x <- view self$instAT as typeobject t
+            operation setID [Integer]
+        end t
+        if x == nil then
+            Environment$env.pass["Can't set instatoid of %s to %#x", {self$name.asString, oid}]
+        else
+            x$ID <- oid
+        end if
+    end setinstATOID
+    
+    operation pruneList[list : Tree]
+        if list !== nil then
+            for i : Integer <- 0 while i <= list.upperbound by i <- i + 1
+                const p <- list[i]
+                const stype <- p.asType
+                const ttype <- view stype as hasID
+                const typeid <- ttype$id
+                
+                list[i] <- globalref.create[p$ln, typeid, 0x1609, nil, nil, nil]
+            end for
+        end if
+    end pruneList
+    
+    export operation prune
+        if self$isPruned then return end if
+        self$isPruned <- true
+        
+        const namesym <- view name as Sym
+        namesym.prune
+        (view myat as ATlit).prune
+        xsetq <- nil
+        decls <- nil
+        
+        if ops !== nil and ops.upperbound >= 0 then
+            ops[0] <- nil
+            ops[1] <- nil
+            ops[2] <- nil
+            
+            for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
+                const xdef <- view ops[i] as OpDef
+                const xsig <- view xdef$sig as OpSig
+                
+                if xdef$isInlineable then
+                    % can't prune anything, really
                 else
-                    %	      Environment$env.pass["  op %d %s is not exported\n",
-                    %		{i, xsig$name.asString}]
+                    % I can prune the signature only if the operation is not inlineable
+                    self.prunelist[xsig$params]
+                    self.prunelist[xsig$results]
+                    xdef$body <- nil
+                    xdef$st <- nil
+                    xsig$st <- nil
                 end if
             end for
         end if
-        const newat <- atlit.create[ln, self$sfname.copy[0], Sym.create[ln, newid], sigs]
-        if id !== nil then
-            if 0x1000 <= id and id <= 0x1040 then
-                newat$id <- id + 0x200
-            end if
-        end if
-        if codeoid !== nil then
-            if 0x1800 <= codeoid and codeoid <= 0x1840 then
-                newat$id <- codeoid - 0x200
-            end if
-        end if
-        if Environment$env$doingIdsEarly then
-            const junk <- newat.removeSugar[nil]
-            if st == nil then
-                newat.defineSymbols[st]
-                newat.resolveSymbols[st, 0]
-            else
-                newat.defineSymbols[st$outer]
-                newat.resolveSymbols[st$outer, 0]
-            end if
-        end if
-        newat.makeMeManifest
-        newat$isimmutable <- self$isimmutable
-        newat$isVector <- self$isVector
-        self$myat <- newat
-        const namesym <- (view self$name as Sym)$mysym
-        if namesym !== nil then
-            namesym$ATInfo <- newat
-            namesym$CTInfo <- self
-        end if
-    end if
-end if
-r <- self$myat
-end getAT
-
-export operation getCT -> [r : Tree]
-if self$generateOnlyCT then
-    r <- builtinlit.create[self$ln, 0x18].getInstCT
-else
-    r <- self
-end if
-end getCT
-
-export function getInstCT -> [r : Tree]
-if !self$knowinstct then
-    if self$generateOnlyCT then
-        % I don't know!!!!  nil will do for now
-    else
-        instct <- view self.findInvocResult[opname.literal["create"], nil, 1] as ObLit
-    end if
-    self$knowinstct <- true
-end if
-r <- instct
-end getInstCT
-
-export function getInstAT -> [r : Tree]
-if !self$knowinstat then
-    instat <- self.findInvocResult[opname.literal["getsignature"], nil, 1]
-    if instat !== nil then
-        instat <- instat.execute.asType
-    end if
-    self$knowinstat <- true
-end if
-r <- instat
-end getInstAT
-
-export function getinstCTOID -> [r : Integer]
-const x <- self$instCT
-if x !== nil and nameof x = "anoblit" then
-    const y <- view x as hasIDs
-    r <- y$codeOID
-end if
-end getinstCTOID
-
-export function getinstATOID -> [r : Integer]
-const x <- self$instAT
-if x !== nil then
-    const xx <- view x as hasID
-    r <- xx$ID
-end if
-end getinstATOID
-
-export operation getATOID -> [oid : Integer]
-const x <- view self.getAT as hasID
-oid <- x$id
-end getATOID
-
-export operation setATOID [oid : Integer]
-const x <- view self.getAT as typeobject t
-    operation setID [Integer]
-end t
-if x == nil then
-    Environment$env.pass["Can't set atOID of %S to %#x", {self$name, oid}]
-else
-    x$id <- oid
-end if
-end setATOID
-
-export operation setinstCTOID [oid : Integer]
-const x <- view self$instCT as typeobject t
-    operation setCodeOID [Integer]
-end t
-if x == nil then
-    Environment$env.pass["Can't set instctoid of %s to %#x", {self$name.asString, oid}]
-else
-    x$codeOID <- oid
-end if
-end setinstCTOID
-
-export operation setinstATOID [oid : Integer]
-const x <- view self$instAT as typeobject t
-    operation setID [Integer]
-end t
-if x == nil then
-    Environment$env.pass["Can't set instatoid of %s to %#x", {self$name.asString, oid}]
-else
-    x$ID <- oid
-end if
-end setinstATOID
-
-operation pruneList[list : Tree]
-if list !== nil then
-    for i : Integer <- 0 while i <= list.upperbound by i <- i + 1
-        const p <- list[i]
-        const stype <- p.asType
-        const ttype <- view stype as hasID
-        const typeid <- ttype$id
-        
-        list[i] <- globalref.create[p$ln, typeid, 0x1609, nil, nil, nil]
-    end for
-end if
-end pruneList
-
-export operation prune
-if self$isPruned then return end if
-self$isPruned <- true
-
-const namesym <- view name as Sym
-namesym.prune
-(view myat as ATlit).prune
-xsetq <- nil
-decls <- nil
-
-if ops !== nil and ops.upperbound >= 0 then
-    ops[0] <- nil
-    ops[1] <- nil
-    ops[2] <- nil
+    end prune
     
-    for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
-        const xdef <- view ops[i] as OpDef
-        const xsig <- view xdef$sig as OpSig
-        
-        if xdef$isInlineable then
-            % can't prune anything, really
-        else
-            % I can prune the signature only if the operation is not inlineable
-            self.prunelist[xsig$params]
-            self.prunelist[xsig$results]
-            xdef$body <- nil
-            xdef$st <- nil
-            xsig$st <- nil
-        end if
-    end for
-end if
-end prune
-
-export function asString -> [r : String]
-r <- "oblit"
-end asString
+    export function asString -> [r : String]
+        r <- "oblit"
+    end asString
 end Oblit
