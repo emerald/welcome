@@ -47,7 +47,8 @@ def custom_split(s):
     return res[0:i+1]
 
 for fn in argv[1:]:
-
+    if not fn.endswith(".m"):
+        continue
     with open(fn, "r") as f:
         lines = f.readlines()
 
