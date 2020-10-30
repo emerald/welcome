@@ -1,6 +1,6 @@
 %{
 %  imports go here
-%} 
+%}
 %{
 
 const MYENVT <- typeobject MYENVT
@@ -20,8 +20,8 @@ const MYENVT <- typeobject MYENVT
 end MYENVT
 const env <- view environment as MYENVT
 
-%} 
-%start compilation 
+%}
+%start compilation
 %token  TEOF 0 /*  "end of file" */
 %token  TIDENTIFIER /* "identifier" */
 %token  TOPERATOR /* "operator"  */
@@ -135,13 +135,14 @@ const env <- view environment as MYENVT
 %token  KWHEN /*  "when" */
 %token  KWHILE /*  "while" */
 %token  KWHERE /*  "where" */
+%token  KRECEIVE /*  "receive" */
 %right  KAS KTO  /* precedence, lowest first */
-%left  OOR KOR 
-%left  OAND KAND 
-%left  ONOT 
-%left  OIDENTITY ONOTIDENTITY OEQUAL ONOTEQUAL OGREATER OLESS OGREATEREQUAL OLESSEQUAL OCONFORMSTO 
-%left  OPLUS OMINUS 
-%left  OTIMES ODIVIDE OMOD TOPERATOR 
+%left  OOR KOR
+%left  OAND KAND
+%left  ONOT
+%left  OIDENTITY ONOTIDENTITY OEQUAL ONOTEQUAL OGREATER OLESS OGREATEREQUAL OLESSEQUAL OCONFORMSTO
+%left  OPLUS OMINUS
+%left  OTIMES ODIVIDE OMOD TOPERATOR
 %left  ONEGATE KISLOCAL KISFIXED KLOCATE KAWAITING KCODEOF KNAMEOF KTYPEOF KSYNTACTICTYPEOF
 %%
 compilation :
@@ -149,11 +150,11 @@ compilation :
 		{ $$ <- comp.create[env$ln - 1, env$fileName, nil, nil, $1] env.done[$$] }
 	;
 constantDeclarationS :
-		empty 
+		empty
 		{ $$ <- sseq.create[env$ln] }
-	|	constantDeclarationS environmentExport 
+	|	constantDeclarationS environmentExport
 		{ $$ <- $1 $$.rcons[$2] }
-	|	constantDeclarationS constantDeclaration 
+	|	constantDeclarationS constantDeclaration
 		{ $$ <- $1 $$.rcons[$2] }
 	;
 empty :
@@ -171,7 +172,7 @@ typeClauseOpt :
 	|	typeClause { $$ <- $1 }
 	;
 typeClause :
-		TCOLON typeDefinition 
+		TCOLON typeDefinition
 		{ $$ <- $2 }
 	;
 typeDefinition :
@@ -187,14 +188,14 @@ abstractType :
 		  end if }
 	;
 record :
-		KRECORD symbolDefinition recordFieldS KEND symbolReference 
+		KRECORD symbolDefinition recordFieldS KEND symbolReference
 		{ env.checkNames[$2, $5]
 	      $$ <- recordlit.create[env$ln, env$fileName, $2, $3] }
 	;
 recordFieldS :
-		recordField 
+		recordField
 		{ $$ <- seq.create[env$ln] $$.rappend[$1] }
-	|	recordFieldS recordField 
+	|	recordFieldS recordField
 		{ $$ <- $1 $$.rappend[$2] }
 	;
 recordField :
@@ -220,22 +221,22 @@ recordField :
 	      }
 	;
 enumeration :
-		KENUMERATION symbolDefinition symbolDefinitionS KEND symbolReference 
+		KENUMERATION symbolDefinition symbolDefinitionS KEND symbolReference
 		{
 		  env.checkNames[$2, $5]
 		  $$ <- enumlit.create[env$ln, $2, $3]
 		}
 	;
 symbolDefinitionS :
-		symbolDefinition 
+		symbolDefinition
 		{ $$ <- seq.singleton[$1] }
-	|	symbolDefinitionS TCOMMA symbolDefinition 
+	|	symbolDefinitionS TCOMMA symbolDefinition
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 symbolReferenceS :
-		symbolReference 
+		symbolReference
 		{ $$ <- seq.singleton[$1] }
-	|	symbolReferenceS TCOMMA symbolReference 
+	|	symbolReferenceS TCOMMA symbolReference
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 symbolReferenceOrLiteral:
@@ -255,36 +256,36 @@ symbolReferenceOrLiteralS :
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 operationSignatureS :
-		empty 
+		empty
 		{ $$ <- seq.create[env$ln] }
-	|	operationSignatureS operationSignature 
+	|	operationSignatureS operationSignature
 		{ $$ <- $1 $$.rcons[$2] newid.reset }
 	;
 operationSignature :
-		KFUNCTION operationNameDefinition parameterClause returnClause whereClause 
+		KFUNCTION operationNameDefinition parameterClause returnClause whereClause
 		{ const x : OpSig <- opsig.create[env$ln, (view $2 as hasIdent)$id, $3, $4, $5]
 		  x$isFunction <- true
 		  $$ <- x
 		}
-	|	
-		operationWord operationNameDefinition parameterClause returnClause whereClause 
+	|
+		operationWord operationNameDefinition parameterClause returnClause whereClause
 		{ $$ <- opsig.create[env$ln, (view $2 as hasIdent)$id, $3, $4, $5] }
 	;
 operationWord :
-		KOPERATION 
-	|	KOP 
+		KOPERATION
+	|	KOP
 	;
 parameterClause :
 		empty { $$ <- $1 }
-	|	TLSQUARE TRSQUARE 
+	|	TLSQUARE TRSQUARE
 		{ $$ <- nil }
-	|	TLSQUARE parameterS TRSQUARE 
+	|	TLSQUARE parameterS TRSQUARE
 		{ $$ <- $2 }
 	;
 parameterS :
-		parameter 
+		parameter
 		{ $$ <- seq.singleton[$1] }
-	|	parameterS TCOMMA parameter 
+	|	parameterS TCOMMA parameter
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 omove:
@@ -317,9 +318,9 @@ parameter :
 	;
 returnClause :
 		empty { $$ <- nil }
-	|	ORETURNS TLSQUARE TRSQUARE 
+	|	ORETURNS TLSQUARE TRSQUARE
 		{ $$ <- nil }
-	|	ORETURNS TLSQUARE parameterS TRSQUARE 
+	|	ORETURNS TLSQUARE parameterS TRSQUARE
 		{ $$ <- $3 }
 	;
 whereClause :
@@ -328,9 +329,9 @@ whereClause :
 		{ $$ <- $1 }
 	;
 whereWidgitS :
-		whereWidgit 
+		whereWidgit
 		{ $$ <- seq.singleton[$1] }
-	|	whereWidgitS whereWidgit 
+	|	whereWidgitS whereWidgit
 		{ $$ <- $1 $$.rcons[$2] }
 	;
 whereWidgit :
@@ -347,20 +348,20 @@ builtin:
 		{ $$ <- $2 }
 	;
 object :
-		KOBJECT symbolDefinition builtin declarationS operationDefinitionS KEND symbolReference 
+		KOBJECT symbolDefinition builtin declarationS operationDefinitionS KEND symbolReference
 		{ const x : Oblit <- oblit.create[env$ln, env$fileName, $2, $4, $5]
 		  env.checkNames[$2, $7]
 		  if $3 !== nil then
 		    x.setBuiltinID[$3]
-		  end if 
+		  end if
 		  $$ <- x }
 	;
 closure :
-		KCLOSURE symbolDefinition builtin parameterClause declarationS operationDefinitionS KEND symbolReference 
+		KCLOSURE symbolDefinition builtin parameterClause declarationS operationDefinitionS KEND symbolReference
 		{ const x : Oblit <- oblit.create[env$ln,env$fileName, $2, $5, $6]
 
 		  % solve the setq problem.  Each of the symbols in the
-		  % parameter clause needs to be turned into a setq with an 
+		  % parameter clause needs to be turned into a setq with an
 		  % undefined outer.  Hmmmm.....
 		  % Nope.  We need another thing for explicit parameters,
 		  % cause they need types.
@@ -371,26 +372,26 @@ closure :
 		  env.checkNames[$2, $8]
 		  if $3 !== nil then
 		    x.setBuiltinID[$3]
-		  end if 
+		  end if
 		  $$ <- x }
 	;
 creators :
-		empty 
+		empty
 		{ $$ <- nil }
-	|	creators KCLASS constantDeclaration 
+	|	creators KCLASS constantDeclaration
 		{ if $1 == nil then $$ <- seq.pair[seq.singleton[$3], seq.create[env$ln]] else $$ <- $1 $$[0].rcons[$3] end if }
 	;
-	|	creators KCLASS operationDefinition 
+	|	creators KCLASS operationDefinition
 		{ if $1 == nil then $$ <- seq.pair[seq.create[env$ln], seq.singleton[$3]] else $$ <- $1 $$[1].rcons[$3] end if }
 	;
 obase :
 		empty { $$ <- nil }
-	|	TLPAREN symbolReference TRPAREN 
+	|	TLPAREN symbolReference TRPAREN
 		{ $$ <- $2 }
 	;
 class :
-		KCLASS symbolDefinition obase parameterClause builtin creators declarationS operationDefinitionS KEND symbolReference 
-		{ 
+		KCLASS symbolDefinition obase parameterClause builtin creators declarationS operationDefinitionS KEND symbolReference
+		{
 		  env.checkNames[$2, $10]
 		  const c <- xclass.create[env$ln, env$fileName, $2, $3, $4, $6, $7, $8]
 		  if $5 !== nil then c.setbuiltinid[$5] end if
@@ -398,18 +399,18 @@ class :
 		}
 	;
 declarationS :
-		empty 
+		empty
 		{ $$ <- nil }
-	|	declarationS declaration 
+	|	declarationS declaration
 		{ if $1 == nil then $$ <- sseq.singleton[$2] else $$ <- $1 $$.rcons[$2] end if }
 	;
 attached :
-		KATTACHED 
+		KATTACHED
 		{ $$ <- sseq.create[env$ln] }
 	|	empty { $$ <- nil }
 	;
 declaration :
-		attached declarationprime 
+		attached declarationprime
 	      {
 		if $1 !== nil then
 		  const s : Tree <- $2
@@ -437,18 +438,18 @@ declarationprime :
 	|	externalDeclaration { $$ <- $1 }
 	;
 constantDefOp :
-		OASSIGN 
+		OASSIGN
 	;
 fieldDeclaration :
-		KFIELD symbolDefinition typeClause initializerOpt 
+		KFIELD symbolDefinition typeClause initializerOpt
 		{ $$ <- fielddecl.create[env$ln, $2, $3, $4] }
-	|	KCONST KFIELD symbolDefinition typeClause initializerOpt 
+	|	KCONST KFIELD symbolDefinition typeClause initializerOpt
 		{ const f : FieldDecl <- fielddecl.create[env$ln, $3, $4, $5]
 		  f$isConst <- true
 		  $$ <- f }
 	;
 constantDeclaration :
-		KCONST symbolDefinition typeClauseOpt constantDefOp expression 
+		KCONST symbolDefinition typeClauseOpt constantDefOp expression
 		{ $$ <- constdecl.create[env$ln, $2, $3, $5] }
 	;
 externalDeclaration :
@@ -457,29 +458,29 @@ externalDeclaration :
 	;
 initializerOpt :
 		empty { $$ <- $1 }
-	|	OASSIGN expression 
+	|	OASSIGN expression
 		{ $$ <- $2 }
 	;
 initializer :
-		OASSIGN expression 
+		OASSIGN expression
 		{ $$ <- $2 }
 	;
 variableDeclaration :
-		KVAR symbolDefinitionS typeClause initializerOpt 
+		KVAR symbolDefinitionS typeClause initializerOpt
 		{ $$ <- env.distribute[vardecl, $2, $3, $4] }
 	;
 operationDefinitionS :
-		empty 
+		empty
 		{ $$ <- seq.create[env$ln]
 		  $$.rcons[nil] $$.rcons[nil] $$.rcons[nil] }
-	|	operationDefinitionS operationDefinition 
+	|	operationDefinitionS operationDefinition
 		{ $$ <- $1 $$.rcons[$2] }
 	|	operationDefinitionS initiallyDefinition
-		{ $$ <- $1 
+		{ $$ <- $1
 		  if $$.getElement[0] !== nil then
 		    env.SemanticError[$2$ln, "Only one initially definition is allowed", nil]
 		  else
-		    $$.setElement[0, $2] 
+		    $$.setElement[0, $2]
 		  end if
 		}
 	|	operationDefinitionS recoveryDefinition
@@ -487,7 +488,7 @@ operationDefinitionS :
 		  if $$.getElement[1] !== nil then
 		    env.SemanticError[$2$ln, "Only one recovery definition is allowed", nil]
 		  else
-		    $$.setElement[1, $2] 
+		    $$.setElement[1, $2]
 		  end if
 		}
 	|	operationDefinitionS processDefinition
@@ -495,7 +496,7 @@ operationDefinitionS :
 		  if $$.getElement[2] !== nil then
 		    env.SemanticError[$2$ln, "Only one process definition is allowed", nil]
 		  else
-		    $$.setElement[2, $2] 
+		    $$.setElement[2, $2]
 		  end if
 		}
 	;
@@ -506,26 +507,26 @@ operationDefinition :
 		{ (view $2 as OpDef)$isExported <- true $$ <- $2 }
 	;
 operationDefinitionRest :
-                operationSignature blockBody KEND operationNameReference 
+                operationSignature blockBody KEND operationNameReference
 		{ const sig <- view $1 as OpSig
 		  env.checkNamesByID[sig$name, (view $4 as hasIdent)$id]
 		  sig.isInDefinition
 		  $$ <- opdef.create[env$ln, $1, $2] }
 	;
 blockBody :
-		declarationsAndStatements unavailableHandler failureHandler 
+		declarationsAndStatements unavailableHandler failureHandler
 		{ $$ <- block.create[env$ln, $1, $2, $3] }
 	;
 initiallyDefinition :
-		KINITIALLY blockBody KEND KINITIALLY 
+		KINITIALLY blockBody KEND KINITIALLY
 		{ $$ <- initdef.create[env$ln, $2] }
 	;
 recoveryDefinition :
-		KRECOVERY blockBody KEND KRECOVERY 
+		KRECOVERY blockBody KEND KRECOVERY
 		{ $$ <- recoverydef.create[env$ln, $2] }
 	;
 processDefinition :
-		KPROCESS blockBody KEND KPROCESS 
+		KPROCESS blockBody KEND KPROCESS
 		{ $$ <- processdef.create[env$ln, $2] }
 	;
 declarationsAndStatements :
@@ -554,44 +555,44 @@ statement :
 	|	returnStatement { $$ <- $1 }
 	|	returnAndFailStatement { $$ <- $1 }
         |       acceptStatement { $$ <- $1 }
-	|	error 
+	|	error
 	;
 optDeclaration :
 		empty { $$ <- $1 }
-	|	TLSQUARE symbolDefinition TRSQUARE 
+	|	TLSQUARE symbolDefinition TRSQUARE
 		{ $$ <- vardecl.create[env$ln, $2, sym.create[env$ln, env$itable.Lookup["any", 999]], nil] }
 	;
 unavailableHandler :
 		empty { $$ <- $1 }
-	|	KUNAVAILABLE optDeclaration blockBody KEND KUNAVAILABLE 
+	|	KUNAVAILABLE optDeclaration blockBody KEND KUNAVAILABLE
                 { $$ <- xunavail.create[env$ln, $2, $3] }
 	;
 failureHandler :
 		empty { $$ <- $1 }
-	|	KFAILURE blockBody KEND KFAILURE 
+	|	KFAILURE blockBody KEND KFAILURE
                 { $$ <- xfailure.create[env$ln, $2] }
 	;
 ifClauseS :
-		ifClause 
+		ifClause
 		{ $$ <- seq.singleton[$1] }
-	|	ifClauseS KELSEIF ifClause 
+	|	ifClauseS KELSEIF ifClause
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 ifClause :
-		expression KTHEN declarationsAndStatements 
+		expression KTHEN declarationsAndStatements
 		{ $$ <- ifclause.create[env$ln, $1, $3] }
 	;
 elseClause :
 		empty { $$ <- $1 }
-	|	KELSE declarationsAndStatements 
+	|	KELSE declarationsAndStatements
 		{ $$ <- elseclause.create[env$ln, $2] }
 	;
 ifStatement :
-		KIF ifClauseS elseClause KEND KIF 
+		KIF ifClauseS elseClause KEND KIF
 		{ $$ <- ifstat.create[env$ln, $2, $3] }
 	;
 forStatement :
-		KFOR TLPAREN assignmentOrInvocationStatement TCOLON expression TCOLON assignmentOrInvocationStatement TRPAREN declarationsAndStatements KEND KFOR 
+		KFOR TLPAREN assignmentOrInvocationStatement TCOLON expression TCOLON assignmentOrInvocationStatement TRPAREN declarationsAndStatements KEND KFOR
 		{ const inv : Invoc <- invoc.create[env$ln, $5, opname.literal["!"], nil]
 		  const ex : ExitStat <- exitstat.create[env$ln, inv]
 		  var s : Tree <- sseq.create[env$ln]
@@ -604,7 +605,7 @@ forStatement :
 		  s.rcons[$3]
 		  s.rcons[l]
 		  $$ <- block.create[env$ln, s, nil, nil] }
-	|	KFOR symbolDefinition typeClause initializer KWHILE expression KBY assignmentOrInvocationStatement declarationsAndStatements KEND KFOR 
+	|	KFOR symbolDefinition typeClause initializer KWHILE expression KBY assignmentOrInvocationStatement declarationsAndStatements KEND KFOR
 		{ const inv : Invoc <- invoc.create[env$ln, $6, opname.literal["!"], nil]
 		  const ex : ExitStat <- exitstat.create[env$ln, inv]
 		  var s : Tree <- sseq.create[env$ln]
@@ -618,7 +619,7 @@ forStatement :
 		  s.rcons[l]
 		  $$ <- block.create[env$ln, s, nil, nil] }
 	|	KFOR symbolDefinition KIN expression declarationsAndStatements KEND KFOR
-		{ 
+		{
 		  const id <- env$itable.Lookup["i" || env.newid.asString, 999]
 		  const lb <- env$itable.Lookup["lb" || env.newid.asString, 999]
 		  const ub <- env$itable.Lookup["ub" || env.newid.asString, 999]
@@ -631,7 +632,7 @@ forStatement :
 		  const ubconst <- constdecl.create[env$ln, sym.create[env$ln, ub], nil,
 											invoc.create[env$ln, sym.create[env$ln, col], opname.literal["upperbound"], nil]]
 		  const indexvar <- vardecl.create[env$ln, sym.create[env$ln, id], sym.create[env$ln, int], sym.create[env$ln, lb]]
-		  
+
 		  const inv : Invoc <- invoc.create[env$ln, sym.create[env$ln, id], opname.literal[">"], seq.singleton[sym.create[env$ln, ub]]]
 		  const ex : ExitStat <- exitstat.create[env$ln, inv]
 		  var s : Tree <- sseq.create[env$ln]
@@ -655,54 +656,54 @@ forStatement :
 		  $$ <- block.create[env$ln, s, nil, nil] }
 	;
 loopStatement :
-		KLOOP declarationsAndStatements KEND KLOOP 
+		KLOOP declarationsAndStatements KEND KLOOP
 		{ $$ <- loopstat.create[env$ln, $2] }
 	;
 exitStatement :
-		KEXIT whenClause 
+		KEXIT whenClause
 		{ $$ <- exitstat.create[env$ln, $2] }
 	;
 whenClause :
 		empty { $$ <- $1 }
-	|	KWHEN expression 
+	|	KWHEN expression
 		{ $$ <- $2 }
 	;
 alphaS :
 		alpha
 		{ $$ <- seq.singleton[$1] }
-	|	alphaS TCOMMA alpha 
+	|	alphaS TCOMMA alpha
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 assignmentOrInvocationStatement :
 		alpha
 		{ $$ <- $1 }
-	|	alphaS OASSIGN expressionS 
+	|	alphaS OASSIGN expressionS
 		{ $$ <- assignstat.create[env$ln, $1, $3] }
 	;
 assertStatement :
-		KASSERT expression 
+		KASSERT expression
 		{ $$ <- assertstat.create[env$ln, $2] }
 	;
 moveStatement :
-		KMOVE expression KTO expression 
+		KMOVE expression KTO expression
 		{ $$ <- movestat.create[env$ln, $2, $4, opname.literal["move"]] }
-	|	KFIX expression KAT expression 
+	|	KFIX expression KAT expression
 		{ $$ <- movestat.create[env$ln, $2, $4, opname.literal["fix"]] }
-	|	KREFIX expression KAT expression 
+	|	KREFIX expression KAT expression
 		{ $$ <- movestat.create[env$ln, $2, $4, opname.literal["refix"]] }
 	|	KUNFIX expression
 		{ $$ <- movestat.create[env$ln, $2, nil, opname.literal["unfix"]] }
 	;
 compoundStatement :
-		KBEGIN blockBody KEND 
+		KBEGIN blockBody KEND
 		{ $$ <- $2 }
 	;
 returnStatement :
-		KRETURN 
+		KRETURN
 		{ $$ <- returnstat.create[env$ln] }
 	;
 returnAndFailStatement :
-		KRETURNANDFAIL 
+		KRETURNANDFAIL
 		{ $$ <- returnandfailstat.create[env$ln] }
 	;
 primitiveImplementation :
@@ -721,7 +722,7 @@ ovar :
 	|	KVAR { $$ <- selflit.create[env$ln] }
 	;
 primitiveStatement :
-		KPRIMITIVE oself ovar primitiveImplementation TLSQUARE symbolReferenceSopt TRSQUARE OASSIGN TLSQUARE symbolReferenceOrLiteralSopt TRSQUARE 
+		KPRIMITIVE oself ovar primitiveImplementation TLSQUARE symbolReferenceSopt TRSQUARE OASSIGN TLSQUARE symbolReferenceOrLiteralSopt TRSQUARE
 		{ $$ <- primstat.create[env$ln, $2, $3, $4, $6, $10] }
 	;
 symbolReferenceSopt :
@@ -733,17 +734,17 @@ symbolReferenceOrLiteralSopt :
 	|	symbolReferenceOrLiteralS { $$ <- $1 }
 	;
 waitStatement :
-		KWAIT expression 
+		KWAIT expression
 		{ $$ <- waitstat.create[env$ln, $2] }
 	;
 signalStatement :
-		KSIGNAL expression 
+		KSIGNAL expression
 		{ $$ <- signalstat.create[env$ln, $2] }
 	;
 expressionS :
-		expression 
+		expression
 		{ $$ <- seq.singleton[$1] }
-	|	expressionS TCOMMA expression 
+	|	expressionS TCOMMA expression
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 negate :
@@ -752,55 +753,55 @@ negate :
 	;
 expression :
 		expressionZero { $$ <- $1 }
-	|	expression OOR expression 
+	|	expression OOR expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression KOR expression 
+	|	expression KOR expression
 		{ $$ <- exp.create[env$ln, $1, opname.literal["or"], $3]}
-	|	expression OAND expression 
+	|	expression OAND expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression KAND expression 
+	|	expression KAND expression
 		{ $$ <- exp.create[env$ln, $1, opname.literal["and"], $3]}
-	|	ONOT expression 
+	|	ONOT expression
 		{ $$ <- invoc.create[env$ln, $2, (view $1 as hasIdent)$id, nil] }
-	|	expression OIDENTITY expression 
+	|	expression OIDENTITY expression
 		{ $$ <- exp.create[env$ln, $1, (view $2 as hasIdent)$id, $3] }
-	|	expression ONOTIDENTITY expression 
+	|	expression ONOTIDENTITY expression
 		{ $$ <- exp.create[env$ln, $1, (view $2 as hasIdent)$id, $3] }
-	|	expression OEQUAL expression 
+	|	expression OEQUAL expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression ONOTEQUAL expression 
+	|	expression ONOTEQUAL expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OGREATER expression 
+	|	expression OGREATER expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OLESS expression 
+	|	expression OLESS expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OGREATEREQUAL expression 
+	|	expression OGREATEREQUAL expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OLESSEQUAL expression 
+	|	expression OLESSEQUAL expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OCONFORMSTO expression 
+	|	expression OCONFORMSTO expression
 		{ $$ <- exp.create[env$ln, $1, (view $2 as hasIdent)$id, $3] }
-	|	KVIEW expression KAS expression 
+	|	KVIEW expression KAS expression
 		{ $$ <- xview.create[env$ln, $2, $4] }
-	|	KRESTRICT expression KTO expression 
+	|	KRESTRICT expression KTO expression
 		{ $$ <- xview.create[env$ln, $2, $4] }
-	|	expression OPLUS expression 
+	|	expression OPLUS expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OMINUS expression 
+	|	expression OMINUS expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OTIMES expression 
+	|	expression OTIMES expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression ODIVIDE expression 
+	|	expression ODIVIDE expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression OMOD expression 
+	|	expression OMOD expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
-	|	expression TOPERATOR expression 
+	|	expression TOPERATOR expression
 		{ $$ <- invoc.create[env$ln, $1, (view $2 as hasIdent)$id, seq.singleton[$3]] }
 	|	negate expression %prec ONEGATE
 		{
 		  const x : Tree <- $2
 		  const s <- nameof x
-		  
+
 		  if s = "aliteral" and (view x as Literal)$index = IntegerIndex then
 		    const il : Literal <- view x as Literal
 		    const old : String <- il$str
@@ -814,22 +815,24 @@ expression :
 		    $$ <- invoc.create[env$ln, $2, (view $1 as hasIdent)$id, nil]
 		  end if
 		}
-	|	KLOCATE expression 
+	|	KLOCATE expression
 		{ $$ <- unaryexp.create[env$ln, opname.literal["locate"],$2]}
-	|	KAWAITING expression 
+	|	KAWAITING expression
 		{ $$ <- unaryexp.create[env$ln, opname.literal["awaiting"],$2]}
-	|	KCODEOF expression 
+	|	KCODEOF expression
 		{ $$ <- unaryexp.create[env$ln,opname.literal["codeof"],$2]}
-	|	KNAMEOF expression 
+	|	KNAMEOF expression
 		{ $$ <- unaryexp.create[env$ln,opname.literal["nameof"],$2]}
-	|	KTYPEOF expression 
+	|	KTYPEOF expression
 		{ $$ <- unaryexp.create[env$ln,opname.literal["typeof"],$2]}
-	|	KSYNTACTICTYPEOF expression 
+	|	KSYNTACTICTYPEOF expression
 		{ $$ <- unaryexp.create[env$ln,opname.literal["syntactictypeof"],$2]}
-        |       KISLOCAL expression
-                { $$ <- unaryexp.create[env$ln,opname.literal["islocal"],$2]}
-        |       KISFIXED expression
-                { $$ <- unaryexp.create[env$ln,opname.literal["isfixed"],$2]}
+    |   KISLOCAL expression
+        { $$ <- unaryexp.create[env$ln,opname.literal["islocal"],$2]}
+    |   KISFIXED expression
+        { $$ <- unaryexp.create[env$ln,opname.literal["isfixed"],$2]}
+    |   KRECEIVE expression
+        { $$ <- unaryexp.create[env$ln,opname.literal["receive"],$2]}
 	;
 expressionZero :
 		alpha { $$ <- $1 }
@@ -837,13 +840,13 @@ expressionZero :
 /* alphas are any invocation expression */
 alpha :
 		beta { $$ <- $1 }
-	|	KNEW primary 
+	|	KNEW primary
 		{ $$ <- newExp.create[env$ln, $2, nil] }
 	|	alpha TDOT operationNameReference
 		{ $$ <- invoc.create[env$ln, $1, (view $3 as hasIdent)$id, nil] }
 	|	alpha TDOTSTAR primary
 		{ $$ <- starinvoc.create[env$ln, $1, $3, nil] }
-	|	alpha TDOTQUESTION operationNameReference 
+	|	alpha TDOTQUESTION operationNameReference
 		{ $$ <- questinvoc.create[env$ln, $1, (view $3 as hasIdent)$id, nil] }
 	;
 /* betas are subscriptable */
@@ -851,22 +854,22 @@ beta:
 		primary { $$ <- $1 }
 	|	KNEW primary neArgumentClause
 		{ $$ <- newExp.create[env$ln, $2, $3] }
-	|	beta TLSQUARE argumentS TRSQUARE 
+	|	beta TLSQUARE argumentS TRSQUARE
 		{ $$ <- subscript.create[env$ln, $1, $3] }
-	|	alpha TDOLLAR TIDENTIFIER 
+	|	alpha TDOLLAR TIDENTIFIER
 		{ $$ <- fieldsel.create[env$ln, $1, $3] }
-	|	alpha TDOT operationNameReference neArgumentClause 
+	|	alpha TDOT operationNameReference neArgumentClause
 		{ $$ <- invoc.create[env$ln, $1, (view $3 as hasIdent)$id, $4] }
-	|	alpha TDOTSTAR primary neArgumentClause 
+	|	alpha TDOTSTAR primary neArgumentClause
 		{ $$ <- starinvoc.create[env$ln, $1, $3, $4] }
-	|	alpha TDOTQUESTION operationNameReference neArgumentClause 
+	|	alpha TDOTQUESTION operationNameReference neArgumentClause
 		{ $$ <- questinvoc.create[env$ln, $1, (view $3 as hasIdent)$id, $4] }
 	;
-		
+
 primary :
 		literal { $$ <- $1 }
 	|	symbolReference { $$ <- $1 }
-	|	TLPAREN expression TRPAREN 
+	|	TLPAREN expression TRPAREN
 		{ $$ <- $2 }
 	;
 operationNameDefinition :
@@ -878,7 +881,7 @@ operatorName :
 		TOPERATOR { $$ <- $1 }
 	;
 operationName :
-		TIDENTIFIER 
+		TIDENTIFIER
 		{ $$ <- $1 }
 	;
 definableOperatorName :
@@ -910,26 +913,26 @@ operationNameReference :
 	|	operationName { $$ <- $1 }
 	;
 neArgumentClause :
-		TLSQUARE TRSQUARE 
+		TLSQUARE TRSQUARE
 		{ $$ <- nil }
-	|	TLSQUARE argumentS TRSQUARE 
+	|	TLSQUARE argumentS TRSQUARE
 		{ $$ <- $2 }
 	;
 argumentS :
-		argument 
+		argument
 		{ $$ <- seq.singleton[$1] }
-	|	argumentS TCOMMA argument 
+	|	argumentS TCOMMA argument
 		{ $$ <- $1 $$.rcons[$3] }
 	;
 argument :
-		expression 
+		expression
 		{ $$ <- $1 }
-	|	KMOVE expression 
+	|	KMOVE expression
 		{ const t <- arg.create[env$ln, $2]
 % If doing move/visit
 %		  t$ismove <- true
-		  $$ <- t }  
-	|	KVISIT expression 
+		  $$ <- t }
+	|	KVISIT expression
 		{ const t : Arg <- arg.create[env$ln, $2]
 % If doing move/visit
 %		  t$isvisit <- true
@@ -940,21 +943,21 @@ literal :
 	|	TCHARACTERLITERAL { $$ <- $1 }
 	|	TINTEGERLITERAL { $$ <- $1 }
 	|	TREALLITERAL { $$ <- $1 }
-	|	KTRUE 
-		{ const t <- Literal.BooleanL[env$ln, true] 
+	|	KTRUE
+		{ const t <- Literal.BooleanL[env$ln, true]
 		  $$ <- t }
-	|	KFALSE 
+	|	KFALSE
 		{ const t <- Literal.BooleanL[env$ln, false]
 		  $$ <- t }
-	|	KSELF 
+	|	KSELF
 		{ $$ <- selflit.create[env$ln] }
-	|	KNIL 
+	|	KNIL
 		{ $$ <- Literal.NilL[env$ln] }
 	|	typeLiteral { $$ <- $1 }
 	|	vectorLiteral { $$ <- $1 }
 	;
 vectorLiteral :
-		TLCURLY expressionSOpt typeClauseOpt TRCURLY 
+		TLCURLY expressionSOpt typeClauseOpt TRCURLY
 		{ $$ <- vectorlit.create[env$ln, $3, $2, nil] }
 	;
 expressionSOpt :
@@ -971,21 +974,21 @@ typeObject :
 		  $$ <- $2 }
 	;
 typeLiteral :
-		typeRest 
+		typeRest
 		{ $$ <- $1 }
-	|	KIMMUTABLE typeRest 
+	|	KIMMUTABLE typeRest
 		{ const x <- $2
 		  const y <- view x as OTree
 		  y$isImmutable <- true
 		  $$ <- $2 }
-	|	KMONITOR typeRest 
-		{ 
+	|	KMONITOR typeRest
+		{
 		  const y <- view $2 as Monitorable
 		  if nameof $2 = "anatlit" then
 		    env.SemanticError[$2$ln, "Monitored typeobjects don't make sense", nil]
 		  end if
 		  y$isMonitored <- true
-		  $$ <- $2 
+		  $$ <- $2
 		}
 	;
 typeRest :
@@ -997,11 +1000,11 @@ typeRest :
 	|	class { $$ <- $1 }
 	;
 symbolReference :
-		TIDENTIFIER 
+		TIDENTIFIER
 		{ $$ <- $1 }
 	;
 symbolDefinition :
-		TIDENTIFIER 
+		TIDENTIFIER
 		{ $$ <- $1 }
 	;
 %%

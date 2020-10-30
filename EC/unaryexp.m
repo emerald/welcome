@@ -42,13 +42,13 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             r <- self
         end if
     end iremoveSugar
-    
-    
+
+
     export operation removeSugar [ob : Tree] -> [r : Tree]
         r <- self.iremoveSugar[]
         r <- FTree.removeSugar[r, ob]
     end removeSugar
-    
+
     export operation getCT -> [r : Tree]
         const s : String <- xop$name
         var index : Integer
@@ -66,20 +66,22 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             index <- 0x06
         elseif s = "syntactictypeof" then
             index <- 0x09
+        elseif s = "receive" then
+            index <- 0x00
         end if
         r <- builtinlit.create[self$ln, index].getInstCT
     end getCT
-    
+
     export operation getIsNotManifest -> [r : Boolean]
         const s : String <- xop$name
         r <- s != "syntactictypeof"
     end getIsNotManifest
-    
+
     export function asType -> [r : Tree]
         r <- self.execute
         if r !== nil then r <- r.asType end if
     end astype
-    
+
     export operation execute -> [r : Tree]
         const s : String <- xop$name
         if s = "syntactictypeof" then
@@ -87,7 +89,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             if r !== nil then r <- r.execute end if
         end if
     end execute
-    
+
     export operation getAT -> [r : Tree]
         const s : String <- xop$name
         var index : Integer
@@ -105,13 +107,15 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             index <- 0x06
         elseif s = "syntactictypeof" then
             index <- 0x09
+        elseif s = "receive" then
+            index <- 0x00
         end if
         r <- builtinlit.create[self$ln, index].getInstAT
     end getAT
-    
+
     export operation generate [xct : Printable]
         const bc <- view xct as ByteCode
-        
+
         const s : String <- xop$name
         if s = "locate" then
             bc.pushSize[8]
@@ -166,11 +170,17 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             expat.generate[bc]
             bc.popSize
             bc.finishExpr[4, 0x1809, 0x1609]
+        elseif s = "receive" then
+            % const expat <- exp.getAT
+            % bc.pushSize[4]
+            % expat.generate[bc]
+            % bc.popSize
+            % bc.finishExpr[4, 0x1809, 0x1609]
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
         end if
     end generate
-    
+
     export function asString -> [r : String]
         r <- "unaryexp"
     end asString

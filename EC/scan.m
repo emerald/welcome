@@ -116,6 +116,7 @@ const scanner <- immutable object scanner
     const KWHEN <- 110
     const KWHILE <- 111
     const KWHERE <- 112
+    const KRECEIVE <- 113
     const tokenNameTable <- {
     "end of file",
     "identifier",
@@ -229,13 +230,14 @@ const scanner <- immutable object scanner
     "wait",
     "when",
     "while",
-    "where"
+    "where",
+    "receive"
     }
     const firstKeyword <- OAND
-    const lastKeyword  <- KWHERE
-    
+    const lastKeyword  <- KRECEIVE
+
     const token <- integer
-    
+
     const scannerType <- typeobject scannerType
         operation lex -> [Integer, yystype]
         function lineNumber -> [Integer]
@@ -243,11 +245,11 @@ const scanner <- immutable object scanner
         function position -> [Integer]
         operation reset [InputThing]
     end scannerType
-    
+
     export function getSignature -> [r : Signature]
         r <- scannerType
     end getSignature
-    
+
     export operation create [xstdin : InputThing, it : IdentTable] -> [r : scannerType]
         r <- object aScanner
             var stdin : InputThing <- xstdin
@@ -284,7 +286,7 @@ const scanner <- immutable object scanner
             const CEOF <- 17
             const CWHITE <- 18
             const CNL <- 19
-            
+
             const charClass <- {
             CILLEGAL,CILLEGAL,CILLEGAL,CILLEGAL,CILLEGAL,CILLEGAL,CILLEGAL,CILLEGAL,
             CILLEGAL,CWHITE,CNL,CILLEGAL,CWHITE,CWHITE,CILLEGAL,CILLEGAL,
@@ -319,12 +321,12 @@ const scanner <- immutable object scanner
             CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,
             CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER,CLETTER
             }
-            
+
             operation readLine
                 nextPosition <- ~1
                 lineBuffer.readString[stdin, EOF]
             end readLine
-            
+
             operation getNextChar
                 var c : Character
                 if needIncLineNumber then
@@ -336,7 +338,7 @@ const scanner <- immutable object scanner
                 needIncLineNumber <- c == '\n' or c == EOF
                 nextChar <- c
             end getNextChar
-            
+
             operation doAChar -> [r : Character]
                 var num : integer <- 0
                 if nextChar = '\\' then
@@ -379,13 +381,13 @@ const scanner <- immutable object scanner
                 end if
                 r <- Character.literal[num]
             end doAChar
-            
+
             operation doaccept
                 nextTokenBuffer.reset
                 nextTokenValue <- nil
                 self.scan[]
             end doaccept
-            
+
             operation scan
                 var cc : Integer
                 loop
@@ -396,7 +398,7 @@ const scanner <- immutable object scanner
                     end if
                     currentPosition <- nextPosition
                     cc <- charClass[nextChar.ord]
-                    
+
                     if cc = CILLEGAL then
                         %	    IllegalCharacter[nextChar]
                         self.getNextChar[]
@@ -560,7 +562,7 @@ const scanner <- immutable object scanner
                 end loop
                 nextToken <- nextToken + 257
             end scan
-            
+
             export operation lex -> [thissym : token, yylval : yystype]
                 var d : Integer
                 self.doaccept[]
@@ -585,19 +587,19 @@ const scanner <- immutable object scanner
                 % 	  out.putchar['\n']
                 % #endif
             end lex
-            
+
             export function lineNumber -> [r : Integer]
                 r <- nextLineNumber
             end lineNumber
-            
+
             export function line -> [r : String]
                 r <- lineBuffer.asString
             end line
-            
+
             export function position -> [r : Integer]
                 r <- currentPosition
             end position
-            
+
             export operation reset [f : InputThing]
                 stdin <- f
                 nextLineNumber <- 0
@@ -606,14 +608,14 @@ const scanner <- immutable object scanner
                 nextTokenBuffer.reset
                 lineBuffer.reset
             end reset
-            
+
             initially
                 var id : Ident
                 for i : integer <- firstKeyword while i <= lastKeyword by i <- i + 1
                     id <- it.Lookup[tokenNameTable[i], i]
                 end for
             end initially
-            
+
         end aScanner
     end create
 end scanner
