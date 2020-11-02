@@ -67,7 +67,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
         elseif s = "syntactictypeof" then
             index <- 0x09
         elseif s = "receive" then
-            index <- 0x00
+            index <- 0x07
         end if
         r <- builtinlit.create[self$ln, index].getInstCT
     end getCT
@@ -108,7 +108,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
         elseif s = "syntactictypeof" then
             index <- 0x09
         elseif s = "receive" then
-            index <- 0x00
+            index <- 0x07
         end if
         r <- builtinlit.create[self$ln, index].getInstAT
     end getAT
@@ -172,10 +172,11 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             bc.finishExpr[4, 0x1809, 0x1609]
         elseif s = "receive" then
             % const expat <- exp.getAT
-            % bc.pushSize[4]
-            % expat.generate[bc]
-            % bc.popSize
-            % bc.finishExpr[4, 0x1809, 0x1609]
+            bc.pushSize[4]
+            exp.execute.asType.generate[bc]
+            bc.popSize
+            bc.finishExpr[4, 0x1807, 0x1607]
+
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
         end if
