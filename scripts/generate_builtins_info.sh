@@ -12,5 +12,5 @@ while True:
         if inp not in lst: lst.append(inp)
     except EOFError:
         break
-[print(f'{num:10}{name}') for name, num in sorted(lst, key=lambda p:int(p[1], 16))]
+[print('{:10}{}'.format(num, name)) for name, num in sorted(lst, key=lambda p:int(p[1], 16))]
 """
