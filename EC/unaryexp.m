@@ -171,12 +171,11 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             bc.popSize
             bc.finishExpr[4, 0x1809, 0x1609]
         elseif s = "receive" then
-            % const expat <- exp.getAT
             bc.pushSize[4]
             exp.execute.asType.generate[bc]
             bc.popSize
+            % bc.addCode["RECV"]
             bc.finishExpr[4, 0x1807, 0x1607]
-
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
         end if
