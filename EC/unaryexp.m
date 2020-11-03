@@ -182,6 +182,37 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
         end if
     end generate
 
+    export op assignTypes
+        const s : String <- xop$name
+        const env : EnvironmentType <- Environment$env
+        if s = "receive" then
+            var theType : Tree
+
+            if exp$isNotManifest then
+                env.SemanticError[self$ln, "Type in receive statement must be manifest", NIL]
+            else
+                theType <- self$exp
+                if env$traceassignTypes then env.printf["Type is %S on line %d\n", { theType, self$ln }] end if
+                theType <- theType.execute
+                if env$traceassignTypes then env.printf["  type.execute is %S\n", { theType }] end if
+                if theType !== nil then
+                    theType <- theType.asType
+                    if env$traceassignTypes then env.printf["  type.execute.asType is %S\n", { theType }] end if
+                end if
+            end if
+
+            if thetype == nil then
+                if env$traceassignTypes then
+                    env.printf["Couldn't find a type in receive statement on line %d\n",
+                    { self$ln}]
+                end if
+                env.SemanticError[ln, "Non type in receive statement", nil]
+            end if
+
+            FTree.assignTypes[self]
+        end if
+    end assignTypes
+
     export function asString -> [r : String]
         r <- "unaryexp"
     end asString
