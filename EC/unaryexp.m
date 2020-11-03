@@ -174,7 +174,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             bc.pushSize[4]
             exp.execute.asType.generate[bc]
             bc.popSize
-            % bc.addCode["RECV"]
+            bc.addCode["RECV"]
             bc.finishExpr[4, 0x1807, 0x1607]
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
