@@ -8,13 +8,13 @@
 #include "squeue.h"
 
 typedef struct monitor {
-  int 		busy;
-  SQueue 	waiting;
+	int busy;
+	SQueue waiting;
 } monitor;
 
 typedef struct condition {
-  Object	o;
-  SQueue	waiting;
+	Object o;
+	SQueue waiting;
 } condition;
 
 extern SQueue ready;

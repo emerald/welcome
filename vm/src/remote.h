@@ -6,30 +6,30 @@
 #endif
 
 typedef struct RemoteOpHeader {
-  unsigned int marker;
-  unsigned char kind;
-  unsigned char status;
-  unsigned char option1;
-  unsigned char option2;
-  unsigned int distgcseq;
-  OID ss;
-  Node sslocation;
-  OID target;
-  OID targetct;
+	unsigned int marker;
+	unsigned char kind;
+	unsigned char status;
+	unsigned char option1;
+	unsigned char option2;
+	unsigned int distgcseq;
+	OID ss;
+	Node sslocation;
+	OID target;
+	OID targetct;
 } RemoteOpHeader;
 
 typedef enum {
-  EchoRequest, EchoReply,
-  InvokeRequest, InvokeReply,
-  ObjectRequest, ObjectReply,
-  LocateRequest, LocateReply,
-  MoveRequest, MoveReply,
-  Move3rdPartyRequest, Move3rdPartyReply,
-  InvokeForwardRequest, InvokeForwardReply,
-  IsFixedRequest, IsFixedReply,
-  GaggleUpdate, DistGCInfo,
-  DistGCDoneRequest, DistGCDoneReply,
-  DistGCDoneReport
+	EchoRequest, EchoReply,
+	InvokeRequest, InvokeReply,
+	ObjectRequest, ObjectReply,
+	LocateRequest, LocateReply,
+	MoveRequest, MoveReply,
+	Move3rdPartyRequest, Move3rdPartyReply,
+	InvokeForwardRequest, InvokeForwardReply,
+	IsFixedRequest, IsFixedReply,
+	GaggleUpdate, DistGCInfo,
+	DistGCDoneRequest, DistGCDoneReply,
+	DistGCDoneReport
 } MesageType;
 
 #define EMERALDMARKER 0xdeafdeaf
@@ -68,7 +68,7 @@ extern void WriteNode(Node *srv, Stream theStream);
  *
  * We should check out the status of every remote operation each time a node
  * dies.
- * 
+ *
  * For invocations, if the object in question isn't alive, our invocation
  * isn't coming back.  Otherwise we can't know whether the invocation that
  * we did is still in progress, the invocation message got lost, or the

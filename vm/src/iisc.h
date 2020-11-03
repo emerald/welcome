@@ -1,5 +1,5 @@
 /*
- * IIScs (searchable collections) are things that map 
+ * IIScs (searchable collections) are things that map
  * elements of some domain onto some range.  Operations:
  *	create, destroy, insert, lookup, size, and print
  */
@@ -12,14 +12,14 @@
  *	IIScRangeType	- a typedef for the range
  *	IIScHASH		- a macro that computes an integer from a given
  *			  element of the domain
- *	IIScCOMPARE	- a macro that compares two elements of 
- *				  the domain, evaluating to 1 if they are 
+ *	IIScCOMPARE	- a macro that compares two elements of
+ *				  the domain, evaluating to 1 if they are
  *				  the same
  */
 #define IIScDomainType int
 #define IIScRangeType  int
 #define IIScHASH(X) ((unsigned)(((X) >> 2) ^ ((X) << 7)))
-#define IIScCOMPARE(X,Y) ((X)==(Y))
+#define IIScCOMPARE(X,Y) ((X) == (Y))
 #define IIScNIL (-1)
 #define IIScIsNIL(x) (((int)x) == IIScNIL)
 
@@ -32,13 +32,13 @@
  */
 
 typedef struct IIScTE {
-    IIScDomainType	 key;		/* the key for this entry */
-    IIScRangeType	 value;		/* what we want */
+	IIScDomainType key;         /* the key for this entry */
+	IIScRangeType value;        /* what we want */
 } IIScTE, *IIScTEPtr;
 
 typedef struct IIScRecord {
-    IIScTEPtr table;
-    int size, maxCount, count;
+	IIScTEPtr table;
+	int size, maxCount, count;
 } IIScRecord, *IISc;
 
 /* OPERATIONS */
@@ -65,44 +65,44 @@ void IIScDelete(IISc sc, IIScDomainType key);
 /* Select a random (the first) key from the set sc */
 IIScDomainType IIScSelect(IISc sc, int *rangeptr);
 
-/* Return the value associated with key in collection 
+/* Return the value associated with key in collection
  * IISc, or 0 if no such pair exists */
 int IIScLookup(IISc sc, IIScDomainType key);
 
 /* DEBUGGING: Print the collection IISc */
 void IIScPrint(IISc sc);
 
-/* Iterate over the elements of the collection IISc.  
+/* Iterate over the elements of the collection IISc.
  * At each iteration, IISckey and IIScvalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	IIScForEach(someSc, key, value) {
  *	  / * whatever you want to do with key, value * /
  *	} IIScNext();
  */
 #define IIScForEach(IISc, IISckey, IIScvalue) \
-  { \
-    int IIScxx_index; \
-    for (IIScxx_index = 0; IIScxx_index < (IISc)->size; IIScxx_index++) { \
-      if ((IISc)->table[IIScxx_index].key != IIScNIL) { \
-	*(IIScDomainType*)(&(IISckey)) = (IISc)->table[IIScxx_index].key; \
-	*(IIScRangeType *)(&(IIScvalue)) = (IISc)->table[IIScxx_index].value; \
-	{ 
+	{ \
+		int IIScxx_index; \
+		for (IIScxx_index = 0; IIScxx_index < (IISc)->size; IIScxx_index++) { \
+			if ((IISc)->table[IIScxx_index].key != IIScNIL) { \
+				*(IIScDomainType*)(&(IISckey)) = (IISc)->table[IIScxx_index].key; \
+				*(IIScRangeType *)(&(IIScvalue)) = (IISc)->table[IIScxx_index].value; \
+				{
 
 #define IIScForEachBackwards(IISc, IISckey, IIScvalue) \
-  { \
-    int IIScxx_index; \
-    for (IIScxx_index = (IISc->size); IIScxx_index >= 0; IIScxx_index--) { \
-      if ((IISc)->table[IIScxx_index].key != IIScNIL) { \
-	*(IIScDomainType*)(&(IISckey)) = (IISc)->table[IIScxx_index].key; \
-	*(IIScRangeType *)(&(IIScvalue)) = (IISc)->table[IIScxx_index].value; \
-	{ 
+	{ \
+		int IIScxx_index; \
+		for (IIScxx_index = (IISc->size); IIScxx_index >= 0; IIScxx_index--) { \
+			if ((IISc)->table[IIScxx_index].key != IIScNIL) { \
+				*(IIScDomainType*)(&(IISckey)) = (IISc)->table[IIScxx_index].key; \
+				*(IIScRangeType *)(&(IIScvalue)) = (IISc)->table[IIScxx_index].value; \
+				{
 
 #define IIScNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in IISc */
 #define IIScSize(IISc) ((IISc)->count)

@@ -24,23 +24,23 @@
 #endif
 
 #ifdef SELECT_USES_INT
-#define EM_SELECT_T int 
-#define S_A(x) &((x).fds_bits)
+#define EM_SELECT_T int
+#define S_A(x) & ((x).fds_bits)
 #else
 #define EM_SELECT_T fd_set
-#define S_A(x) &(x)
-#endif 
+#define S_A(x) & (x)
+#endif
 typedef enum { EIO_Read, EIO_Write, EIO_Except } EDirection;
 typedef void (*IoHandler)(int fd, EDirection direction, void *state);
 
 typedef struct readBuffer {
-  char *buffer;
-  int nread, goal, acceptless;
-  ssize_t (*reader)(int, void *, size_t);
+	char *buffer;
+	int nread, goal, acceptless;
+	ssize_t (*reader)(int, void *, size_t);
 } readBuffer;
 
 extern void setupReadBuffer(readBuffer *rb, void *buf, int goal, int acceptless,
-		     ssize_t (*reader)(int, void *, size_t));
+                            ssize_t (*reader)(int, void *, size_t));
 extern int tryReading(readBuffer *rb, int s);
 
 extern void IOInit(void);

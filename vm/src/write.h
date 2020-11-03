@@ -18,7 +18,7 @@ extern void CheckpointToFile(Object o, ConcreteType ct, String file);
 extern void FigureSize(Object o, ConcreteType c);
 extern void WriteOID(OID *oid, Stream theStream);
 extern Stream OpenCheckpointFile(char *cpfile);
-extern void WriteTheCheckpointStream(Stream theStream, 
-				     CheckpointData *theContents);
+extern void WriteTheCheckpointStream(Stream theStream,
+                                     CheckpointData *theContents);
 
 #endif /* _EMERALD_WRITE_H */

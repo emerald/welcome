@@ -10,8 +10,8 @@
 #define GETNAME   9
 #define GETNODE  10
 #define JUNLINK  11
-#define GETACTIVENODES	12
-#define GETALLNODES	13
+#define GETACTIVENODES  12
+#define GETALLNODES 13
 #define JDELAY 14
 #define JISATTY 15
 #define JFOPEN     16

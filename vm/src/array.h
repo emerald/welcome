@@ -10,7 +10,7 @@
 #endif
 
 typedef struct array {
-  int *base, *limit, *cp;
+	int *base, *limit, *cp;
 } *array;
 
 #define ASUB(a,i) (*((a)->base + (int)(i)))

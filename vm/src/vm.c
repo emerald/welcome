@@ -473,9 +473,9 @@ restofcalloid: ;
       POP(ConcreteType, a);
       POP(Object, o);
 
-      if (ISNIL(a)) { 
-	(opindex) = 0; 
-      } else { 
+      if (ISNIL(a)) {
+	(opindex) = 0;
+      } else {
 	OpVector ov = (a)->d.opVector;
 	OpVectorElement ope;
 	int i;
@@ -483,7 +483,7 @@ restofcalloid: ;
 	for (i = 3; i < ov->d.items; i++) {
 	  ope = ov->d.data[i];
 	  if (ope->d.id == (opoid)) {
-	    (opindex) = i; 
+	    (opindex) = i;
 	    break;
 	  }
 	}
@@ -570,7 +570,7 @@ restofcalloid: ;
 #endif
 		}
         break;
-      case QUIT: { 
+      case QUIT: {
                   u8 nargs;
 		  Object xop;
 		  ConcreteType xcp;
@@ -598,10 +598,10 @@ restofcalloid: ;
 			  ("QUIT forking process in object %#x (%.*s)",
 			   xop, xcp->d.name->d.items, xcp->d.name->d.data ) );
 		    run(xop, OVE_PROCESS, 1);
-		  } 
+		  }
 		}
         break;
-      case GETLOCSRV: { 
+      case GETLOCSRV: {
   		  Object o;
 		  o = locsrv;
 		  PUSH(Object, o);
@@ -670,10 +670,10 @@ restofcalloid: ;
 		  SETTOP(Vector, o);
 		}
         break;
-      case QUITP: { 
+      case QUITP: {
       extern State *processDone(State *, int);
       if (TRACING(call, 1)) doret(fp, sb, -2, cp);
-      SYNCH(); 
+      SYNCH();
       TRACE( process, 2,
 	    ( "End of process in object %#x (%.*s)", state->op,
 	     state->cp->d.name->d.items, state->cp->d.name->d.data ) );
@@ -692,7 +692,7 @@ restofcalloid: ;
 		  if (!f) pc += o; }
         break;
       case CASE: { s16 low, high, off; s32 v;
-    		  IFETCH2(low); 
+    		  IFETCH2(low);
 		  IFETCH2(high);
 		  POP(s32, v);
 		  v -= low; high -= low;
@@ -709,7 +709,7 @@ restofcalloid: ;
         break;
       case LDSELF: { PUSH(Object, op); }
         break;
-      case LDSELFV: { 
+      case LDSELFV: {
 		  PUSH(Object, op);
 #ifdef USEABCONS
 		  if (ISNIL(cp->d.type)) {
@@ -718,7 +718,7 @@ restofcalloid: ;
 		    PUSH(AbCon, findAbCon(OIDOf(cp->d.type), OIDOf(cp)));
 		  }
 #else
-		  PUSH(ConcreteType, cp); 
+		  PUSH(ConcreteType, cp);
 #endif
 		}
         break;
@@ -735,7 +735,7 @@ restofcalloid: ;
 		  IFETCH1(sysindex);
 		  IFETCH1(ac);
 		  if (sysindex < 0 || sysindex >= JSYS_OPS) {
-		    sprintf(buf, "Illegal sys index %d (ac = %d)", 
+		    sprintf(buf, "Illegal sys index %d (ac = %d)",
 			    sysindex, ac);
 		    DEBUG(buf);
 		    continue;
@@ -984,7 +984,7 @@ nextInstruction: ;
 		  /* This currently leaves the stack unaligned (4 not 8) */
 		  /* PUSH(ConcreteType, p); */
 		  if (!ISNIL(ove)) {
-		    if (ove->d.nargs > 0 && 
+		    if (ove->d.nargs > 0 &&
 			(ISNIL(v) || ove->d.nargs < v->d.items)) {
 		      DEBUG("Not enough arguments to XCREATE");
 		      continue;
@@ -1194,7 +1194,7 @@ nextInstruction: ;
         break;
       case LOR: { BINARY(s32,|) }
         break;
-      case LSETBIT: { 
+      case LSETBIT: {
 		  u32 a, b, v;
 		  POP(u32, v);
 		  POP(u32, b);
@@ -1245,7 +1245,7 @@ nextInstruction: ;
 		  PUSH(u32, conforms(a, b));
 		}
         break;
-      case DSTR: { 
+      case DSTR: {
 		  u32 secs;
 		  String s, timeToDate(int);
 		  POP(u32, secs);
@@ -1427,15 +1427,15 @@ nextInstruction: ;
 		   }
 		 }
         break;
-      case LDLITB: { 
+      case LDLITB: {
       		  u8 t;
 		  IFETCH1(t);
 		  PUSH(Object, cp->d.literals->d.data[t].ptr);
 		}
         break;
-      case SWAPV: { u32 ad, at, bd, bt; 
-		   POP(u32, at); 
-		   POP(u32, ad); 
+      case SWAPV: { u32 ad, at, bd, bt;
+		   POP(u32, at);
+		   POP(u32, ad);
 		   POP(u32, bt);
 		   POP(u32, bd);
 		   PUSH(u32, ad);
@@ -1449,7 +1449,7 @@ nextInstruction: ;
 		    POP(ConcreteType, c);
 		    /* fix the literals in c */
 		    TRACE(trans, 1, ("Fixing literals in %#x (OID %#x) a %.*s",
-				     c, OIDSeqOf((Object)c), 
+				     c, OIDSeqOf((Object)c),
 				     c->d.name->d.items, c->d.name->d.data));
 		    fixCTLiterals(c);
 		  }
@@ -1589,7 +1589,7 @@ nextInstruction: ;
 		  }
 		}
         break;
-      case LSETBITS: { 
+      case LSETBITS: {
 		  u32 a, o, l, v, m = -1L;
 		  POP(u32, v);
 		  POP(u32, l);
@@ -1750,12 +1750,12 @@ nextInstruction: ;
       case ADDTOGAGGLE: {
       Object manager, newobject;
       ConcreteType xxx, oct;
-        
+
       POP(ConcreteType, oct);
       POP(Object, newobject);
       POP(ConcreteType, xxx);
       POP(Object, manager);
-      
+
 #ifdef DISTRIBUTED
       {
 	OID moid, ooid;
@@ -1859,6 +1859,9 @@ nextInstruction: ;
       PUSH(ConcreteType, intct);
 #endif
     }
+        break;
+    case RECV:
+        printf("Receive not yet implemented. Statement ignored.\n");
         break;
       default:
 	fprintf(stderr, "Undefined bytecode %d\n", opcode);
@@ -2063,6 +2066,7 @@ struct ite {
   { "GETGAGGLEMEMBER", "", 182 } ,
   { "GETGAGGLEELEMENT", "", 183 } ,
   { "GETGAGGLESIZE", "", 184 } ,
+  { "RECV", "", 185 } ,
 };
 
 void disassemble(unsigned int ptr, int len, FILE *f)

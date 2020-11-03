@@ -24,7 +24,7 @@ extern void vmFree(void *);
 extern void *gc_malloc(int);
 extern void *gc_malloc_old(int nb, int remember);
 extern void *extraRoots[];
-extern int     extraRootsSP;
+extern int extraRootsSP;
 #define regRoot(x) (extraRoots[extraRootsSP++] = (void *)&(x))
 #define unregRoot() ( extraRoots[--extraRootsSP] = 0)
 

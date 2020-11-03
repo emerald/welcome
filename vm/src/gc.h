@@ -12,8 +12,8 @@
 #include "types.h"
 #endif
 
-#define WORDS_TO_BYTES(x)   (((int)(x))<<2)
-#define BYTES_TO_WORDS(x)   (((int)(x))>>2)
+#define WORDS_TO_BYTES(x)   (((int)(x)) << 2)
+#define BYTES_TO_WORDS(x)   (((int)(x)) >> 2)
 
 typedef unsigned int word;
 
@@ -22,13 +22,13 @@ typedef unsigned int word;
 Object *move_stack;
 extern int move_stack_size;
 
-extern int heapsize;		/* Heap size in bytes */
+extern int heapsize;        /* Heap size in bytes */
 
 /****************************
- *
- *   Objects                
- *
- ****************************/
+*
+*   Objects
+*
+****************************/
 
 /*
  * The garbage collector allocates an additional word at the front of each
@@ -65,12 +65,12 @@ extern void recordSize(Object, int);
 extern int wasGCMalloced(void *addr);
 extern void doToNewGeneration(void (*f)(Object), void (*cleanup)(void));
 extern void doToOldGeneration(void (*f)(Object), word *limit);
-extern void doToExternalRoots(void (*pointers_f)(int, Object *), 
-		       void (*variable_f)(Object *, ConcreteType *),
-		       void (*variables_f)(int, Bits32 *),
-		       int destructive,
-		       int doFromObjectTable);
-extern void push_ms (Object p);
+extern void doToExternalRoots(void (*pointers_f)(int, Object *),
+                              void (*variable_f)(Object *, ConcreteType *),
+                              void (*variables_f)(int, Bits32 *),
+                              int destructive,
+                              int doFromObjectTable);
+extern void push_ms(Object p);
 extern int varContainsPointer(ConcreteType ct);
 
 extern unsigned distGCBitToSend(Object o);

@@ -35,28 +35,27 @@ extern IISc processes;
 extern IISc notHostedMap;
 extern Node MyNode;
 
-extern int
-	getstdin(struct State *),
-	getstdout(struct State *),
-	gettod(struct State *),
-	getlnn(struct State *),
-	getname(struct State *),
-	getnode(struct State *),
-	getactivenodes(struct State *),
-	getallnodes(struct State *),
-	delay(struct State *),
-	jislocal(struct State *),
-	jisfixed(struct State *),
-	jmove(struct State *),
-	jfix(struct State *),
-	junfix(struct State *),
-	jrefix(struct State *),
-	jlocate(struct State *),
-	jgetIncarnationTime(struct State *),
-	jgetLoadAverage(struct State *);
+extern int getstdin(struct State *),
+getstdout(struct State *),
+gettod(struct State *),
+getlnn(struct State *),
+getname(struct State *),
+getnode(struct State *),
+getactivenodes(struct State *),
+getallnodes(struct State *),
+delay(struct State *),
+jislocal(struct State *),
+jisfixed(struct State *),
+jmove(struct State *),
+jfix(struct State *),
+junfix(struct State *),
+jrefix(struct State *),
+jlocate(struct State *),
+jgetIncarnationTime(struct State *),
+jgetLoadAverage(struct State *);
 
-extern int (*(sysfuncs[]))(struct State *),
-	(*(xfuncs[]))(int *);
+extern int(*(sysfuncs[]))(struct State *),
+(*(xfuncs[]))(int *);
 extern void initGlobals(void);
 
 #endif /* _EMERALD_GLOBALS_H */

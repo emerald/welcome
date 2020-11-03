@@ -7,6 +7,6 @@ int main(ac,av)
 int ac;
 char **av;
 {
-  mainp(ac,av);
-  return 0;
+	mainp(ac,av);
+	return 0;
 }

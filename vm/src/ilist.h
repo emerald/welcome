@@ -9,12 +9,12 @@
 /*
  * Before using this, one must define the following:
  *	IListDomainType	- a typedef for the domain
- *	IListCOMPARE	- a macro that compares two elements of 
- *				  the domain, evaluating to 1 if they are 
+ *	IListCOMPARE	- a macro that compares two elements of
+ *				  the domain, evaluating to 1 if they are
  *				  the same
  */
 #define IListDomainType int
-#define IListCOMPARE(X,Y) ((X)==(Y))
+#define IListCOMPARE(X,Y) ((X) == (Y))
 
 /*
  * Hidden, private type declarations.  The only thing
@@ -25,12 +25,12 @@
  */
 
 typedef struct IListTE {
-    IListDomainType key;		/* the key for this entry */
+	IListDomainType key;        /* the key for this entry */
 } IListTE, *IListTEPtr;
 
 typedef struct IListRecord {
-    IListTEPtr table;
-    int size, count;
+	IListTEPtr table;
+	int size, count;
 } IListRecord, *IList;
 
 /* OPERATIONS */
@@ -53,33 +53,33 @@ IListDomainType IListMember(IList sc, IListDomainType key);
 /* DEBUGGING: Print the collection IList */
 void IListPrint(IList sc);
 
-/* Iterate over the elements of the collection IList.  
- * At each iteration, IListkey is set to the next key in the set.  
+/* Iterate over the elements of the collection IList.
+ * At each iteration, IListkey is set to the next key in the set.
  * Usage:
  *	IListForEach(someSq, key) {
  *	  / * whatever you want to do with key * /
  *	} IListNext();
  */
 #define IListForEach(IList, IListkey) \
-  { \
-    int IListxx_index; \
-    for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index++) { \
-      *(IListDomainType*)(&(IListkey)) = IList->table[IListxx_index].key; \
-      { 
+	{ \
+		int IListxx_index; \
+		for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index++) { \
+			*(IListDomainType*)(&(IListkey)) = IList->table[IListxx_index].key; \
+			{
 
-/* Iterate over the elements of the collection IList.  
- * At each iteration, IListkey is set to the next key in the set.  
+/* Iterate over the elements of the collection IList.
+ * At each iteration, IListkey is set to the next key in the set.
  * Usage:
  *	IListForEachReverse(someSq, key) {
  *	  / * whatever you want to do with key * /
  *	} IListNext();
  */
 #define IListForEachReverse(IList, IListkey) \
-  { \
-    int IListxx_index; \
-    for (IListxx_index = (IList->count-1); IListxx_index >= 0; IListxx_index--) { \
-      *(IListDomainType*)(&(IListkey)) = IList->table[IListxx_index].key; \
-      { 
+	{ \
+		int IListxx_index; \
+		for (IListxx_index = (IList->count - 1); IListxx_index >= 0; IListxx_index--) { \
+			*(IListDomainType*)(&(IListkey)) = IList->table[IListxx_index].key; \
+			{
 
 /* Iterate over the elements of the collection IList, two at a time.
  * At each iteration, IListkey1 and IListkey2 are set to the next keys
@@ -90,12 +90,12 @@ void IListPrint(IList sc);
  *	} IListNext();
  */
 #define IListForEachByTwo(IList, IListkey1, IListkey2) \
-  { \
-    int IListxx_index; \
-    for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index += 2) { \
-      *(IListDomainType*)(&(IListkey1)) = IList->table[IListxx_index].key; \
-      *(IListDomainType*)(&(IListkey2)) = IList->table[IListxx_index+1].key; \
-      {
+	{ \
+		int IListxx_index; \
+		for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index += 2) { \
+			*(IListDomainType*)(&(IListkey1)) = IList->table[IListxx_index].key; \
+			*(IListDomainType*)(&(IListkey2)) = IList->table[IListxx_index + 1].key; \
+			{
 
 /* Iterate over the elements of the collection IList, three at a time.
  * At each iteration, IListkey1, IListkey2, IListkey3 are set to the next
@@ -106,18 +106,18 @@ void IListPrint(IList sc);
  *	} IListNext();
  */
 #define IListForEachByThree(IList, IListkey1, IListkey2, IListkey3) \
-  { \
-    int IListxx_index; \
-    for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index += 3) { \
-      *(IListDomainType*)(&(IListkey1)) = IList->table[IListxx_index].key; \
-      *(IListDomainType*)(&(IListkey2)) = IList->table[IListxx_index+1].key; \
-      *(IListDomainType*)(&(IListkey3)) = IList->table[IListxx_index+2].key; \
-      {
+	{ \
+		int IListxx_index; \
+		for (IListxx_index = 0; IListxx_index < (IList)->count; IListxx_index += 3) { \
+			*(IListDomainType*)(&(IListkey1)) = IList->table[IListxx_index].key; \
+			*(IListDomainType*)(&(IListkey2)) = IList->table[IListxx_index + 1].key; \
+			*(IListDomainType*)(&(IListkey3)) = IList->table[IListxx_index + 2].key; \
+			{
 
 #define IListNext() \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in IList */
 #define IListSize(IList) ((IList)->count)

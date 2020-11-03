@@ -27,10 +27,10 @@ void init_nodeinfo(void);
 
 typedef struct noderecord noderecord;
 struct noderecord {
-  int up;
-  OID node, inctm;
-  Node srv;
-  noderecord *p;
+	int up;
+	OID node, inctm;
+	Node srv;
+	noderecord *p;
 };
 
 #ifdef DISTRIBUTED
@@ -38,8 +38,8 @@ Object doObjectRequest( Node srv, OID *oid, ConcreteType ct );
 int doMoveRequest( OID *oid, ConcreteType CT, OID *doid );
 
 typedef struct {
-  Node srv;
-  Stream str;
+	Node srv;
+	Stream str;
 } msgrec;
 
 noderecord *getNodeRecordFromSrv(Node srv);

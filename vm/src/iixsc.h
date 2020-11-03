@@ -11,15 +11,15 @@
 #define SMALLONES (2 * 1024 + 3)
 
 struct IIXScElement {
-  int size, value;
+	int size, value;
 };
 
 typedef struct IIXScRecord {
-    union { int i; struct IIXScElement *p; } smallOnes[SMALLONES];
-    IISc bigOnes;
-    int compacted;
-    int count, bigstart;
-    struct IIXScElement *pairs;
+	union { int i; struct IIXScElement *p; } smallOnes[SMALLONES];
+	IISc bigOnes;
+	int compacted;
+	int count, bigstart;
+	struct IIXScElement *pairs;
 } IIXScRecord, *IIXSc;
 
 /* OPERATIONS */
@@ -45,7 +45,7 @@ void IIXScCompact(IIXSc sc);
 /* Select the largest key in the set that is no larger than key */
 int IIXScSelectSmaller(IIXSc sc, int key);
 
-/* Return the value associated with key in collection 
+/* Return the value associated with key in collection
  * IIXSc, or 0 if no such pair exists */
 int IIXScLookup(IIXSc sc, int key);
 

@@ -14,8 +14,8 @@ extern void FatalError(char *ErrorMessage);
 # else
 #  ifndef NDEBUG
 #   define assertMessage "Assertion failed: file %s, line %d"
-#   define _assert(ex) {if (!(ex)){printf(assertMessage, __FILE__, __LINE__); abort();}}
-#   define assert(ex) {if (!(ex)){printf(assertMessage, __FILE__, __LINE__);abort();}}
+#   define _assert(ex) {if (!(ex)) {printf(assertMessage, __FILE__, __LINE__); abort();}}
+#   define assert(ex) {if (!(ex)) {printf(assertMessage, __FILE__, __LINE__); abort();}}
 #  else
 #   define _assert(ex) ;
 #   define assert(ex) ;

@@ -1,14 +1,14 @@
 /****************************************************************************
- File     : socketstreams.c 
- Date     : 08-11-92
- Author   : Mark Immel
+   File     : socketstreams.c
+   Date     : 08-11-92
+   Author   : Mark Immel
 
- Contents : Socket Streams package
+   Contents : Socket Streams package
 
- Modifications
- -------------
+   Modifications
+   -------------
 
-*****************************************************************************/
+ *****************************************************************************/
 
 #include <stddef.h>
 #ifdef WIN32
@@ -50,18 +50,20 @@ static int  FlushWriteSocketStream(StreamBuffer theBuffer, void **Hook);
 static int  DestroyWriteSocketStream(StreamBuffer theBuffer, void **Hook);
 
 static struct StreamConstructor ReadSocketStreamConstructor = {
-  Read,
-  CreateReadSocketStream,
-  FillReadSocketStream,
-  DestroyReadSocketStream,
-  NULL };
+	Read,
+	CreateReadSocketStream,
+	FillReadSocketStream,
+	DestroyReadSocketStream,
+	NULL
+};
 
 static struct StreamConstructor WriteSocketStreamConstructor = {
-  Write,
-  CreateWriteSocketStream,
-  FlushWriteSocketStream,
-  DestroyWriteSocketStream,
-  NULL }; 
+	Write,
+	CreateWriteSocketStream,
+	FlushWriteSocketStream,
+	DestroyWriteSocketStream,
+	NULL
+};
 
 static StreamBuffer BufferCache[MAX_FILE_DESCRIPTORS];
 
@@ -72,25 +74,23 @@ static StreamBuffer BufferCache[MAX_FILE_DESCRIPTORS];
  * This function then resets Hook to contain the file descriptor.
  */
 
-static int
-CreateReadSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  int   fd;
+static int CreateReadSocketStream(StreamBuffer theBuffer, void **Hook) {
+	int fd;
 
-  assert(sizeof(int) <= sizeof(void *)); /* Make sure it's OK to store
-					    fd in *Hook */
+	assert(sizeof(int) <= sizeof(void *)); /* Make sure it's OK to store
+	                                          fd in *Hook */
 
-  fd = *((int *) *Hook);
-  *((int *) Hook) = fd;
+	fd = *((int *) *Hook);
+	*((int *) Hook) = fd;
 
-  theBuffer->Start = (StreamByte *) vmMalloc(READSOCKETBUFFERSIZE);
-  theBuffer->End = theBuffer->Start + READSOCKETBUFFERSIZE;
-  theBuffer->Head = theBuffer->Start;
-  theBuffer->ValidBytes = 0;
+	theBuffer->Start = (StreamByte *) vmMalloc(READSOCKETBUFFERSIZE);
+	theBuffer->End = theBuffer->Start + READSOCKETBUFFERSIZE;
+	theBuffer->Head = theBuffer->Start;
+	theBuffer->ValidBytes = 0;
 
-  BufferCache[fd] = theBuffer;
-  RegisterFD(fd, ProcessNewSocketData);
-  return 0;
+	BufferCache[fd] = theBuffer;
+	RegisterFD(fd, ProcessNewSocketData);
+	return 0;
 }
 
 /*
@@ -103,49 +103,45 @@ CreateReadSocketStream(StreamBuffer theBuffer, void **Hook)
 #define write _write
 #endif
 
-static int
-FillReadSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  int fd, BytesRead;
+static int FillReadSocketStream(StreamBuffer theBuffer, void **Hook) {
+	int fd, BytesRead;
 
-  fd = *((int *) Hook);
+	fd = *((int *) Hook);
 
-  BytesRead = read(fd, theBuffer->Start + theBuffer->ValidBytes,
-		   theBuffer->End - theBuffer->Start - theBuffer->ValidBytes);
+	BytesRead = read(fd, theBuffer->Start + theBuffer->ValidBytes,
+	                 theBuffer->End - theBuffer->Start - theBuffer->ValidBytes);
 
-  if (BytesRead < 0) {
+	if (BytesRead < 0) {
 #ifndef WIN32
-    if (errno == EWOULDBLOCK)
-      return 0;
-    else
+		if (errno == EWOULDBLOCK)
+			return 0;
+		else
 #endif /* not WIN32 */
-      FatalError("FillReadSocketStream ");
-  }
-  
-  if (BytesRead == 0)
-    theBuffer->AtEOF = 1;
+		FatalError("FillReadSocketStream ");
+	}
 
-  return BytesRead;
+	if (BytesRead == 0)
+		theBuffer->AtEOF = 1;
+
+	return BytesRead;
 }
 
 /*
- * Destroy the ReadSocketStream 
+ * Destroy the ReadSocketStream
  */
 
-static int
-DestroyReadSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  int fd;
+static int DestroyReadSocketStream(StreamBuffer theBuffer, void **Hook) {
+	int fd;
 
-  fd = *((int *) Hook);
+	fd = *((int *) Hook);
 
-  UnRegisterFD(fd);
-  if (close(fd) < 0) 
-    FatalError("DestroyReadSocketStream ");
+	UnRegisterFD(fd);
+	if (close(fd) < 0)
+		FatalError("DestroyReadSocketStream ");
 
-  if (theBuffer->Start)
-    vmFree(theBuffer->Start);
-  return 0;
+	if (theBuffer->Start)
+		vmFree(theBuffer->Start);
+	return 0;
 }
 
 /*
@@ -155,67 +151,60 @@ DestroyReadSocketStream(StreamBuffer theBuffer, void **Hook)
  * This function then resets Hook to contain the file descriptor.
  */
 
-static int
-CreateWriteSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  int   fd;
+static int CreateWriteSocketStream(StreamBuffer theBuffer, void **Hook) {
+	int fd;
 
-  assert(sizeof(int) <= sizeof(void *)); /* Make sure it's OK to store
-					    fd in *Hook */
+	assert(sizeof(int) <= sizeof(void *)); /* Make sure it's OK to store
+	                                          fd in *Hook */
 
-  fd = *((int *) *Hook);
-  *((int *) Hook) = fd;
+	fd = *((int *) *Hook);
+	*((int *) Hook) = fd;
 
-  theBuffer->Start = (StreamByte *) vmMalloc(WRITESOCKETBUFFERSIZE);
-  theBuffer->End = theBuffer->Start + WRITESOCKETBUFFERSIZE;
-  theBuffer->Head = theBuffer->Start;
-  theBuffer->ValidBytes = 0;
-  return 0;
+	theBuffer->Start = (StreamByte *) vmMalloc(WRITESOCKETBUFFERSIZE);
+	theBuffer->End = theBuffer->Start + WRITESOCKETBUFFERSIZE;
+	theBuffer->Head = theBuffer->Start;
+	theBuffer->ValidBytes = 0;
+	return 0;
 }
 
 /*
  * Flush the file buffer
  */
 
-static int
-FlushWriteSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  int fd, BytesWritten;
+static int FlushWriteSocketStream(StreamBuffer theBuffer, void **Hook) {
+	int fd, BytesWritten;
 
-  fd = *((int *) Hook);
+	fd = *((int *) Hook);
 
-  BytesWritten = write(fd, theBuffer->Start, theBuffer->ValidBytes);
+	BytesWritten = write(fd, theBuffer->Start, theBuffer->ValidBytes);
 
-  if (BytesWritten < 0)
-    FatalError("FlushWriteSocketStream ");
+	if (BytesWritten < 0)
+		FatalError("FlushWriteSocketStream ");
 
-  assert(BytesWritten == theBuffer->ValidBytes);
+	assert(BytesWritten == theBuffer->ValidBytes);
 
-  return BytesWritten;
+	return BytesWritten;
 }
 
 /*
- * Destroy the WriteSocketStream 
+ * Destroy the WriteSocketStream
  */
 
-static int
-DestroyWriteSocketStream(StreamBuffer theBuffer, void **Hook)
-{
-  if (theBuffer->Start)
-    vmFree(theBuffer->Start);
-  return 0;
+static int DestroyWriteSocketStream(StreamBuffer theBuffer, void **Hook) {
+	if (theBuffer->Start)
+		vmFree(theBuffer->Start);
+	return 0;
 }
 
 /*
  * Deal with new data arriving on a socket.
  */
 
-void ProcessNewSocketData(Socket theSocket) 
-{
-  int BytesRead;
+void ProcessNewSocketData(Socket theSocket) {
+	int BytesRead;
 
-  BytesRead = FillReadSocketStream(BufferCache[theSocket], (void**)&theSocket);
-  BufferCache[theSocket]->ValidBytes += BytesRead;
+	BytesRead = FillReadSocketStream(BufferCache[theSocket], (void**)&theSocket);
+	BufferCache[theSocket]->ValidBytes += BytesRead;
 
-  ActivateFD(theSocket);
+	ActivateFD(theSocket);
 }

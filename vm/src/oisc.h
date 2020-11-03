@@ -1,5 +1,5 @@
 /*
- * OIScs (searchable collections) are things that map 
+ * OIScs (searchable collections) are things that map
  * pairs of oids onto ints.  Operations:
  *	create, destroy, insert, lookup, size, and print
  */
@@ -26,14 +26,14 @@ typedef OID OIScDomainType;
  */
 
 typedef struct OIScTE {
-    OIScDomainType	 key;		/* the key for this entry */
-    OIScRangeType	 value;		/* what we want */
-    int			 chain;		/* overflow chain */
+	OIScDomainType key;     /* the key for this entry */
+	OIScRangeType value;    /* what we want */
+	int chain;              /* overflow chain */
 } OIScTE, *OIScTEPtr;
 
 typedef struct OIScRecord {
-    OIScTEPtr table;
-    int size, maxCount, count, ofsize, ofcount, of;
+	OIScTEPtr table;
+	int size, maxCount, count, ofsize, ofcount, of;
 } OIScRecord, *OISc;
 
 /* OPERATIONS */
@@ -52,7 +52,7 @@ void OIScInsert(OISc sc, OID a, OIScRangeType value);
 /* Delete the pair with key key from the collection OISc */
 void OIScDelete(OISc sc, OID a);
 
-/* Return the value associated with key in collection 
+/* Return the value associated with key in collection
  * OISc, or OIScNIL if no such pair exists */
 int OIScLookup(OISc sc, OID a);
 
@@ -60,51 +60,51 @@ int OIScLookup(OISc sc, OID a);
 void OIScPrint(OISc sc);
 void OIScPrintF(OISc sc);
 
-/* Iterate over the elements of the collection OISc.  
+/* Iterate over the elements of the collection OISc.
  * At each iteration, OISckey and OIScvalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	OIScForEach(sc, key_a, value) {
  *	  / * whatever you want to do with key_a, key_b, value * /
  *	} OIScNext();
  */
 #define OIScForEach(OISc, OISckey, OIScvalue) \
-  { \
-    int OIScxx_index; \
-    for (OIScxx_index = 0; OIScxx_index < OIScTSize(OISc); OIScxx_index++) { \
-      if (!OIScIsNIL((OISc)->table[OIScxx_index].value)) { \
-	*(OID*)(&(OISckey)) = (OISc)->table[OIScxx_index].key; \
-	*(OIScRangeType *)(&(OIScvalue)) = (OISc)->table[OIScxx_index].value; \
-	{
+	{ \
+		int OIScxx_index; \
+		for (OIScxx_index = 0; OIScxx_index < OIScTSize(OISc); OIScxx_index++) { \
+			if (!OIScIsNIL((OISc)->table[OIScxx_index].value)) { \
+				*(OID*)(&(OISckey)) = (OISc)->table[OIScxx_index].key; \
+				*(OIScRangeType *)(&(OIScvalue)) = (OISc)->table[OIScxx_index].value; \
+				{
 
 #define OIScNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
-/* Iterate over the elements of the collection OISc backwards.  
+/* Iterate over the elements of the collection OISc backwards.
  * At each iteration, OISckey and OIScvalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	OIScForEachBackwards(sc, key_a, value) {
  *	  / * whatever you want to do with key_a, key_b, value * /
  *	} OIScNext();
  */
 #define OIScForEachBackwards(OISc, OISckey, OIScvalue) \
-  { \
-    int OIScxx_index; \
-    for (OIScxx_index = OIScTSize(OISc) - 1; OIScxx_index >= 0; OIScxx_index--) { \
-      if (!OIScIsNIL((OISc)->table[OIScxx_index].value)) { \
-	*(OID*)(&(OISckey)) = (OISc)->table[OIScxx_index].key; \
-	*(OIScRangeType *)(&(OIScvalue)) = (OISc)->table[OIScxx_index].value; \
-	{ 
+	{ \
+		int OIScxx_index; \
+		for (OIScxx_index = OIScTSize(OISc) - 1; OIScxx_index >= 0; OIScxx_index--) { \
+			if (!OIScIsNIL((OISc)->table[OIScxx_index].value)) { \
+				*(OID*)(&(OISckey)) = (OISc)->table[OIScxx_index].key; \
+				*(OIScRangeType *)(&(OIScvalue)) = (OISc)->table[OIScxx_index].value; \
+				{
 
 #define OIScNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in OISc */
 #define OIScSize(OISc) ((OISc)->count)

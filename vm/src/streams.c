@@ -1,14 +1,14 @@
 /****************************************************************************
- File     : streams.c 
- Date     : 08-11-92
- Author   : Mark Immel
+   File     : streams.c
+   Date     : 08-11-92
+   Author   : Mark Immel
 
- Contents : Streams package
+   Contents : Streams package
 
- Modifications
- -------------
+   Modifications
+   -------------
 
-*****************************************************************************/
+ *****************************************************************************/
 
 #define E_NEEDS_STRING
 #define E_NEEDS_IOV
@@ -21,165 +21,157 @@
 #include "misc.h"
 
 typedef struct Stream {
-  struct StreamBuffer  theBuffer;
-  StreamSeekFunction   theSeekFn;
-  StreamFunction       theUpdateFn;
-  StreamFunction       theDestroyFn;
-  StreamType           theType;
-  void                *Hook;
+	struct StreamBuffer theBuffer;
+	StreamSeekFunction theSeekFn;
+	StreamFunction theUpdateFn;
+	StreamFunction theDestroyFn;
+	StreamType theType;
+	void                *Hook;
 } StreamRep;
 
-int IsReadStream(Stream theStream)
-{
-  return theStream->theType == Read;
+int IsReadStream(Stream theStream) {
+	return theStream->theType == Read;
 }
 
-int IsWriteStream(Stream theStream)
-{
-  return theStream->theType == Write;
+int IsWriteStream(Stream theStream) {
+	return theStream->theType == Write;
 }
 
 /*
  * Create a new stream
  */
 
-Stream CreateStream(StreamConstructor theConstructor, void *Hook)
-{
-  Stream NewStream;
+Stream CreateStream(StreamConstructor theConstructor, void *Hook) {
+	Stream NewStream;
 
-  assert(theConstructor->theCreateFn);
+	assert(theConstructor->theCreateFn);
 
-  NewStream = (Stream) vmMalloc(sizeof(StreamRep));
-  if( NewStream == NULL ) return NULL;
+	NewStream = (Stream) vmMalloc(sizeof(StreamRep));
+	if ( NewStream == NULL ) return NULL;
 
-  NewStream->theBuffer.AtEOF = 0;
-  NewStream->theType = theConstructor->theType;
-  NewStream->Hook = Hook;
+	NewStream->theBuffer.AtEOF = 0;
+	NewStream->theType = theConstructor->theType;
+	NewStream->Hook = Hook;
 
-  if( theConstructor->theCreateFn(&NewStream->theBuffer, &NewStream->Hook) ) {
-    vmFree( NewStream );
-    return NULL;
-  }
+	if ( theConstructor->theCreateFn(&NewStream->theBuffer, &NewStream->Hook) ) {
+		vmFree( NewStream );
+		return NULL;
+	}
 
-  NewStream->theUpdateFn = theConstructor->theUpdateFn;
-  NewStream->theDestroyFn = theConstructor->theDestroyFn;
-  NewStream->theSeekFn = theConstructor->theSeekFn;
+	NewStream->theUpdateFn = theConstructor->theUpdateFn;
+	NewStream->theDestroyFn = theConstructor->theDestroyFn;
+	NewStream->theSeekFn = theConstructor->theSeekFn;
 
-  return NewStream;
+	return NewStream;
 }
 
-/* 
+/*
  * Destroy a stream
  */
 
-void DestroyStream(Stream theStream)
-{
-  if( theStream == NULL ) return;
+void DestroyStream(Stream theStream) {
+	if ( theStream == NULL ) return;
 
-  if (theStream->theType == Write)
-    FlushStream(theStream);
+	if (theStream->theType == Write)
+		FlushStream(theStream);
 
-  TRACE(rinvoke, 15, ("Destroying stream %x", theStream));
-  if (theStream->theDestroyFn)
-    theStream->theDestroyFn(&theStream->theBuffer, &theStream->Hook);
-  memset( (void*) theStream, 0, sizeof(*theStream) );
-  vmFree(theStream);
+	TRACE(rinvoke, 15, ("Destroying stream %x", theStream));
+	if (theStream->theDestroyFn)
+		theStream->theDestroyFn(&theStream->theBuffer, &theStream->Hook);
+	memset( (void*) theStream, 0, sizeof(*theStream) );
+	vmFree(theStream);
 }
 
 /*
  * Steal a stream.  This makes the old reference invalid and uninteresting,
  * useful only for destroying.
  */
-Stream StealStream(Stream theStream)
-{
-  Stream theNewStream = (Stream) vmMalloc(sizeof(StreamRep));
-  TRACE(rinvoke, 5, ("Stealing the substance of stream %x to stream %x", theStream,
-		     theNewStream));
-  assert (theNewStream != NULL);
-  memmove(theNewStream, theStream, sizeof(StreamRep));
-  memset(theStream, 0, sizeof(StreamRep));
-  return theNewStream;
+Stream StealStream(Stream theStream) {
+	Stream theNewStream = (Stream) vmMalloc(sizeof(StreamRep));
+	TRACE(rinvoke, 5, ("Stealing the substance of stream %x to stream %x", theStream,
+	                   theNewStream));
+	assert(theNewStream != NULL);
+	memmove(theNewStream, theStream, sizeof(StreamRep));
+	memset(theStream, 0, sizeof(StreamRep));
+	return theNewStream;
 }
 
 /*
  * Read some bytes from a stream
  */
 
-StreamByte *ReadStream(Stream theStream, unsigned int Bytes)
-{
-  StreamByte *Result;
-  
-  assert(theStream->theType == Read);
+StreamByte *ReadStream(Stream theStream, unsigned int Bytes) {
+	StreamByte *Result;
 
-  /* Make sure the buffer is big enough */
-  assert (theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
+	assert(theStream->theType == Read);
 
-  if (theStream->theBuffer.ValidBytes < (int)Bytes)
-    FillStream(theStream);
+	/* Make sure the buffer is big enough */
+	assert(theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
 
-  if (theStream->theBuffer.ValidBytes >= (int)Bytes) {
-    Result = theStream->theBuffer.Head;
-    theStream->theBuffer.Head += Bytes;
-    theStream->theBuffer.ValidBytes -= Bytes;
-  }
-  else /* Insufficient data available */
-    Result = NULL;
+	if (theStream->theBuffer.ValidBytes < (int)Bytes)
+		FillStream(theStream);
 
-  return Result;
+	if (theStream->theBuffer.ValidBytes >= (int)Bytes) {
+		Result = theStream->theBuffer.Head;
+		theStream->theBuffer.Head += Bytes;
+		theStream->theBuffer.ValidBytes -= Bytes;
+	}
+	else /* Insufficient data available */
+		Result = NULL;
+
+	return Result;
 }
 
 /*
  * Peek at some bytes from a stream,
  */
 
-StreamByte *PeekStream(Stream theStream, unsigned int Bytes)
-{
-  StreamByte *Result;
-  
-  assert(theStream->theType == Read);
+StreamByte *PeekStream(Stream theStream, unsigned int Bytes) {
+	StreamByte *Result;
 
-  /* Make sure the buffer is big enough */
-  assert (theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
+	assert(theStream->theType == Read);
 
-  if (theStream->theBuffer.ValidBytes < (int)Bytes)
-    FillStream(theStream);
+	/* Make sure the buffer is big enough */
+	assert(theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
 
-  if (theStream->theBuffer.ValidBytes >= (int)Bytes) {
-    Result = theStream->theBuffer.Head;
-  }
-  else /* Insufficient data available */
-    Result = NULL;
+	if (theStream->theBuffer.ValidBytes < (int)Bytes)
+		FillStream(theStream);
 
-  return Result;
+	if (theStream->theBuffer.ValidBytes >= (int)Bytes) {
+		Result = theStream->theBuffer.Head;
+	}
+	else /* Insufficient data available */
+		Result = NULL;
+
+	return Result;
 }
 
 /*
  * Write some bytes to a stream
  */
 
-StreamByte *WriteStream(Stream theStream, unsigned int Bytes)
-{
-  StreamByte *Result;
+StreamByte *WriteStream(Stream theStream, unsigned int Bytes) {
+	StreamByte *Result;
 
-  assert(theStream->theType == Write);
+	assert(theStream->theType == Write);
 
-  /* Make sure the buffer is big enough */
-  assert (theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
+	/* Make sure the buffer is big enough */
+	assert(theStream->theBuffer.End - theStream->theBuffer.Start >= (int)Bytes);
 
-  if (theStream->theBuffer.End - theStream->theBuffer.Start -
-      theStream->theBuffer.ValidBytes < (int)Bytes)
-    FlushStream(theStream);
+	if (theStream->theBuffer.End - theStream->theBuffer.Start -
+	    theStream->theBuffer.ValidBytes < (int)Bytes)
+		FlushStream(theStream);
 
-  if (theStream->theBuffer.End - theStream->theBuffer.Start - 
-      theStream->theBuffer.ValidBytes >= (int)Bytes) {
-    Result = theStream->theBuffer.Head;
-    theStream->theBuffer.Head += Bytes;
-    theStream->theBuffer.ValidBytes += Bytes;
-  }
-  else /* Insufficient space available */
-    Result = NULL;
+	if (theStream->theBuffer.End - theStream->theBuffer.Start -
+	    theStream->theBuffer.ValidBytes >= (int)Bytes) {
+		Result = theStream->theBuffer.Head;
+		theStream->theBuffer.Head += Bytes;
+		theStream->theBuffer.ValidBytes += Bytes;
+	}
+	else /* Insufficient space available */
+		Result = NULL;
 
-  return Result;
+	return Result;
 }
 
 /*
@@ -187,149 +179,140 @@ StreamByte *WriteStream(Stream theStream, unsigned int Bytes)
  */
 
 void ReadStreamToBuffer(Stream theStream, unsigned int Bytes,
-			StreamByte *theBuffer)
-{
-  int BytesToCopy;
+                        StreamByte *theBuffer) {
+	int BytesToCopy;
 
-  assert(theStream->theType == Read);
+	assert(theStream->theType == Read);
 
-  while (1) {
-    if (theStream->theBuffer.ValidBytes >= (int)Bytes)
-      BytesToCopy = Bytes;
-    else
-      BytesToCopy = theStream->theBuffer.ValidBytes;
+	while (1) {
+		if (theStream->theBuffer.ValidBytes >= (int)Bytes)
+			BytesToCopy = Bytes;
+		else
+			BytesToCopy = theStream->theBuffer.ValidBytes;
 
-    memmove(theBuffer, theStream->theBuffer.Head, BytesToCopy);
-    theStream->theBuffer.Head += BytesToCopy;
-    theStream->theBuffer.ValidBytes -= BytesToCopy;
+		memmove(theBuffer, theStream->theBuffer.Head, BytesToCopy);
+		theStream->theBuffer.Head += BytesToCopy;
+		theStream->theBuffer.ValidBytes -= BytesToCopy;
 
-    theBuffer += BytesToCopy;
-    Bytes -= BytesToCopy;
-    
-    if (Bytes == 0) break;
-  
-    FillStream(theStream);
-  }
+		theBuffer += BytesToCopy;
+		Bytes -= BytesToCopy;
 
-  return;
+		if (Bytes == 0) break;
+
+		FillStream(theStream);
+	}
+
+	return;
 }
-  
+
 /*
  * Write some bytes into a stream from a designated buffer
  */
 
 void WriteStreamFromBuffer(Stream theStream, unsigned int Bytes,
-			   StreamByte *theBuffer)
-{
-  int BytesToCopy;
+                           StreamByte *theBuffer) {
+	int BytesToCopy;
 
-  assert(theStream->theType == Write);
+	assert(theStream->theType == Write);
 
-  while (1) {
-    if (theStream->theBuffer.End - theStream->theBuffer.Start -
-	theStream->theBuffer.ValidBytes >= (int)Bytes)
-      BytesToCopy = Bytes;
-    else
-      BytesToCopy = (theStream->theBuffer.End - theStream->theBuffer.Start -
-		     theStream->theBuffer.ValidBytes);
+	while (1) {
+		if (theStream->theBuffer.End - theStream->theBuffer.Start -
+		    theStream->theBuffer.ValidBytes >= (int)Bytes)
+			BytesToCopy = Bytes;
+		else
+			BytesToCopy = (theStream->theBuffer.End - theStream->theBuffer.Start -
+			               theStream->theBuffer.ValidBytes);
 
-    memmove(theStream->theBuffer.Head, theBuffer, BytesToCopy);
-    theStream->theBuffer.Head += BytesToCopy;
-    theStream->theBuffer.ValidBytes += BytesToCopy;
-    Bytes -= BytesToCopy;
-    theBuffer += BytesToCopy;
+		memmove(theStream->theBuffer.Head, theBuffer, BytesToCopy);
+		theStream->theBuffer.Head += BytesToCopy;
+		theStream->theBuffer.ValidBytes += BytesToCopy;
+		Bytes -= BytesToCopy;
+		theBuffer += BytesToCopy;
 
-    if (Bytes == 0) break;
-    
-    FlushStream(theStream);
-  }
+		if (Bytes == 0) break;
 
-  return;
+		FlushStream(theStream);
+	}
+
+	return;
 }
-  
+
 /*
- * Fill a stream with new data 
+ * Fill a stream with new data
  */
 
-void FillStream(Stream theStream)
-{
-  assert(theStream->theType == Read);
+void FillStream(Stream theStream) {
+	assert(theStream->theType == Read);
 
-  if( theStream->theUpdateFn == NULL ) {
-    theStream->theBuffer.AtEOF = 1;
-    return;
-  }
+	if ( theStream->theUpdateFn == NULL ) {
+		theStream->theBuffer.AtEOF = 1;
+		return;
+	}
 
-  memcpy(theStream->theBuffer.Start, theStream->theBuffer.Head, 
-	  theStream->theBuffer.ValidBytes);
-  theStream->theBuffer.Head = theStream->theBuffer.Start;
-  
-  theStream->theBuffer.ValidBytes += 
-    theStream->theUpdateFn(&theStream->theBuffer, &theStream->Hook);
+	memcpy(theStream->theBuffer.Start, theStream->theBuffer.Head,
+	       theStream->theBuffer.ValidBytes);
+	theStream->theBuffer.Head = theStream->theBuffer.Start;
+
+	theStream->theBuffer.ValidBytes +=
+		theStream->theUpdateFn(&theStream->theBuffer, &theStream->Hook);
 }
 
 /*
  * Flush a stream
  */
 
-void FlushStream(Stream theStream)
-{
-  int BytesWritten;
-  
-  assert(theStream->theType == Write);
-  assert(theStream->theUpdateFn);
+void FlushStream(Stream theStream) {
+	int BytesWritten;
 
-  if (theStream->theBuffer.ValidBytes > 0) {
-    BytesWritten = theStream->theUpdateFn(&theStream->theBuffer, 
-					  &theStream->Hook);
-    theStream->theBuffer.ValidBytes -= BytesWritten;
-    theStream->theBuffer.Head -= BytesWritten;
-  }
+	assert(theStream->theType == Write);
+	assert(theStream->theUpdateFn);
+
+	if (theStream->theBuffer.ValidBytes > 0) {
+		BytesWritten = theStream->theUpdateFn(&theStream->theBuffer,
+		                                      &theStream->Hook);
+		theStream->theBuffer.ValidBytes -= BytesWritten;
+		theStream->theBuffer.Head -= BytesWritten;
+	}
 }
 
 /*
  * Seek to a given position in a stream
  */
 
-void SeekStream(Stream theStream, unsigned int Position)
-{
-  assert(theStream->theSeekFn);
+void SeekStream(Stream theStream, unsigned int Position) {
+	assert(theStream->theSeekFn);
 
-  theStream->theSeekFn(&theStream->theBuffer, &theStream->Hook, Position);
+	theStream->theSeekFn(&theStream->theBuffer, &theStream->Hook, Position);
 }
 
 /*
  * Rewind a stream
  */
 
-void RewindStream(Stream theStream)
-{
-  SeekStream(theStream, 0);
+void RewindStream(Stream theStream) {
+	SeekStream(theStream, 0);
 }
 
 /*
  * Determine whether or not a stream is at the end of file
  */
 
-int StreamLength(Stream theStream)
-{
-  assert(theStream->theBuffer.AtEOF);
-  return theStream->theBuffer.ValidBytes;
+int StreamLength(Stream theStream) {
+	assert(theStream->theBuffer.AtEOF);
+	return theStream->theBuffer.ValidBytes;
 }
 
-short AtEOF(Stream theStream)
-{
-  return theStream->theBuffer.AtEOF && !theStream->theBuffer.ValidBytes;
+short AtEOF(Stream theStream) {
+	return theStream->theBuffer.AtEOF && !theStream->theBuffer.ValidBytes;
 }
 
 /*
  * Get at the private stream data from its abstract type
  */
 
-void GetStreamData( Stream str, StreamBuffer *buf, void **Hook )
-{
-  *buf = &str->theBuffer;
-  *Hook = str->Hook;
+void GetStreamData( Stream str, StreamBuffer *buf, void **Hook ) {
+	*buf = &str->theBuffer;
+	*Hook = str->Hook;
 }
 
 /* EOF */

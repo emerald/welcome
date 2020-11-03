@@ -22,8 +22,8 @@ typedef struct State * SQueueDomainType;
  */
 
 typedef struct SQueueRecord {
-    SQueueDomainType *table;
-    int size, first, count;
+	SQueueDomainType *table;
+	int size, first, count;
 } SQueueRecord, *SQueue;
 
 /* OPERATIONS */
@@ -60,20 +60,20 @@ void SQueuePrint(SQueue q);
  *	} SQueueNext();
  */
 #define SQueueForEach(q, value) \
-  { \
-    int SQueuexx_index, SQueuexx_count; \
-    for (SQueuexx_index = (((q) && !ISNIL(q)) ? (q)->first: 0), SQueuexx_count = 0; \
-	 SQueuexx_count < (((q) && !ISNIL(q)) ? (q)->count : 0); \
-	 SQueuexx_count++, \
-	 SQueuexx_index += \
-	   (SQueuexx_index == (q)->size -1 ? -((q)->size - 1) : 1)) { \
-      *(SQueueDomainType*)(&(value)) = (q)->table[SQueuexx_index]; \
-      { 
+	{ \
+		int SQueuexx_index, SQueuexx_count; \
+		for (SQueuexx_index = (((q) && !ISNIL(q)) ? (q)->first : 0), SQueuexx_count = 0; \
+		     SQueuexx_count < (((q) && !ISNIL(q)) ? (q)->count : 0); \
+		     SQueuexx_count++, \
+		     SQueuexx_index += \
+				 (SQueuexx_index == (q)->size - 1 ? -((q)->size - 1) : 1)) { \
+			*(SQueueDomainType*)(&(value)) = (q)->table[SQueuexx_index]; \
+			{
 
 #define SQueueNext() \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in SQueue */
 #define SQueueSize(q) (((q) && !ISNIL(q)) ? (q)->count : 0)

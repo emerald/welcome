@@ -58,7 +58,7 @@
 #if defined(E_NEEDS_STRING)
 #  include <string.h>
 #  if (defined(sun) && !defined(__svr4__))
-     extern char *sys_errlist[];
+extern char *sys_errlist[];
 #    define strerror(n) (sys_errlist[(n)])
 #  endif
 #endif
@@ -71,7 +71,7 @@
 #    define ETIMEDOUT 999
 #  endif
 #  ifndef errno
-     extern int errno;
+extern int errno;
 #  endif
 #endif
 
@@ -118,10 +118,10 @@
 
 #ifdef E_NEEDS_IOV
 #  if defined(WIN32)
-     struct iovec {
-       char *iov_base;
-       int   iov_len;
-     };
+struct iovec {
+	char *iov_base;
+	int iov_len;
+};
 #  else
 #    include <sys/uio.h>
 #  endif
@@ -143,9 +143,9 @@
 
 #if defined(E_NEEDS_SELECT)
 #  if defined(hp700) || defined(__NeXT__) || defined(WIN32) || (defined(sun) && !defined(__svr4__)) || defined(linux)
-     /*
-      * The select stuff is in unistd.h
-      */
+/*
+ * The select stuff is in unistd.h
+ */
 #  else
 #    include <sys/select.h>
 #  endif

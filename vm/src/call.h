@@ -9,11 +9,12 @@
 #include "types.h"
 #endif
 
-typedef enum { RFine = 0,
-	       RInitially = 1,
-	       RRemote = 2,
-	       RDead = 4 }
-    Reason;
+typedef enum {
+	RFine = 0,
+	RInitially = 1,
+	RRemote = 2,
+	RDead = 4
+} Reason;
 
 extern IISc allfrozen;
 

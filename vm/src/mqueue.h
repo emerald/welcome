@@ -5,9 +5,9 @@
 #include "types.h"
 
 typedef struct {
-  Node id;
-  int length;
-  void *msg;
+	Node id;
+	int length;
+	void *msg;
 } Message;
 
 /*
@@ -25,8 +25,8 @@ typedef struct {
  */
 
 typedef struct MQueueRecord {
-    Message *table;
-    int size, count, firstfull, firstempty;
+	Message *table;
+	int size, count, firstfull, firstempty;
 } MQueueRecord, *MQueue;
 
 /* OPERATIONS */

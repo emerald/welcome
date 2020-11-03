@@ -1,14 +1,14 @@
 /****************************************************************************
- File     : init.h
- Date     : 08-11-92
- Author   : Mark Immel
+   File     : init.h
+   Date     : 08-11-92
+   Author   : Mark Immel
 
- Contents : Various Initialization Routines
+   Contents : Various Initialization Routines
 
- Modifications
- -------------
+   Modifications
+   -------------
 
-*****************************************************************************/
+ *****************************************************************************/
 
 #ifndef _EMERALD_INIT_H
 #define _EMERALD_INIT_H

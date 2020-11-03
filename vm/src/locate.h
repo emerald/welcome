@@ -24,12 +24,12 @@
 #define LOCATE_TIMES_TO_TRY 5
 
 typedef struct locationRecord {
-  OID  oid, ctoid;
-  enum { LEasy, LAggressive } stage;
-  int count;
-  ISet outstandingRequests;
-  ISet waitingStates;
-  ISet waitingMsgs;
+	OID oid, ctoid;
+	enum { LEasy, LAggressive } stage;
+	int count;
+	ISet outstandingRequests;
+	ISet waitingStates;
+	ISet waitingMsgs;
 } locationRecord;
 
 extern OISc outstandingLocates;

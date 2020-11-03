@@ -23,16 +23,16 @@ typedef unsigned int indexType;
  */
 
 typedef struct OTableTE {
-    OID			 key;		/* the key for this entry */
-    Object		 value;		/* what we want */
-    indexType	 ochain;	/* overflow chain */
-    indexType	 oidchain;	/* overflow chain */
+	OID key;                /* the key for this entry */
+	Object value;           /* what we want */
+	indexType ochain;       /* overflow chain */
+	indexType oidchain;     /* overflow chain */
 } OTableTE, *OTableTEPtr;
 
 typedef struct OTableRecord {
-    OTableTEPtr table;
-    int size, count, free;
-    indexType *olookup, *oidlookup;
+	OTableTEPtr table;
+	int size, count, free;
+	indexType *olookup, *oidlookup;
 } OTableRecord, *OTable;
 
 /* OPERATIONS */
@@ -59,51 +59,51 @@ OID OTableLookupByObject(OTable sc, Object o);
 /* DEBUGGING: Print the collection OTable */
 void OTablePrint(OTable sc);
 
-/* Iterate over the elements of the collection OTable.  
+/* Iterate over the elements of the collection OTable.
  * At each iteration, OTablekey and OTablevalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	OTableForEach(sc, key_a, value) {
  *	  / * whatever you want to do with key_a, key_b, value * /
  *	} OTableNext();
  */
 #define OTableForEach(OTable, OTablekey, OTablevalue) \
-  { \
-    int OTablexx_index; \
-    for (OTablexx_index = 0; OTablexx_index < OTable->size; OTablexx_index++) { \
-      if (!OTableIsNIL((OTable)->table[OTablexx_index].value)) { \
-	*(OID*)(&(OTablekey)) = (OTable)->table[OTablexx_index].key; \
-	*(Object *)(&(OTablevalue)) = (OTable)->table[OTablexx_index].value; \
-	{
+	{ \
+		int OTablexx_index; \
+		for (OTablexx_index = 0; OTablexx_index < OTable->size; OTablexx_index++) { \
+			if (!OTableIsNIL((OTable)->table[OTablexx_index].value)) { \
+				*(OID*)(&(OTablekey)) = (OTable)->table[OTablexx_index].key; \
+				*(Object *)(&(OTablevalue)) = (OTable)->table[OTablexx_index].value; \
+				{
 
 #define OTableNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
-/* Iterate over the elements of the collection OTable backwards.  
+/* Iterate over the elements of the collection OTable backwards.
  * At each iteration, OTablekey and OTablevalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	OTableForEachBackwards(sc, key_a, value) {
  *	  / * whatever you want to do with key_a, key_b, value * /
  *	} OTableNext();
  */
 #define OTableForEachBackwards(OTable, OTablekey, OTablevalue) \
-  { \
-    int OTablexx_index; \
-    for (OTablexx_index = OTable->size - 1; OTablexx_index >= 0; OTablexx_index--) { \
-      if (!OTableIsNIL((OTable)->table[OTablexx_index].value)) { \
-	*(OID*)(&(OTablekey)) = (OTable)->table[OTablexx_index].key; \
-	*(Object *)(&(OTablevalue)) = (OTable)->table[OTablexx_index].value; \
-	{ 
+	{ \
+		int OTablexx_index; \
+		for (OTablexx_index = OTable->size - 1; OTablexx_index >= 0; OTablexx_index--) { \
+			if (!OTableIsNIL((OTable)->table[OTablexx_index].value)) { \
+				*(OID*)(&(OTablekey)) = (OTable)->table[OTablexx_index].key; \
+				*(Object *)(&(OTablevalue)) = (OTable)->table[OTablexx_index].value; \
+				{
 
 #define OTableNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in OTable */
 #define OTableSize(OTable) ((OTable)->count)

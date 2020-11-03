@@ -13,9 +13,9 @@
 
 typedef struct gtype *gtypeptr;
 
-struct gtype{
-  OID gmember;
-  gtypeptr next;
+struct gtype {
+	OID gmember;
+	gtypeptr next;
 };
 
 extern OISc gaggleTable;

@@ -1,14 +1,14 @@
 /****************************************************************************
- File     : error.h 
- Date     : 08-11-92
- Author   : Mark Immel
+   File     : error.h
+   Date     : 08-11-92
+   Author   : Mark Immel
 
- Contents : Error handling package
+   Contents : Error handling package
 
- Modifications
- -------------
+   Modifications
+   -------------
 
-*****************************************************************************/
+ *****************************************************************************/
 
 #ifndef _ERROR_H
 #define _ERROR_H

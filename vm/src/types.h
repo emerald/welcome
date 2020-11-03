@@ -23,9 +23,9 @@
    sizeof(Bits32) == 4
    sizeof(Bits16) == 2
    sizeof(Bits8)  == 1 */
-typedef unsigned int   Bits32;
+typedef unsigned int Bits32;
 typedef unsigned short Bits16;
-typedef unsigned char  Bits8;
+typedef unsigned char Bits8;
 
 /* Forward declarations */
 
@@ -37,7 +37,7 @@ typedef struct Forward      *Forward;
 #define TemplateRep VectorRep
 
 /*****************************************************************************
-				Object
+                Object
 *****************************************************************************/
 
 /* Bits in the flags of a FirstThing */
@@ -68,7 +68,7 @@ typedef struct Forward      *Forward;
 #define CLEARRESDNT(f)    ((f) &= ~RESDNTBIT)
 #else
 #define RESDNT(f)         1
-#define SETRESDNT(f)      
+#define SETRESDNT(f)
 #define CLEARRESDNT(f)    abort()
 #endif
 
@@ -101,142 +101,142 @@ extern int codeptrextra;
 #define CODEPTR(f)       ((ConcreteType)((((unsigned int)f) & CODEPTRBITS) | codeptrextra))
 #define CODEPTRINDEX(f)  ((unsigned int)f & CODEPTRBITS)
 #define SETCODEPTR(f,cp)  \
-  ((f) = ((((unsigned int)f) & ~CODEPTRBITS)) | ((unsigned int)cp & ~codeptrextra))
+	((f) = ((((unsigned int)f) & ~CODEPTRBITS)) | ((unsigned int)cp & ~codeptrextra))
 #define SETCODEPTRINDEX(f,cp)  \
-  ((f) = (((unsigned int)f) & ~CODEPTRBITS) | (unsigned int)cp)
+	((f) = (((unsigned int)f) & ~CODEPTRBITS) | (unsigned int)cp)
 
 typedef Bits32 FirstThing;
 
 #define HOSTED(f)         (IIScIsNIL(IIScLookup(notHostedMap, (int)(f))))
-#define SETHOSTED(f)	(IIScDelete(notHostedMap, (int)(f)))
+#define SETHOSTED(f)    (IIScDelete(notHostedMap, (int)(f)))
 #define CLEARHOSTED(f)    (abort())
 
 struct ObjectDescriptor {
-  FirstThing       flags;
-  Bits32	   d[1];
+	FirstThing flags;
+	Bits32 d[1];
 };
 
 typedef struct ObjectDescriptor *Object;
 
 /*
- Almost all objects (the exceptions are builtins like Integer and Boolean)
- have ObjectDescriptors.  
+   Almost all objects (the exceptions are builtins like Integer and Boolean)
+   have ObjectDescriptors.
 
- The Flags field is used as follows :
+   The Flags field is used as follows :
 
-              Set                       Clear 
+              Set                       Clear
               ---                       -----
- BROKENBIT    The Object is broken      The Object is unbroken
+   BROKENBIT    The Object is broken      The Object is unbroken
 
- HASOIDBIT    The Object has been       The Object has not been assigned
+   HASOIDBIT    The Object has been       The Object has not been assigned
               assigned an OID.          an OID.
 
- RESDNTBIT    The Object is resident    The Object is not resident on this
+   RESDNTBIT    The Object is resident    The Object is not resident on this
               on this node.             node.
 
- REMSETBIT    (not during gc)		This object is not in the remembered
-	      This object is in the	set.
-	      remembered set since it
-	      is in the old generation
-	      and (may) hold a 
-	      reference to an object
-	      in the new generation.
-	      
-	      (during gc)
-	      This object is marked.	This object is not marked.
+   REMSETBIT    (not during gc)		This object is not in the remembered
+          This object is in the	set.
+          remembered set since it
+          is in the old generation
+          and (may) hold a
+          reference to an object
+          in the new generation.
 
- DISTGCBIT    (Only defined during a distributed gc)
-	      This object is Black	This object is White
-	      (In a message (object header) since we never send refs to white objects)
-	      This object is Black	This object is Grey
+          (during gc)
+          This object is marked.	This object is not marked.
 
- VZEROL	      (Defined only for vector stubs)
-	      The vector has 0 elements The vector has > 0 elements,
-					the number of words taken in stored in
-					the third word of the structure.
+   DISTGCBIT    (Only defined during a distributed gc)
+          This object is Black	This object is White
+          (In a message (object header) since we never send refs to white objects)
+          This object is Black	This object is Grey
 
- The ct of the object is stored in the same 32 bit FirstThing, to save a
- word in every object.  This really is a good idea, although it is somewhat
- messy.
+   VZEROL	      (Defined only for vector stubs)
+          The vector has 0 elements The vector has > 0 elements,
+                    the number of words taken in stored in
+                    the third word of the structure.
 
- The data portion of the object follows immediately after the first thing.
+   The ct of the object is stored in the same 32 bit FirstThing, to save a
+   word in every object.  This really is a good idea, although it is somewhat
+   messy.
 
- If the object is not resident, then the first word of the object data area
- is a pointer to a noderecord indicating the best information we have about
- where the object might be.
+   The data portion of the object follows immediately after the first thing.
+
+   If the object is not resident, then the first word of the object data area
+   is a pointer to a noderecord indicating the best information we have about
+   where the object might be.
  */
 
 /****************************************************************************
-	       Non-Object Types Used By The Virtual Machine
+           Non-Object Types Used By The Virtual Machine
 ****************************************************************************/
 
 typedef int Socket;
 
 typedef struct Node {
-  Bits32 ipaddress;
-  Bits16 port;
-  Bits16 epoch;
+	Bits32 ipaddress;
+	Bits16 port;
+	Bits16 epoch;
 } Node;
 
 typedef struct OID {
-  Bits32 ipaddress;
-  Bits16 port;
-  Bits16 epoch;
-  Bits32 Seq;
+	Bits32 ipaddress;
+	Bits16 port;
+	Bits16 epoch;
+	Bits32 Seq;
 } OID;
 
 #define isNoOID(oid)  (((oid).ipaddress == 0) \
-		       && ((oid).port == 0) \
-		       && ((oid).epoch == 0) \
-		       && ((oid).Seq == 0))
+	                   && ((oid).port == 0) \
+	                   && ((oid).epoch == 0) \
+	                   && ((oid).Seq == 0))
 
 #define isNoNode(oid) (((oid).ipaddress == 0) \
-		       && ((oid).port == 0) \
-		       && ((oid).epoch == 0))
+	                   && ((oid).port == 0) \
+	                   && ((oid).epoch == 0))
 
 #define sameOID(a,b) ((a).ipaddress == (b).ipaddress && \
-		      (a).port == (b).port && \
-		      (a).epoch == (b).epoch && \
-		      (a).Seq == (b).Seq)
-		      
+	                  (a).port == (b).port && \
+	                  (a).epoch == (b).epoch && \
+	                  (a).Seq == (b).Seq)
+
 #define isBuiltinOID(a) ((isNoNode(a)) && isBuiltin((a).Seq))
 
 /*****************************************************************************
-			   Object Subtypes
+               Object Subtypes
 
-The following types are subtypes of object:
+   The following types are subtypes of object:
 
-AbCon
-AbstractType
-ATOpVector
-ATOpVectorElement
-ATTypeVector
-Bitchunk
-Code
-ConcreteType
-Decoder
-InterpreterState
-JTime
-OpVector
-OpVectorElement
-String
-Template
-Vector
+   AbCon
+   AbstractType
+   ATOpVector
+   ATOpVectorElement
+   ATTypeVector
+   Bitchunk
+   Code
+   ConcreteType
+   Decoder
+   InterpreterState
+   JTime
+   OpVector
+   OpVectorElement
+   String
+   Template
+   Vector
 
-****************************************************************************/
+ ****************************************************************************/
 
 /* Macro to automatically declare subtypes of ObjectDescriptor */
 
 #define OBJECTSUBTYPE(theType) \
-  typedef struct theType {     \
-  FirstThing		flags;         \
-  struct theType##Rep	d;  \
-  } *theType 
+	typedef struct theType {     \
+		FirstThing flags;         \
+		struct theType ## Rep d;  \
+	} *theType
 
 /****************************************************************************
-			Object Representations
+            Object Representations
 
-Internal representations for the various builtin types.
+   Internal representations for the various builtin types.
 ****************************************************************************/
 
 /* Many of the following object representations contain a final slot which
@@ -247,25 +247,25 @@ Internal representations for the various builtin types.
    know about the extra slots. */
 
 struct VectorRep {
-  int	items;
-  Bits8 data[4];
+	int items;
+	Bits8 data[4];
 };
 OBJECTSUBTYPE(Vector);
 
 OBJECTSUBTYPE(String);
 
 struct ATOpVectorElementRep {
-  unsigned int id;
-  int	       isFunction;
-  String       name;
-  struct ATTypeVector *arguments;
-  struct ATTypeVector *results;
+	unsigned int id;
+	int isFunction;
+	String name;
+	struct ATTypeVector *arguments;
+	struct ATTypeVector *results;
 };
 OBJECTSUBTYPE(ATOpVectorElement);
 
 struct ATOpVectorRep {
-  int		    items;
-  ATOpVectorElement data[1];
+	int items;
+	ATOpVectorElement data[1];
 };
 OBJECTSUBTYPE(ATOpVector);
 
@@ -274,16 +274,16 @@ OBJECTSUBTYPE(ATOpVector);
 #define AT_ISVECTOR 4
 
 struct AbstractTypeRep {
-  int	       flags;
-  ATOpVector   ops;
-  String       name;
-  String       filename;
+	int flags;
+	ATOpVector ops;
+	String name;
+	String filename;
 };
 OBJECTSUBTYPE(AbstractType);
 
 struct ATTypeVectorRep {
-  int	       items;
-  AbstractType data[1];
+	int items;
+	AbstractType data[1];
 };
 OBJECTSUBTYPE(ATTypeVector);
 
@@ -295,15 +295,15 @@ OBJECTSUBTYPE(Template);
 typedef struct State *InterpreterState;
 
 struct JTimeRep {
-  int secs;
-  int usecs;
+	int secs;
+	int usecs;
 };
 OBJECTSUBTYPE(JTime);
 
-/* 
-  The first three elements of the OpVectorRep are not actually invocable
-  operations.  They correspond to the initially, process, and recovery
-  sections, respectively.
+/*
+   The first three elements of the OpVectorRep are not actually invocable
+   operations.  They correspond to the initially, process, and recovery
+   sections, respectively.
  */
 
 #define OVE_INITIALLY 0
@@ -312,30 +312,30 @@ OBJECTSUBTYPE(JTime);
 #define OVE_FIRSTOP   3
 
 #define HASINITIALLY(ct) \
-   (ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_INITIALLY]))
+	(ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_INITIALLY]))
 
 #define HASRECOVERY(ct) \
-   (ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_RECOVERY]))
+	(ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_RECOVERY]))
 
 #define HASPROCESS(ct) \
-   (ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_PROCESS]))
+	(ISNOTNIL(((ConcreteType)ct)->d.opVector->d.data[OVE_PROCESS]))
 
 #define ISCOMPILATION(ct) \
-   (!strncmp((char*)ct->d.name->d.data, "Compilation", ct->d.name->d.items))
+	(!strncmp((char*)ct->d.name->d.data, "Compilation", ct->d.name->d.items))
 
 struct OpVectorElementRep {
-  unsigned int id;
-  int	       nargs;
-  int	       nress;
-  String       name;
-  Template     template;
-  Code         code;
+	unsigned int id;
+	int nargs;
+	int nress;
+	String name;
+	Template     template;
+	Code code;
 };
 OBJECTSUBTYPE(OpVectorElement);
 
-struct OpVectorRep {       
-  int		  items;
-  OpVectorElement data[1];
+struct OpVectorRep {
+	int items;
+	OpVectorElement data[1];
 };
 OBJECTSUBTYPE(OpVector);
 
@@ -344,13 +344,13 @@ OBJECTSUBTYPE(OpVector);
  * compiler at the end of a code section look like:
  */
 struct LFERep {
-  OID    oid;
-  Object ptr;
+	OID oid;
+	Object ptr;
 };
 
 struct LFEVectorRep {
-  int items;
-  struct LFERep data[1];
+	int items;
+	struct LFERep data[1];
 };
 OBJECTSUBTYPE(LFEVector);
 
@@ -359,20 +359,20 @@ OBJECTSUBTYPE(LFEVector);
  * is set, it indicates that the object is represented with an object
  * descriptor in the usual way.  If not set, then the object is simply a
  * 32-bit chunk of data.  This allows implementation of some builtin objects
- * like Integer and Boolean.  
+ * like Integer and Boolean.
  */
 
 struct ConcreteTypeRep {
-  int	       instanceSize; /* The amount of space to allocate for
-				instances */
-  Bits32       instanceFlags;
-  OpVector     opVector;
-  String       name;
-  String       filename;
-  Template     template;  /* A table describing the data fields of instances
-                             to allow host-network translation */
-  AbstractType type;
-  LFEVector    literals;
+	int instanceSize;      /* The amount of space to allocate for
+	                          instances */
+	Bits32 instanceFlags;
+	OpVector opVector;
+	String name;
+	String filename;
+	Template     template; /* A table describing the data fields of instances
+	                          to allow host-network translation */
+	AbstractType type;
+	LFEVector literals;
 };
 
 /*
@@ -381,22 +381,22 @@ struct ConcreteTypeRep {
  * to redo the typedef, and since C can't handle that we have to do it by hand.
  */
 struct ConcreteType {
-  FirstThing		flags;
-  struct ConcreteTypeRep	d;
+	FirstThing flags;
+	struct ConcreteTypeRep d;
 };
 
 struct AbConRep {
-  OID 		  abOID;
-  OID 		  conOID;
-  AbstractType    ab;
-  ConcreteType    con;
-  int 		  nops;        /* Number of operations */
-  OpVectorElement ops[1];
+	OID abOID;
+	OID conOID;
+	AbstractType ab;
+	ConcreteType con;
+	int nops;              /* Number of operations */
+	OpVectorElement ops[1];
 };
 OBJECTSUBTYPE(AbCon);
 
 /****************************************************************************
-		     sizeof and filesizeof macros
+             sizeof and filesizeof macros
 ****************************************************************************/
 
 /* Some of the above object representations declare one-element arrays.  In
@@ -407,17 +407,17 @@ OBJECTSUBTYPE(AbCon);
 
 #define sizeofObject       (sizeof(struct ObjectDescriptor) - sizeof(Bits32))
 #define sizeofOpVector     (sizeofObject + sizeof(struct OpVectorRep) -     \
-			    sizeof(OpVectorElement))
+	                        sizeof(OpVectorElement))
 #define sizeofVector       (sizeofObject + sizeof(struct VectorRep) -       \
-			    4 * sizeof(Bits8))
+	                        4 * sizeof(Bits8))
 #define sizeofATOpVector   (sizeofObject + sizeof(struct ATOpVectorRep) -   \
-			    sizeof(ATOpVectorElement))
+	                        sizeof(ATOpVectorElement))
 #define sizeofATTypeVector (sizeofObject + sizeof(struct ATTypeVectorRep) - \
-			    sizeof(AbstractType))
+	                        sizeof(AbstractType))
 #define sizeofCode          sizeofVector
 #define sizeofString        sizeofVector
-#define sizeofAbCon	   (sizeofObject + sizeof(struct AbConRep) -        \
-			    sizeof(OpVectorElement))
+#define sizeofAbCon    (sizeofObject + sizeof(struct AbConRep) -        \
+	                    sizeof(OpVectorElement))
 
 /* The sizeof macros give the size of objects in memory.  The filesizeof
    macros give the size of objects on disk or on the wire. */
@@ -429,7 +429,7 @@ OBJECTSUBTYPE(AbCon);
 #define filesizeofOID       (filesizeofNode + filesizeofBits32)
 
 /****************************************************************************
-			 Byte-swapping macros
+             Byte-swapping macros
 ****************************************************************************/
 
 #endif /* _EMERALD_TYPES_H */

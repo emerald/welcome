@@ -10,9 +10,9 @@
 typedef int (*ccallFunction)(void);
 
 typedef struct CCallDescriptor {
-  ccallFunction ccFunction;
-  char* ccName;
-  char* ccArgTemplate;
+	ccallFunction ccFunction;
+	char* ccName;
+	char* ccArgTemplate;
 } CCallDescriptor;
 
 extern CCallDescriptor *ccalltable[];

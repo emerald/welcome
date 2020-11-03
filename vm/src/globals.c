@@ -8,11 +8,10 @@
 #include "jsys.h"
 #include "creation.h"
 
-int obsoletesys(struct State *state)
-{
-  printf("Obsolete JSYS\n");
-  abort();
-  return 1;
+int obsoletesys(struct State *state) {
+	printf("Obsolete JSYS\n");
+	abort();
+	return 1;
 }
 
 int codeptrextra;
@@ -22,51 +21,50 @@ String TrueString, FalseString;
 Node MyNode;
 char *gRootNode;
 int (*sysfuncs[JSYS_OPS])(struct State *) = {
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       getstdin,
-       getstdout,
-       gettod,
-       getlnn,
-       getname,
-       obsoletesys,
-       obsoletesys,
-       getactivenodes,
-       getallnodes,
-       delay,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       obsoletesys,
-       jislocal,
-       obsoletesys,
-       jmove,
-       jfix,
-       junfix,
-       jrefix,
-       jlocate,
-       jisfixed,
-       jgetIncarnationTime,
-       jgetLoadAverage
-     };
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	getstdin,
+	getstdout,
+	gettod,
+	getlnn,
+	getname,
+	obsoletesys,
+	obsoletesys,
+	getactivenodes,
+	getallnodes,
+	delay,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	obsoletesys,
+	jislocal,
+	obsoletesys,
+	jmove,
+	jfix,
+	junfix,
+	jrefix,
+	jlocate,
+	jisfixed,
+	jgetIncarnationTime,
+	jgetLoadAverage
+};
 
-void initGlobals()
-{
-  TrueString = CreateString("true");
-  FalseString = CreateString("false");
+void initGlobals() {
+	TrueString = CreateString("true");
+	FalseString = CreateString("false");
 }

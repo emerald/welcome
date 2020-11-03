@@ -22,9 +22,9 @@
 #endif
 
 typedef struct NodeAddr {
-  unsigned int ipaddress;
-  unsigned short port;
-  unsigned short incarnation;
+	unsigned int ipaddress;
+	unsigned short port;
+	unsigned short incarnation;
 } NodeAddr;
 
 extern void MTInit(void);

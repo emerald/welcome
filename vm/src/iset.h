@@ -10,13 +10,13 @@
  *	ISetDomainType	- a typedef for the domain
  *	ISetHASH		- a macro that computes an integer from a given
  *			  element of the domain
- *	ISetCOMPARE	- a macro that compares two elements of 
- *				  the domain, evaluating to 1 if they are 
+ *	ISetCOMPARE	- a macro that compares two elements of
+ *				  the domain, evaluating to 1 if they are
  *				  the same
  */
 #define ISetDomainType int
 #define ISetHASH(X) ((unsigned)(((X) >> 2) ^ ((X) << 7)))
-#define ISetCOMPARE(X,Y) ((X)==(Y))
+#define ISetCOMPARE(X,Y) ((X) == (Y))
 
 /*
  * Hidden, private type declarations.  The only thing
@@ -27,12 +27,12 @@
  */
 
 typedef struct ISetTE {
-    ISetDomainType	 key;		/* the key for this entry */
+	ISetDomainType key;         /* the key for this entry */
 } ISetTE, *ISetTEPtr;
 
 typedef struct ISetRecord {
-    ISetTEPtr table;
-    int size, maxCount, count;
+	ISetTEPtr table;
+	int size, maxCount, count;
 } ISetRecord, *ISet;
 
 /* OPERATIONS */
@@ -62,26 +62,26 @@ int ISetMember(ISet sc, ISetDomainType key);
 /* DEBUGGING: Print the collection ISet */
 void ISetPrint(ISet sc);
 
-/* Iterate over the elements of the collection ISet.  
- * At each iteration, ISetkey is set to the next key in the set.  
+/* Iterate over the elements of the collection ISet.
+ * At each iteration, ISetkey is set to the next key in the set.
  * Usage:
  *	ISetForEach(someSc, key) {
  *	  / * whatever you want to do with key * /
  *	} ISetNext();
  */
 #define ISetForEach(ISet, ISetkey) \
-  { \
-    int ISetxx_index; \
-    for (ISetxx_index = 0; ISetxx_index < (ISet)->size; ISetxx_index++) { \
-      if ((ISet)->table[ISetxx_index].key != 0) { \
-	*(ISetDomainType*)(&(ISetkey)) = (ISet)->table[ISetxx_index].key; \
-	{ 
+	{ \
+		int ISetxx_index; \
+		for (ISetxx_index = 0; ISetxx_index < (ISet)->size; ISetxx_index++) { \
+			if ((ISet)->table[ISetxx_index].key != 0) { \
+				*(ISetDomainType*)(&(ISetkey)) = (ISet)->table[ISetxx_index].key; \
+				{
 
 #define ISetNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in ISet */
 #define ISetSize(ISet) ((ISet)->count)

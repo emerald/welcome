@@ -1,5 +1,5 @@
 /*
- * OOIScs (searchable collections) are things that map 
+ * OOIScs (searchable collections) are things that map
  * pairs of oids onto ints.  Operations:
  *	create, destroy, insert, lookup, size, and print
  */
@@ -11,11 +11,11 @@
 #include "types.h"
 
 typedef struct {
-  OID a, b;
+	OID a, b;
 } OOIScDomainType;
 #define OOIScRangeType  int
 #define OOIScHASH(X,Y) ((unsigned) ((X.ipaddress) ^ ((X.Seq) << 0) ^ \
-			 ((Y.ipaddress) << 3) ^ ((Y.Seq) << 1)))
+	                                ((Y.ipaddress) << 3) ^ ((Y.Seq) << 1)))
 #define OOIScCOMPARE(K,X,Y) (sameOID((K).a, (X)) && sameOID((K).b, (Y)))
 #define OOIScNIL (-1)
 #define OOIScIsNIL(X) ((int)(X) == OOIScNIL)
@@ -29,13 +29,13 @@ typedef struct {
  */
 
 typedef struct OOIScTE {
-    OOIScDomainType	 key;		/* the key for this entry */
-    OOIScRangeType	 value;		/* what we want */
+	OOIScDomainType key;        /* the key for this entry */
+	OOIScRangeType value;       /* what we want */
 } OOIScTE, *OOIScTEPtr;
 
 typedef struct OOIScRecord {
-    OOIScTEPtr table;
-    int size, maxCount, count;
+	OOIScTEPtr table;
+	int size, maxCount, count;
 } OOIScRecord, *OOISc;
 
 /* OPERATIONS */
@@ -58,36 +58,36 @@ int OOIScBumpBy(OOISc sc, OID a, OID b, int value);
 /* Delete the pair with key key from the collection OOISc */
 void OOIScDelete(OOISc sc, OID a, OID b);
 
-/* Return the value associated with key in collection 
+/* Return the value associated with key in collection
  * OOISc, or OOIScNIL if no such pair exists */
 int OOIScLookup(OOISc sc, OID a, OID b);
 
 /* DEBUGGING: Print the collection OOISc */
 void OOIScPrint(OOISc sc);
 
-/* Iterate over the elements of the collection OOISc.  
+/* Iterate over the elements of the collection OOISc.
  * At each iteration, OOISckey and OOIScvalue are set to the next
- * <key, value> pair in the collection.  
+ * <key, value> pair in the collection.
  * Usage:
  *	OOIScForEach(sc, key_a, key_b, value) {
  *	  / * whatever you want to do with key_a, key_b, value * /
  *	} OOIScNext();
  */
 #define OOIScForEach(OOISc, OOISckeya, OOISckeyb, OOIScvalue) \
-  { \
-    int OOIScxx_index; \
-    for (OOIScxx_index = 0; OOIScxx_index < (OOISc)->size; OOIScxx_index++) { \
-      if (!OOIScIsNIL((OOISc)->table[OOIScxx_index].value)) { \
-	*(OID*)(&(OOISckeya)) = (OOISc)->table[OOIScxx_index].key.a; \
-	*(OID*)(&(OOISckeyb)) = (OOISc)->table[OOIScxx_index].key.b; \
-	*(OOIScRangeType *)(&(OOIScvalue)) = (OOISc)->table[OOIScxx_index].value; \
-	{ 
+	{ \
+		int OOIScxx_index; \
+		for (OOIScxx_index = 0; OOIScxx_index < (OOISc)->size; OOIScxx_index++) { \
+			if (!OOIScIsNIL((OOISc)->table[OOIScxx_index].value)) { \
+				*(OID*)(&(OOISckeya)) = (OOISc)->table[OOIScxx_index].key.a; \
+				*(OID*)(&(OOISckeyb)) = (OOISc)->table[OOIScxx_index].key.b; \
+				*(OOIScRangeType *)(&(OOIScvalue)) = (OOISc)->table[OOIScxx_index].value; \
+				{
 
 #define OOIScNext() \
 	} \
-      } \
-    } \
-  }
+	} \
+	} \
+	}
 
 /* Return the number of elements in OOISc */
 #define OOIScSize(OOISc) ((OOISc)->count)
