@@ -1862,6 +1862,17 @@ nextInstruction: ;
         break;
     case RECV:
         printf("Receive not yet implemented. Statement ignored.\n");
+        AbstractType toReceive;
+
+		POP(AbstractType, toReceive);
+        PRINTF("type: %s\n", toReceive->d.name);
+        /*
+            1. Blokke
+            2. Ha tak i pcb fra en annen prosess
+            3. Finne koden for når obj kommer inn
+            4. Gjøre om koden
+            5. 
+        */
         break;
       default:
 	fprintf(stderr, "Undefined bytecode %d\n", opcode);

@@ -6,6 +6,7 @@ EC/CP
 EC/CP_*
 EC/CPIndex*
 EC/name*
+vm/i386linux/emx
 
 # tests
 test/*
