@@ -10,16 +10,16 @@ expression &$::=$& literal \\
 \end{tabular}\end{quote}
 A literal expression directly denotes an object.
 A constant identifier names the object it was initialized to while a variable
-identifier names the object most recently bound to it. 
+identifier names the object most recently bound to it.
 
 \subsection{Operator Expressions}
 Before examining \emd{} expressions that involve operators, we define the
 precedence of the operators used. In Table~\ref{precedences},
 the operators are ordered by increasing
-precedence.  Operators of the same 
+precedence.  Operators of the same
 precedence level are evaluated from left to right.
 
-\begin{table} 
+\begin{table}
 \begin{center}
 \begin{tabular}{||c|l|l||}
     \hline
@@ -50,6 +50,7 @@ precedence level are evaluated from left to right.
             & \kw{nameof}       & Name of an object \\
             & \kw{typeof}       & Type of an object \\
             & \kw{syntactictypeof}       & Compile time type of an expression\\
+            & \kw{receive}       & Obtains a reference to an incoming object \\ & & conforming to the operand\\
     \hline
 \end{tabular}
 \end{center}
@@ -59,7 +60,7 @@ precedence level are evaluated from left to right.
 
 \subsection{Reserved Operators}
 The reserved operators have meanings defined by the language, and may not be
-redefined.  
+redefined.
 
 \begin{quote}\it\begin{tabular}{lcl}
 expression &$::=$& \sseq{expression}{reservedop} \\
@@ -75,7 +76,7 @@ i.e., it evaluates to \kw{true} if the left operand conforms to
 the right operand (cf. Section~\ref{conformity}).
 
 The operator \kw{and} is a {\em conditional and} and evaluates as
-follows: if the left operand evaluates to 
+follows: if the left operand evaluates to
 \kw{false}, the result is \kw{false};
 otherwise, the result is the value of the right expression. The
 operator \kw{or} is a {\em conditional or} and evaluates as follows:
@@ -90,14 +91,15 @@ expression &$::=$& \kw{locate} expression \\
 & $|$ & \kw{codeof} expression \\
 & $|$ & \kw{nameof} expression \\
 & $|$ & \kw{typeof} expression \\
-& $|$ & \kw{syntactictypeof} expression 
+& $|$ & \kw{syntactictypeof} expression \\
+& $|$ & \kw{receive} expression
 \end{tabular}\end{quote}
 \kw{isfixed} {\it e\/} evaluates to \kw{true} if {\it e\/}
 is currently fixed at a site, otherwise it evaluates to \kw{false}.
 \kw{islocal} {\it e\/} evaluates to true if {\it e\/} is currently on the
 local node, and \kw{false} otherwise.
 \kw{locate} {\it e\/} evaluates to an object (of type \tn{Node}) that
-gives a location of the operand object during the execution of this 
+gives a location of the operand object during the execution of this
 expression. This is
 explained in detail in Section~\ref{locatics}.
 
@@ -106,7 +108,7 @@ type \tn{Condition} and returns \kw{true} if at least one process
 is suspended on the operand condition, and
 \kw{false} otherwise (cf. Section~\ref{objects}).
 
-\kw{codeof}, \kw{nameof}, and \kw{typeof} 
+\kw{codeof}, \kw{nameof}, and \kw{typeof}
 \label{operator typeof}
 return the concrete type object (a \tn{ConcreteType}), the name (a \tn{String}), or
 the type (a \tn{Signature}) of any object (including \kw{nil}).
@@ -114,6 +116,11 @@ the type (a \tn{Signature}) of any object (including \kw{nil}).
 expression (cf. Section~\ref{syntactictypeof}).  See
 Appendix~\ref{builtin objects}
 for a description of these builtin types.
+
+\kw{receive}
+blocks until an object that conforms to the abstract type evaulated from the
+following expression is moved onto the local node, and returns a reference to
+that object.
 
 \subsection{Invocations}
 \begin{quote}\it\begin{tabular}{lcl}
@@ -124,7 +131,7 @@ expression.  Invocations are discussed in Section~\ref{operations}.
 
 \subsection{Other Operators}
 All other operators are translated into object invocations.  Each occurrence
-of a unary operator is 
+of a unary operator is
 translated into an invocation of the operand with the invocation name being
 the name of the operator and with no arguments.  Each occurrence of a binary
 operator is translated into an invocation of the left operand with the
@@ -145,7 +152,7 @@ invocation of get and set operations more convenient.
   fieldSelection & $::=$ & expression \terminal{\$} identifier \\
 \end{tabular}\end{quote}
 
-In an expression context (as an r-value) {{\it a}\${\it f}} is translated as 
+In an expression context (as an r-value) {{\it a}\${\it f}} is translated as
 {{\it a\/}.{\it getF}} while in an assignment context (as an l-value) {{\it
 a}\${\it f} \assign{} c}  is translated as {a.setF\/\LB{}c\/\RB{}}.  The get operation
 always takes no arguments and returns one result, while the set operation
@@ -164,7 +171,7 @@ subscripting expression syntax:
 The variable number of expressions inside the square brackets may be used to
 support subscriptable values of higher dimension, or to select ranges of
 values.  Such interpretation is up to the implementor of the subscripted
-object.  
+object.
 
 In an expression context (as an r-value) {{\it a\/}\/\LB{\it b, c, d}\/\RB}
 is translated as {{\it a\/}.{\it getElement}\LB{}{\it b, c, d}\RB}, while in
@@ -185,4 +192,3 @@ not conform to. In other words, this expression permits the user to narrow
 or widen the type of an object.  The restrict expression is similar, except
 that it is later impossible to widen the type of the resulting object
 reference to a type wider than that denoted by {\it typeExpression}.
-

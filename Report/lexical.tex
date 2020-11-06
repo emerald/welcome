@@ -1,11 +1,11 @@
 \section{Notation and Vocabulary}
 \label{lexical considerations}
-This report uses a slight variation of the commonly-used {\em Extended Backus 
+This report uses a slight variation of the commonly-used {\em Extended Backus
 Naur Form} (EBNF) to express the syntax of \emd{}.
 Terminal symbols in \emd{} (i.e. symbols in its vocabulary)
 are shown in the syntax descriptions in typewriter font as {\tt ,} or
 {\tt "}, or in bold font for reserved words like
-\kw{loop}.  
+\kw{loop}.
 Non-terminal symbols are denoted by italicized English words
 that intuitively illustrate the meaning of the syntactic constructs.
 In EBNF, alternatives are indicated by $|$:
@@ -41,11 +41,11 @@ hexdigit           & $::=$  & digit $|$ \terminal{a} $|$ \terminal{b} $|$ \termi
 \end{tabular}\end{quote}
 Numeric literals without a decimal point (\terminal{.}) denote objects of
 the predefined type \tn{Integer}; those with decimal points
-denote objects of the predefined type \tn{Real}.  
+denote objects of the predefined type \tn{Real}.
 Literals beginning with \terminal{0x} are
 interpreted in hexadecimal;
 literals beginning with
-\terminal{0} are interpreted in octal, 
+\terminal{0} are interpreted in octal,
 For example, 12, 014, and 0xc
 are \tn{Integer} literals representing the decimal number 12, and 2.1 and
 215.45 are \tn{Real} literals.
@@ -54,7 +54,7 @@ are \tn{Integer} literals representing the decimal number 12, and 2.1 and
 \label{Boolean literals}
 \begin{quote}\it\begin{tabular}{lcl}
 booleanLiteral 	& $::=$  & \kw{true} $|$ \kw{false}
-\end{tabular} \end{quote} 
+\end{tabular} \end{quote}
 The reserved words \kw{true} and \kw{false} refer to the two objects of
 builtin type \tn{Boolean}.
 
@@ -62,7 +62,7 @@ builtin type \tn{Boolean}.
 \label{Nil literals}
 \begin{quote}\it\begin{tabular}{lcl}
 nilLiteral 	& $::=$  & \kw{nil}
-\end{tabular} \end{quote} 
+\end{tabular} \end{quote}
 The reserved word \kw{nil} refers to the distinguished nil object, whose
 type is \tn{None}.
 
@@ -86,10 +86,10 @@ The character \mybackslash{} permits the introduction of
 escape sequences for the entry of special characters.
 \mybackslash\mybackslash{} generates a single \mybackslash{} character,
 \mybackslash\myuparrow{}C where C is any character
-generates a control character in an implementation-defined 
+generates a control character in an implementation-defined
 manner\footnote{
 In ASCII implementations, \mybackslash\myuparrow{}C
-generates the ascii character formed by turning off the upper 2 bits 
+generates the ascii character formed by turning off the upper 2 bits
 in the character code for C.  Thus, \mybackslash\myuparrow{}J
 is the newline character, and \mybackslash\myuparrow{}@ is the
 null character.  The exception is the delete character, (octal 177) which is
@@ -102,8 +102,8 @@ its numerical (octal) equivalent.
 character.
 
 Examples of characters are \charlit{A}, \charlit{r},
-\charlit{\mybackslash\myuparrow{}C},  
-\charlit{\mybackslash\mybackslash}, 
+\charlit{\mybackslash\myuparrow{}C},
+\charlit{\mybackslash\mybackslash},
 \charlit{\mybackslash\myuparrow{}?},
 \charlit{\mybackslash\myuparrow{}J}, \charlit{\mybackslash{}n} and
 \charlit{\mybackslash{}012};
@@ -121,7 +121,7 @@ Examples of strings are {\tt "Emerald City"},
 \begin{quote}\it\begin{tabular}{lcl}
 vectorLiteral &$::=$&
     \terminal{\lc} \sseq{expression}{\terminal{,}} \opt{\terminal{:} typeExpression}
-    \terminal{\rc} 
+    \terminal{\rc}
 \end{tabular}\end{quote}
 A vector literal is a sequence of expressions enclosed in curly braces,
 representing immutable (read-only) vectors.  The type of the expression is
@@ -145,7 +145,7 @@ constructors) or one of the syntactic extensions which translate to an
 object constructor, which include class constructors, record constructors
 and enumeration constructors.  These are discussed in Section \ref{objects}.
 \item[Types]~\\
-Emerald types are created using type constructors, which are described in 
+Emerald types are created using type constructors, which are described in
 \label{type literals}
 Section \ref{type constructors}.
 \end{description}
@@ -155,7 +155,7 @@ An \emd{} identifier is a non-empty sequence of letters, digits and the
 underscore character ``{\myunderscore}'', beginning with a letter
 or the underscore character. Identifiers are case-insensitive and
 significant up to 64 characters in length.
-Identifiers are used as reserved words, 
+Identifiers are used as reserved words,
 constant names, variable names, operation
 names (cf. Section~\ref{operators}),
 parameter names, and local names of objects.
@@ -165,7 +165,7 @@ parameter names, and local names of objects.
 Reserved identifiers are identifiers that have been reserved for special
 use and may not be used otherwise as identifiers.
 Reserved identifiers are further subdivided into keywords
-and literals. 
+and literals.
 \subsection*{Literals}
 The reserved literal identifiers are:
 \setlength{\boxlength}{1.39in}
@@ -181,7 +181,7 @@ The reserved literal identifiers are:
 \label{keywords}
 \emd{} keywords are used to delimit language
 constructs; for example, the keywords \kw{loop} and \kw{end}~\kw{loop} are
-used to enclose a loop body. 
+used to enclose a loop body.
 
 The reserved keywords are:
 \begin{quote}\sloppy
@@ -231,6 +231,7 @@ The reserved keywords are:
 \bkw{or}
 \bkw{primitive}
 \bkw{process}
+\bkw{receive}
 \bkw{record}
 \bkw{recovery}
 \bkw{refix}
@@ -267,7 +268,7 @@ operatorCharacter & $::=$ & \bcbox{!} $|$ \bcbox{\char '043} $|$ \bcbox{\char '0
 operator & $::=$ & \seq{operatorCharacter}
 \end{tabular}\end{quote}
 An operator is a non-empty sequence of operator characters.
-Operators are used as punctuation and as operation names.  
+Operators are used as punctuation and as operation names.
 
 \subsection*{Reserved Operators}
 \label{reserved operators}
@@ -279,8 +280,8 @@ punctuation.
 \subsection*{Expression operators}
 Expression operators are used within expressions.  The reserved
 expression operators are\footnote{The symbols typeset as \assign, \returns,
-\conforms{}, and \matches{} are typed using 
- {\tt <-}, 
+\conforms{}, and \matches{} are typed using
+ {\tt <-},
 {\tt ->}, {\tt *>}, and {\tt *>} respectively.  The potential ambiguity
 caused by using the same symbol for conforms and matches is resolved by
 context.}:
@@ -301,7 +302,7 @@ punctuation operators are:
 \subsection{Separators}
 Separators are sequences consisting of only spaces, tabs, and newlines; they
 are used to separate consecutive language tokens.
-Consecutive identifiers, operators  and/or numeric literals must be separated 
+Consecutive identifiers, operators  and/or numeric literals must be separated
 by at least one separator.
 
 \subsection{Comments}
