@@ -66,7 +66,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             index <- 0x06
         elseif s = "syntactictypeof" then
             index <- 0x09
-        elseif s = "receive" then
+        elseif s = "welcome" then
             index <- 0x07
         end if
         r <- builtinlit.create[self$ln, index].getInstCT
@@ -107,7 +107,7 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             index <- 0x06
         elseif s = "syntactictypeof" then
             index <- 0x09
-        elseif s = "receive" then
+        elseif s = "welcome" then
             index <- 0x07
         end if
         r <- builtinlit.create[self$ln, index].getInstAT
@@ -170,11 +170,11 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             expat.generate[bc]
             bc.popSize
             bc.finishExpr[4, 0x1809, 0x1609]
-        elseif s = "receive" then
+        elseif s = "welcome" then
             bc.pushSize[4]
             exp.execute.asType.generate[bc]
             bc.popSize
-            bc.addCode["RECV"]
+            bc.addCode["WELCOME"]
             bc.finishExpr[4, 0x1807, 0x1607]
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
@@ -184,11 +184,11 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
     export op assignTypes
         const s : String <- xop$name
         const env : EnvironmentType <- Environment$env
-        if s = "receive" then
+        if s = "welcome" then
             var theType : Tree
 
             if exp$isNotManifest then
-                env.SemanticError[self$ln, "Type in receive statement must be manifest", NIL]
+                env.SemanticError[self$ln, "Type in welcome expression must be manifest", NIL]
             else
                 theType <- self$exp
                 if env$traceassignTypes then env.printf["Type is %S on line %d\n", { theType, self$ln }] end if
@@ -202,10 +202,10 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
 
             if thetype == nil then
                 if env$traceassignTypes then
-                    env.printf["Couldn't find a type in receive statement on line %d\n",
+                    env.printf["Couldn't find a type in welcome expression on line %d\n",
                     { self$ln}]
                 end if
-                env.SemanticError[ln, "Non type in receive statement", nil]
+                env.SemanticError[ln, "Non type in welcome expression", nil]
             end if
 
             FTree.assignTypes[self]

@@ -113,10 +113,10 @@ const scanner <- immutable object scanner
     const KVIEW <- 107
     const KVISIT <- 108
     const KWAIT <- 109
-    const KWHEN <- 110
-    const KWHILE <- 111
-    const KWHERE <- 112
-    const KRECEIVE <- 113
+    const KWELCOME <- 110
+    const KWHEN <- 111
+    const KWHILE <- 112
+    const KWHERE <- 113
     const tokenNameTable <- {
     "end of file",
     "identifier",
@@ -228,13 +228,13 @@ const scanner <- immutable object scanner
     "view",
     "visit",
     "wait",
+    "welcome",
     "when",
     "while",
-    "where",
-    "receive"
+    "where"
     }
     const firstKeyword <- OAND
-    const lastKeyword  <- KRECEIVE
+    const lastKeyword  <- KWHERE
 
     const token <- integer
 
@@ -619,4 +619,3 @@ const scanner <- immutable object scanner
         end aScanner
     end create
 end scanner
-

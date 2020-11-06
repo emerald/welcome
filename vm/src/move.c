@@ -209,13 +209,6 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	}
 	TRACE(rinvoke, 4, ("Move request done"));
 	inhibit_gc--;
-
-	int i;
-	PRINTF("received an obj with concrete type: %s\n", ct->d.name);
-	for(i = 0; i < ct->d.opVector->d.items; i++) {
-		if((int)(ct->d.opVector->d.data[i]) != 0x80000000)
-			PRINTF("\tObject method: %s\n", ct->d.opVector->d.data[i]->d.name);
-	}
 }
 
 void findActivationsInObject(Object, Stream);

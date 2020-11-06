@@ -1860,18 +1860,11 @@ nextInstruction: ;
 #endif
     }
         break;
-    case RECV:
-        printf("Receive not yet implemented. Statement ignored.\n");
-        AbstractType toReceive;
-
-		POP(AbstractType, toReceive);
-        PRINTF("type: %s\n", toReceive->d.name);
+    case WELCOME:
+        printf("Welcome not yet implemented. Statement ignored.\n");
         /*
-            1. Blokke
-            2. Ha tak i pcb fra en annen prosess
-            3. Finne koden for når obj kommer inn
-            4. Gjøre om koden
-            5. 
+        AbstractType toWelcome;
+        POP(AbstractType, toWelcome);
         */
         break;
       default:
@@ -2077,7 +2070,7 @@ struct ite {
   { "GETGAGGLEMEMBER", "", 182 } ,
   { "GETGAGGLEELEMENT", "", 183 } ,
   { "GETGAGGLESIZE", "", 184 } ,
-  { "RECV", "", 185 } ,
+  { "WELCOME", "", 185 } ,
 };
 
 void disassemble(unsigned int ptr, int len, FILE *f)

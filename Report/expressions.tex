@@ -50,7 +50,8 @@ precedence level are evaluated from left to right.
             & \kw{nameof}       & Name of an object \\
             & \kw{typeof}       & Type of an object \\
             & \kw{syntactictypeof}       & Compile time type of an expression\\
-            & \kw{receive}       & Obtains a reference to an incoming object \\ & & conforming to the operand\\
+            & \kw{welcome}      & Obtains a reference to an incoming object \\
+            &                   & conforming to the operand\\
     \hline
 \end{tabular}
 \end{center}
@@ -92,7 +93,7 @@ expression &$::=$& \kw{locate} expression \\
 & $|$ & \kw{nameof} expression \\
 & $|$ & \kw{typeof} expression \\
 & $|$ & \kw{syntactictypeof} expression \\
-& $|$ & \kw{receive} expression
+& $|$ & \kw{welcome} expression
 \end{tabular}\end{quote}
 \kw{isfixed} {\it e\/} evaluates to \kw{true} if {\it e\/}
 is currently fixed at a site, otherwise it evaluates to \kw{false}.
@@ -117,7 +118,7 @@ expression (cf. Section~\ref{syntactictypeof}).  See
 Appendix~\ref{builtin objects}
 for a description of these builtin types.
 
-\kw{receive}
+\kw{welcome}
 blocks until an object that conforms to the abstract type evaulated from the
 following expression is moved onto the local node, and returns a reference to
 that object.

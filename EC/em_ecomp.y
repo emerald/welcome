@@ -132,10 +132,10 @@ const env <- view environment as MYENVT
 %token  KVIEW /*  "view" */
 %token  KVISIT /*  "visit" */
 %token  KWAIT /*  "wait" */
+%token  KWELCOME /*  "welcome" */
 %token  KWHEN /*  "when" */
 %token  KWHILE /*  "while" */
 %token  KWHERE /*  "where" */
-%token  KRECEIVE /*  "receive" */
 %right  KAS KTO  /* precedence, lowest first */
 %left  OOR KOR
 %left  OAND KAND
@@ -831,8 +831,8 @@ expression :
         { $$ <- unaryexp.create[env$ln,opname.literal["islocal"],$2]}
     |   KISFIXED expression
         { $$ <- unaryexp.create[env$ln,opname.literal["isfixed"],$2]}
-    |   KRECEIVE expression
-        { $$ <- unaryexp.create[env$ln,opname.literal["receive"],$2]}
+    |   KWELCOME expression
+        { $$ <- unaryexp.create[env$ln,opname.literal["welcome"],$2]}
 	;
 expressionZero :
 		alpha { $$ <- $1 }

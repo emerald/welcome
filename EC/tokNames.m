@@ -109,8 +109,8 @@ const tokenNameTable <- {
   "view",
   "visit",
   "wait",
+  "welcome",
   "when",
   "while",
-  "where",
-  "receive"
+  "where"
 }
