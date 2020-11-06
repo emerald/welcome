@@ -17,3 +17,12 @@ test/*
 vm/src/vm.h.orig
 vm/src/vm_i.h.orig
 ccalls/xsed
+
+# Report
+Report/*.aux
+Report/*.bbl
+Report/*.blg
+Report/*.dvi
+Report/*.log
+Report/*.toc
+Report/Report.pdf
