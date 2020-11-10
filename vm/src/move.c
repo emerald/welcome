@@ -217,7 +217,8 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 			PRINTF("\tObject method: %s\n", ct->d.opVector->d.data[i]->d.name);
 	}
 	SQueuePrint(welcome_q);
-	printf("Not segfault\n");
+	void *s = SQueueRemove(welcome_q);
+	if(s) makeReady((State*)s);
 }
 
 void findActivationsInObject(Object, Stream);

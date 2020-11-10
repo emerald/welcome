@@ -1861,23 +1861,23 @@ nextInstruction: ;
     }
         break;
     case WELCOME:{
-        // TRACE(process, 3, ("Blocking synchronizing process %#x", state));
-        // AbstractType welcometype;
-        // void *s;
-        //
-        // // POP(AbstractType, welcometype);
-        // SYNCH();
-        //
-        // // SQueuePrint(m->waiting);
-        // // printf("m->wa = %p\n", m->waiting);
-        // // s = (void*)SQueueRemove(m->waiting);
-        // // printf("s = %p\n", s);
-        // // if(s) state = (State*)s;
-        // // UNSYNCH();
-        // // printf("%p\n", m->waiting);
-        // // if (!m->waiting) m->waiting = SQueueCreate();
-        // SQueueInsertFront(welcome_q, state);
-        //return 1;
+        TRACE(process, 3, ("Blocking synchronizing process %#x", state));
+        AbstractType welcometype;
+        void *s;
+
+        // POP(AbstractType, welcometype);
+        SYNCH();
+
+        // SQueuePrint(m->waiting);
+        // printf("m->wa = %p\n", m->waiting);
+        // s = (void*)SQueueRemove(m->waiting);
+        // printf("s = %p\n", s);
+        // if(s) state = (State*)s;
+        // UNSYNCH();
+        // printf("%p\n", m->waiting);
+        // if (!m->waiting) m->waiting = SQueueCreate();
+        SQueueInsertFront(welcome_q, state);
+        return 1;
     }
         break;
       default:
