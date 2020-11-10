@@ -14,6 +14,7 @@ int obsoletesys(struct State *state) {
 	return 1;
 }
 
+SQueue welcome_q;
 int codeptrextra;
 Object BuiltinGlobalArray[NUMBUILTINS][NUMTAGS];
 long totalbytecodes;
@@ -67,4 +68,5 @@ int (*sysfuncs[JSYS_OPS])(struct State *) = {
 void initGlobals() {
 	TrueString = CreateString("true");
 	FalseString = CreateString("false");
+	welcome_q = SQueueCreate();
 }

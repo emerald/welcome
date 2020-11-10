@@ -216,6 +216,8 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		if((int)(ct->d.opVector->d.data[i]) != 0x80000000)
 			PRINTF("\tObject method: %s\n", ct->d.opVector->d.data[i]->d.name);
 	}
+	SQueuePrint(welcome_q);
+	printf("Not segfault\n");
 }
 
 void findActivationsInObject(Object, Stream);
