@@ -31,7 +31,7 @@ while Queues use addUpper and removeLower.
 \end{desc}
 
 \noindent The object resulting from {\it \tn{Array}.of\/\LB{}T\/\RB{}} (with
-type aNewArrayCreatorType) 
+type aNewArrayCreatorType)
 is a creator as well as a type.  It is immutable and has the following
 interface:
 
@@ -46,7 +46,7 @@ interface:
 \end{desc}
 
 \noindent Objects with type {\it \tn{Array}.of\/\LB{}T\/\RB{}} have the
-following interface, named aNewArrayType: 
+following interface, named aNewArrayType:
 
 \begin{desc}
   \item[\kw{function}  getElement\/\LB{}index \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}T\/\RB{}]~\\
@@ -67,25 +67,25 @@ following interface, named aNewArrayType:
     Set the elements indexed starting at {\it lb} for {\it length} elements,
     so that for each such i in that range\CO{}
     self\/\LB{}i\/\RB{} $==$ a\/\LB{}i\/\RB{}. Fail if
-    lb or lb + length - 1 is out of range. 
+    lb or lb + length - 1 is out of range.
   \item[\kw{operation} setSlice\/\LB{}lb \CO{} \tn{Integer}, length \CO{}
   \tn{Integer}, a \CO{} Sequence.of\/\LB{}T\/\RB{}\/\RB{}]~\\
     Same as setElement.
   \item[\kw{operation} slideTo\/\LB{}newlb \CO{} \tn{Integer}\/\RB{}]~\\
     Change the valid indices for self so that the new lowerbound is {\it newlb}.
   \item[\kw{operation} addUpper\/\LB{}value \CO{} T\/\RB{}]~\\
-    Extend the set of valid indices, changing ub to 
+    Extend the set of valid indices, changing ub to
     ub $+$ 1, and setting the element indexed by the new
     ub to be {\it value}.
   \item[\kw{operation} removeUpper \returns{} \/\LB{}T\/\RB{}]~\\
-    Return the element indexed by ub, after contracting 
+    Return the element indexed by ub, after contracting
     the set of valid indices to lb $\leq$ i $\leq$ ub $-$ 1.
   \item[\kw{operation} addLower\/\LB{}value \CO{} T\/\RB{}]~\\
-    Extend the set of valid indices, changing lb to 
+    Extend the set of valid indices, changing lb to
     lb $-$ 1, and setting
     the element indexed by the new lb to be {\it value}.
   \item[\kw{operation} removeLower \returns{} \/\LB{}T\/\RB{}]~\\
-    Return the element indexed by lb, after contracting 
+    Return the element indexed by lb, after contracting
     the set of valid indices to lb $+$ 1 $\leq$ i $\leq$ ub.
   \item[\kw{function}  empty \returns{} \/\LB{}\tn{Boolean}\/\RB{}]~\\
     Return \kw{true} if lb $==$ ub $+$ 1.
@@ -196,9 +196,9 @@ following interface:
   \item[\kw{function} isalpha \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
     Return \kw{true} if the character appears in the alphabet.
   \item[\kw{function} isupper \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
-    Return \kw{true} if the character is upper case.  
+    Return \kw{true} if the character is upper case.
   \item[\kw{function} islower \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
-    Return \kw{true} if the character is lower case.  
+    Return \kw{true} if the character is lower case.
   \item[\kw{function} isdigit \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
     Return \kw{true} if the character is a decimal digit.
   \item[\kw{function} isxdigit \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
@@ -288,7 +288,7 @@ interface:
 
 \begin{desc}
   \item[\kw{function}  getID \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
-    Return the internal id of the operation.    
+    Return the internal id of the operation.
   \item[\kw{function}  getNArgs \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
     Return the number of arguments to the operation.
   \item[\kw{function}  getNRess \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
@@ -303,7 +303,7 @@ interface:
 \end{desc}
 
 \label{builtin InterpreterState}
-The internal representation of the state of the interpreter.  
+The internal representation of the state of the interpreter.
 InterpreterState is a type with the following interface:
 
 \begin{desc}
@@ -313,7 +313,7 @@ InterpreterState is a type with the following interface:
     fp \CO{} \tn{Integer},
     sb \CO{} \tn{Integer},
     o \CO{} \tn{Any},
-    e \CO{} \tn{Any}\/\RB{} 
+    e \CO{} \tn{Any}\/\RB{}
   \returns{} \/\LB{}InterpreterState\/\RB{}
 \end{desc}
 
@@ -398,17 +398,17 @@ Objects whose type is InStream have the following interface:
     Reads up to one line from the input, placing the characters in the
     provided vector.  Returns the number of characters read.  The vector
     will contain the newline character that caused reading to terminate
-    unless no newline 
+    unless no newline
     character is read before the vector is full.
   \item[\kw{operation} rawRead\/\LB{}VectorOfChar\/\RB{} \returns{} \/\LB{}Integer\/\RB{}]~\\
     Reads from the input placing the characters in the
-    provided vector.  Returns the number of characters read.  
+    provided vector.  Returns the number of characters read.
 \end{desc}
 
 \subsection{Integer}
 \label{builtin Integer}
 Conversion between integers and reals is accomplished by the asReal
-operation on Integers, and the asInteger operation on Reals.  
+operation on Integers, and the asInteger operation on Reals.
 The immutable object Integer has the following interface:
 
 \begin{desc}
@@ -454,8 +454,8 @@ interface.  For those operations that manipulate bits, bit numbering starts at
   \item[\kw{function} \opd{$|$} \/\LB{}other \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
     Return the bitwise or of self and {\it other}.
   \item[\kw{function} setBit\/\LB{}o \CO{} \tn{Integer}, v \CO{} \tn{Boolean}\/\RB{} \returns{} \/\LB{}r \CO{} \tn{Integer}\/\RB{}]~\\
-    Return an \tn{Integer} like self except in the {\it o}'th bit position, 
-    where it has the bit {\it v}.  
+    Return an \tn{Integer} like self except in the {\it o}'th bit position,
+    where it has the bit {\it v}.
   \item[\kw{function} getBit\/\LB{}o \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}r \CO{} \tn{Boolean}\/\RB{}]~\\
     Return the bit in {\it o}'th bit position.
   \item[\kw{function} setBits\/\LB{}o \CO{} \tn{Integer}, l \CO{} \tn{Integer}, v \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}r \CO{} \tn{Integer}\/\RB{}]~\\
@@ -471,7 +471,7 @@ interface.  For those operations that manipulate bits, bit numbering starts at
 The nodeEventHandler entries allow appropriate operations to be
 invoked when the node detects changes in the network topology.  The
 operations that query network topology use the auxiliary types
-NodeList and NodeListElement which are described below.  
+NodeList and NodeListElement which are described below.
 The object Node is a type with the following interface:
 
 \begin{desc}
@@ -507,9 +507,14 @@ locations, and have the following interface:
     the target node is executing.  This is not currently implemented.
   \item[\kw{operation} setNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
     Register {\it h} as an additional handler to receive notification when
-    nodes come up or do down.  This is not currently implemented.
+    nodes come up or do down.
   \item[\kw{operation} removeNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
-    Unregister h as a node event handler.  This is not currently implemented.
+    Unregister h as a node event handler.
+  \item[\kw{operation} setNearbyNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
+    Register {\it h} as an additional handler to receive notification when
+    nearby nodes are discovered.
+  \item[\kw{operation} removeNearbyNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
+    Unregister h as a nearby node event handler. 
   \item[\kw{operation} getStdin \returns{} \/\LB{}InStream\/\RB{}]~\\
     Return an InStream representing the target \tn{Node}'s standard input.
   \item[\kw{operation} getStdout \returns{} \/\LB{}OutStream\/\RB{}]~\\
@@ -537,7 +542,7 @@ provide information about a node:
   \item[\kw{function} getLNN \returns{} \/\LB{}\tn{Integer}\/\RB{}]
 \end{desc}
 
-\noindent NodeList is 
+\noindent NodeList is
 {\it ImmutableVector.of\/\LB{}NodeListElement\/\RB{}}.
 
 Directory is the type of name service directories.  Directory is a type with
@@ -593,12 +598,12 @@ is a type with the following interface:
     Mode is as in fopen in C, and must begin with `w' or `a'.
     The operation fails if the file cannot be opened in the given mode.
   \item[\kw{operation} create\/\LB{}file \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}OutStream\/\RB{}]~\\
-    Return a new output stream attached to the given file descriptor. 
+    Return a new output stream attached to the given file descriptor.
 \end{desc}
 
 \noindent Objects with type OutStream have the following interface.
 All of the output operations on OutStream objects fail if the requested
-operation cannot be performed.  
+operation cannot be performed.
 
 \begin{desc}
   \item[\kw{operation} putChar\/\LB{}c \CO{} \tn{Character}\/\RB{}]~\\
@@ -685,12 +690,12 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=\+\kill%
 \end{tabbing}\end{minipage}}
 
 \label{builtin SequenceOfAny}
-SequenceOfAny is Sequence of Any.  
+SequenceOfAny is Sequence of Any.
 Vector.of[Any], ImmutableVector.of[Any], and Array.of[Any]
 all conform to SequenceOfAny.
 
 \label{builtin SequenceOfCharacter}
-SequenceOfCharacter is Sequence of Character.  
+SequenceOfCharacter is Sequence of Character.
 Vector.of[Character], ImmutableVector.of[Character], and Array.of[Character]
 all conform to SequenceOfCharacter.
 
@@ -710,7 +715,7 @@ typeobject constructor that was used in the creation of the signature.
     Return \kw{true} if the typeobject is a type variable which resulted
     from a for all or such that clause.
   \item[\kw{function} getOps \returns{} \/\LB{}AOpVector\/\RB{}]~\\
-    Return a list of the operations in the typeobject.      
+    Return a list of the operations in the typeobject.
   \item[\kw{function} getName \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Return the name of the typeobject.
   \item[\kw{function} getFileName \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
@@ -726,7 +731,7 @@ AOpVector is ImmutableVector.of[AOpVectorE].
 
 \label{builtin AOpVectorE}
 An AOpVectorE describes an operation in a Signature.  AOpVectorE is a type with
-the following interface: 
+the following interface:
 
 \begin{desc}
   \item[\kw{operation} create\/\LB{}]~\\
@@ -754,7 +759,7 @@ interface:
   \item[\kw{function}  getName \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Return the name of the operation.
   \item[\kw{function}  getArguments \returns{} \/\LB{}AParamList\/\RB{}]~\\
-    Return a list of the argument types.    
+    Return a list of the argument types.
   \item[\kw{function}  getResults   \returns{} \/\LB{}AParamList\/\RB{}]~\\
     Return a list of the result types.
 \end{desc}
@@ -767,7 +772,7 @@ The object String is a type and has the following interface:
 \begin{desc}
   \item[\kw{operation} Literal\/\LB{}rep \CO{} Sequence.of\/\LB{}Character\/\RB{}, offset \CO{} \tn{Integer}, len \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Return a \tn{String} with the characters from the given sequence of
-    characters. 
+    characters.
   \item[\kw{operation} FLiteral\/\LB{}rep \CO{} VectorOfChar, offset \CO{} \tn{Integer}, len \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Same as literal, but with a more restrictive argument type (it must be a
     \tn{Vector}), which makes the implementation more efficient.
@@ -795,7 +800,7 @@ interface:
     Return the length of the string.
   \item[\kw{function} \opd{$|$$|$} \/\LB{}more \CO{} \tn{String}\/\RB{} \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Return the result of concatenating the string {\it more} at the end of
-    self. 
+    self.
   \item[\kw{function} asString \returns{} \/\LB{}\tn{String}\/\RB{}]~\\
     Return self.
   \item[\kw{function} lowerbound \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
@@ -810,7 +815,7 @@ interface:
     Return the first position in the string at which the character {\it ch}
     appears.  If ch does not appear, then return \kw{nil}.
   \item[\kw{function} rindex\/\LB{}ch \CO{} \tn{Character}\/\RB{} \returns{}
-	  \/\LB{}r \CO{} \tn{Integer}\/\RB{}]~\\ 
+	  \/\LB{}r \CO{} \tn{Integer}\/\RB{}]~\\
     Return the last position in the string at which the character {\it ch}
     appears.  If ch does not appear, then return \kw{nil}.
   \item[\kw{function} span\/\LB{}s \CO{} \tn{String}\/\RB{} \returns{} \/\LB{}r \CO{} \tn{Integer}\/\RB{}]~\\
@@ -841,17 +846,17 @@ interface:
 \label{builtin Time}
 Times represent times and dates.  They are stored as a number of
 seconds (since Jan 1, 1970 when interpreted as dates) and a number of
-microseconds.  They can be 
+microseconds.  They can be
 used as either dates or times, and the standard arithmetic operations
 are defined on them (where they make sense).  The object Time is a type
-and has the following interface: 
+and has the following interface:
 
 \begin{desc}
   \item[\kw{operation} create\/\LB{}seconds \CO{} \tn{Integer}, microseconds \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}Time\/\RB{}]~\\
     Create a new time object with the given values for its seconds and
     microseconds fields.
 \end{desc}
-    
+
 \noindent Objects with type Time are immutable and have the following
 interface:
 
@@ -892,7 +897,7 @@ mutable vectors.  Vectors provide the most
 primitive mechanism for acquiring indexable storage.  The builtin
 object Array is implemented entirely in Emerald, using the facilities
 offered by Vector.  The object Vector is immutable and has the following
-interface: 
+interface:
 
 \begin{desc}
   \item[\kw{function} of\/\LB{}T \CO{} \tn{Type}\/\RB{} \returns{} \/\LB{}aNewVectorCreatorType\/\RB{}]
@@ -905,7 +910,7 @@ is a type with the following interface, named aNewVectorCreatorType:
 \begin{desc}
   \item[\kw{operation} create\/\LB{}length \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}aNewVectorType\/\RB{}]~\\
     Create a new vector of length {\it length}, all of whose elements are
-    \kw{nil}. 
+    \kw{nil}.
 \end{desc}
 
 \noindent Objects with type {\it \tn{Vector}.of\/\LB{}T\/\RB{}} have the
@@ -944,17 +949,17 @@ ImmutableVector is immutable and has the following interface:
   \item[\kw{function} of\/\LB{}T \CO{} \tn{Type}\/\RB{} \returns{} \/\LB{}aNewVectorCreatorType\/\RB{}]\kw{forall} T
 \end{desc}
 
-\noindent The object resulting from 
+\noindent The object resulting from
 {\it \tn{ImmutableVector}.of\/\LB{}T\/\RB{}}
-is a type and a creator with the following interface, named 
-aNewVectorCreatorType: 
+is a type and a creator with the following interface, named
+aNewVectorCreatorType:
 
 \begin{desc}
   \item[\kw{operation} create\/\LB{}length \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}aNewVectorType\/\RB{}]~\\
     Create a new immutable vector of length {\it length}, all of whose
     elements are \kw{nil}.  This is not terribly useful.
   \item[\kw{operation} literal\/\LB{}other \CO{} Sequence.of\/\LB{}T\/\RB{}\/\RB{} \returns{} \/\LB{}aNewVectorType\/\RB{}]~\\
-    Create a new immutable vector, initialized with all of the elements of 
+    Create a new immutable vector, initialized with all of the elements of
     {\it other}.
   \item[\kw{operation} literal\/\LB{}other \CO{} Sequence.of\/\LB{}T\/\RB{}, length \CO{} \tn{Integer}\/\RB{} \returns{} \/\LB{}aNewVectorType\/\RB{}]~\\
     Create a new immutable vector of length {\it length}, initialized with

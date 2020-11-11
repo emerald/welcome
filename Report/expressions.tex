@@ -121,7 +121,8 @@ for a description of these builtin types.
 \kw{welcome}
 blocks until an object that conforms to the abstract type evaulated from the
 following expression is moved onto the local node, and returns a reference to
-that object.
+that object. If the foreign object arrives from a discovered nearby node, the node
+graph of the local node is merged with the node graph of the object's origin.
 
 \subsection{Invocations}
 \begin{quote}\it\begin{tabular}{lcl}
