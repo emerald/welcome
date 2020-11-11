@@ -7,27 +7,48 @@
 #ifndef _EMERALD_WQUEUE_H
 #define _EMERALD_WQUEUE_H
 
-#include "types.h"
-#include "vm_i.h"
+#define E_NEEDS_STRING
 
+#include "types.h"
+#include "storage.h"
+#include "system.h"
+
+extern int conforms(AbstractType a, AbstractType b);
+
+/*
+ * Before using this, one must define the following:
+ *	WQueueDomainType	- a typedef for the domain
+ */
+typedef struct State *WQueueDomainType;
 
 /* kommentar */
  typedef struct WQueueRecord {
-     State *state;
+     WQueueDomainType state;
      AbstractType at;
      struct WQueueRecord *next, *prev;
  } WQueueRecord, *WQueue;
 
 /* kommentar */
-WQueue WQCreate(void);
+WQueue WQueueCreate(void);
 
 /* kommentar */
-void WQDestroy(WQueue q);
+void WQueueDestroy(WQueue q);
 
 /* kommentar */
-void WQInsert(WQueue q, State *s, AbstractType at);
+void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at);
 
 /* kommentar */
-State* WQFindAndRemove(WQueue q, AbstractType at);
+WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at);
+
+/* kommentar */
+void WQueuePrint(WQueue q);
+
+/* Print out String object */
+#define PRINTF(format, str) { 					\
+		char buf[str->d.items + 1]; 			\
+		buf[str->d.items] = 0; 					\
+		memcpy(buf, str->d.data, str->d.items); \
+		printf(format, buf); 					\
+	}
 
 #endif

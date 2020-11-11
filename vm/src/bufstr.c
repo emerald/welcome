@@ -2,6 +2,7 @@
  */
 
 #define E_NEEDS_IOV
+#define E_NEEDS_STRING
 #include "system.h"
 
 #include "assert.h"

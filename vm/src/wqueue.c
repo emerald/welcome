@@ -5,22 +5,23 @@
  */
 
 #include "wqueue.h"
+#include "vm_i.h"
 
 /* kommentar */
-static WQueueRecord* WQRemoveRecord(WQueueRecord *r) {
+static WQueueRecord* WQueueRemoveRecord(WQueueRecord *r) {
     r->prev->next = r->next;
     r->next->prev = r->prev;
     vmFree((char *)r);
 }
 
 /* kommentar */
-WQueue WQCreate(void) {
+WQueue WQueueCreate(void) {
     WQueue q;
 
 	q = (WQueue) vmMalloc(sizeof(WQueueRecord));
 	if (q == NULL) return NULL;
 
-    q->state = (State *) JNIL;
+    q->state = (WQueueDomainType ) JNIL;
     q->at = (AbstractType) JNIL;
     q->next = q;
     q->prev = q;
@@ -28,7 +29,7 @@ WQueue WQCreate(void) {
 }
 
 /* kommentar */
-void WQDestroy(WQueue q) {
+void WQueueDestroy(WQueue q) {
     WQueueRecord *record;
 
     if (q && !ISNIL(q)) {
@@ -40,31 +41,50 @@ void WQDestroy(WQueue q) {
 }
 
 /* kommentar */
-void WQInsert(WQueue q, State *s, AbstractType at) {
+void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at) {
     WQueueRecord *record;
 
     record = (WQueue) vmMalloc(sizeof(WQueueRecord));
     if (record == NULL) return;
 
+    printf("\n\nINSERTING into wq\n\n");
     record->state = s;
     record->at = at;
     record->next = q->next;
     record->prev = q;
     q->next = record;
+    if (q->prev == q) q->prev = record;
 }
 
 /* kommentar */
-State* WQFindAndRemove(WQueue q, AbstractType at) {
+WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at) {
     WQueueRecord *record;
-    State *s;
+    WQueueDomainType s;
 
     for (record = q->prev; record != q; record = record->prev) {
         if(conforms(at, record->at)) {
             s = record->state;
-            WQRemoveRecord(record);
+            WQueueRemoveRecord(record);
             return s;
         }
     }
 
     return NULL;
+}
+
+/* kommentar */
+void WQueuePrint(WQueue q) {
+    WQueueRecord *record;
+    WQueueDomainType s;
+    int i;
+
+    i = 0;
+    for (record = q->prev; record != q; record = record->prev) i++;
+
+    printf("Printing welcome queue with %d records:\n", i);
+
+    for (record = q->prev; record != q; record = record->prev) {
+        PRINTF("\t- Object %s is welcoming object of type ", record->state->cp->d.name);
+        PRINTF("%s\n", record->at->d.name);
+    }
 }

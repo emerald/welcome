@@ -317,11 +317,4 @@ typedef struct State {
 		pc = state->pc )
 #endif
 
-/* Print out String object */
-#define PRINTF(format, str) { 					\
-		char buf[str->d.items + 1]; 			\
-		buf[str->d.items] = 0; 					\
-		memcpy(buf, str->d.data, str->d.items); \
-		printf(format, buf); 					\
-	}
 

@@ -1865,7 +1865,7 @@ nextInstruction: ;
         AbstractType welcometype;
         void *s;
 
-        // POP(AbstractType, welcometype);
+        POP(AbstractType, welcometype);
         SYNCH();
 
         // SQueuePrint(m->waiting);
@@ -1876,7 +1876,8 @@ nextInstruction: ;
         // UNSYNCH();
         // printf("%p\n", m->waiting);
         // if (!m->waiting) m->waiting = SQueueCreate();
-        SQueueInsertFront(welcome_q, state);
+        WQueueInsert(welcome_q, state, welcometype);
+        WQueuePrint(welcome_q);
         return 1;
     }
         break;

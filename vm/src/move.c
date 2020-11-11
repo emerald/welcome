@@ -147,6 +147,7 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	Stream reply;  StreamByte *buf;
 	Object o;
 	int wasPresent;
+	void *welcomeState;
 
 	anticipateGC(64 * 1024 + 2 * StreamLength(str));
 	TRACE(rinvoke, 3, ("MoveRequest received"));
@@ -210,15 +211,10 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	TRACE(rinvoke, 4, ("Move request done"));
 	inhibit_gc--;
 
-	int i;
-	PRINTF("received an obj with concrete type: %s\n", ct->d.name);
-	for(i = 0; i < ct->d.opVector->d.items; i++) {
-		if((int)(ct->d.opVector->d.data[i]) != 0x80000000)
-			PRINTF("\tObject method: %s\n", ct->d.opVector->d.data[i]->d.name);
+	WQueuePrint(welcome_q);
+	while(welcomeState = WQueueFindAndRemove(welcome_q, ct->d.type)) {
+		makeReady((State*)welcomeState);
 	}
-	SQueuePrint(welcome_q);
-	void *s = SQueueRemove(welcome_q);
-	if(s) makeReady((State*)s);
 }
 
 void findActivationsInObject(Object, Stream);
