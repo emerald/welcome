@@ -7,11 +7,8 @@
 #ifndef _EMERALD_WQUEUE_H
 #define _EMERALD_WQUEUE_H
 
-#define E_NEEDS_STRING
-
 #include "types.h"
 #include "storage.h"
-#include "system.h"
 
 extern int conforms(AbstractType a, AbstractType b);
 

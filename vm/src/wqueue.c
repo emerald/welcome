@@ -4,6 +4,8 @@
  * Written by Olav & Gaute 11.11.2020
  */
 
+#define E_NEEDS_STRING
+#include "system.h"
 #include "wqueue.h"
 #include "vm_i.h"
 
