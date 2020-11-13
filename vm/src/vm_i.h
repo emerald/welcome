@@ -265,7 +265,7 @@ extern int interpret(struct State *);
 
 #define prevOP(xx) ((Object)((u32 *)xx)[-3])
 
-#define NINSTRUCTIONS 185
+#define NINSTRUCTIONS 186
 typedef struct State {
 	u32 firstThing;
 	u32 pc;
