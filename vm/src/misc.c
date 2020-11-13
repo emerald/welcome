@@ -34,6 +34,7 @@ typedef struct CCallDescriptor {
 #define OPOIDTABLESIZE 101
 
 extern void die(void);
+extern void Warning(char *ErrorMessage);
 
 int stackSize = STACKSIZE;
 void   *extraRoots[10];
@@ -1170,7 +1171,7 @@ static void findRootsInStack(State *state, void (*pointers_f)(int, Object *),
 							if (wasCreate) {
 								TRACE(memory, 1, ("Last byte code was CREATE"));
 							}
-							if (!isAllNil(base + sizeFromTemplate(theTemplate),
+							if (!isAllNil((unsigned int*)(base + sizeFromTemplate(theTemplate)),
 							              lstate.sp - base - sizeFromTemplate(theTemplate))) {
 								TRACE(memory, 1, ("Backtrace of process"));
 								showProcess(state, 1);

@@ -20,5 +20,7 @@ extern void WriteOID(OID *oid, Stream theStream);
 extern Stream OpenCheckpointFile(char *cpfile);
 extern void WriteTheCheckpointStream(Stream theStream,
                                      CheckpointData *theContents);
+extern void resetBreakpoints(void);
+extern void setBreakpoints(void);
 
 #endif /* _EMERALD_WRITE_H */

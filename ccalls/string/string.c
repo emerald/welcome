@@ -98,7 +98,7 @@ static void prepare(char bits[256], String t)
     bits[t->d.data[i]] = 1;
   }
 }
-  
+
 int stringSpan( String s, String t)
 {
   char bits[256];
@@ -122,16 +122,17 @@ int stringCSpan( String s, String t)
   }
   return i;
 }
+extern int memcmp(const void *s1, const void *s2, size_t n);
 
 int stringStr(String s, String t)
 {
   int i;
-  
+
   if (t->d.items == 0) return 0;
   for (i = 0; i <= s->d.items - t->d.items; i++) {
-    if (s->d.data[i] == t->d.data[0] && 
+    if (s->d.data[i] == t->d.data[0] &&
 	s->d.data[i + t->d.items - 1] == t->d.data[t->d.items - 1] &&
-	(t->d.items <= 2 || 
+	(t->d.items <= 2 ||
 	 !memcmp(&s->d.data[i+1], &t->d.data[1], t->d.items - 2))) {
       return i;
     }
@@ -147,7 +148,7 @@ void stringTok(String s, String brk, int *startp, int *endp)
   for (start = 0; start < s->d.items; start++) {
     if (!bits[s->d.data[start]]) break;
   }
-  
+
   if (start < s->d.items) {
     for (end = start + 1; end < s->d.items; end++) {
       if (bits[s->d.data[end]]) break;

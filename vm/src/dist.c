@@ -641,7 +641,7 @@ char *NodeString(Node srv) {
 	char *rval;
 
 	rval = buf[i]; i = (i + 1) % 5;
-	sprintf(rval, "%08lx.%04x.%04x", ntohl(srv.ipaddress), srv.port, srv.epoch);
+	sprintf(rval, "%08x.%04x.%04x", ntohl(srv.ipaddress), srv.port, srv.epoch);
 	return rval;
 }
 
