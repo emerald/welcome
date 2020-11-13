@@ -223,7 +223,9 @@ void OpoidsInit(void) {
 			buf.st_size = 65536;
 		}
 		OpNames = (char *) vmMalloc(buf.st_size + 1);
-		read(fd, OpNames, buf.st_size);
+		if (read(fd, OpNames, buf.st_size) < 0) {
+			Warning("Invalid read in OpoidsInit:");
+		}
 
 		NumberOfOps = 0;
 		for (ReadHead = OpNames; ReadHead < OpNames + buf.st_size; ReadHead++) {

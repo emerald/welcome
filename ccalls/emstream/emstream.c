@@ -75,7 +75,7 @@ freeEMStreamBuffer( EMStreamBufferPtr *buf )
 static int trypopen(char *command, int flags)
 {
   int fds[2], pid;
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) < 0) 
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) < 0)
     return -1;
   switch (pid = fork()) {
   case -1:
@@ -87,7 +87,7 @@ static int trypopen(char *command, int flags)
     dup2(fds[1], 1);
     close(fds[0]);
     close(fds[1]);
-    execlp("/bin/sh", "sh", "-c", command, 0);
+    execlp("/bin/sh", "sh", "-c", command, NULL);
     return -1;
     break;
   default:
@@ -149,7 +149,7 @@ streamOpen( int *fail, char *url )
     fd = trypopen(url + nameOffset + 1, openFlags);
   } else {
     /* open the bloody thing */
-    openMode = 
+    openMode =
       O_BINARY |
       ( (openFlags&STREAM_WRITE) ? O_CREAT |
 	( (openFlags&STREAM_APPEND) ? O_APPEND : O_TRUNC ) : 0) |
@@ -232,7 +232,7 @@ streamEos( int *fail, int fd )
     *fail = 1; return -1;
   }
   if( ! streams[fd].eof ) {
-    while( streams[fd].ibuf && 
+    while( streams[fd].ibuf &&
            streams[fd].ibuf->index >= streams[fd].ibuf->max ) {
       freeEMStreamBuffer( &streams[fd].ibuf );
     }
@@ -254,7 +254,7 @@ streamRead( int fd, char *buf, int size )
     if( ! *ibuf ) {
       fillStream( fd );
     } else if( (*ibuf)->max - (*ibuf)->index > size - index ) {
-      memcpy( (void*)(buf+index), (void*)((*ibuf)->buf + 
+      memcpy( (void*)(buf+index), (void*)((*ibuf)->buf +
 		(*ibuf)->index), size - index );
       (*ibuf)->index += size - index; index = size;
     } else {
@@ -336,7 +336,7 @@ streamGetString( int *fail, int fd )
     }
     if( streamRead( fd, buf + index, 1 ) < 1 ) break;
     if( buf[index++] == '\n' ) break;
-  } 
+  }
   buf[index] = '\0';
   TRACE(streams, 1, ("streamGetString( fd=%d ) -> [%dc]", fd, strlen( buf ) ));
   if( index == 0 ) { *fail = 1; }
@@ -465,7 +465,7 @@ void
 streamPutInt( int *fail, int fd, int n, int width )
 {
   char buf[256];
-  
+
   if( ! VERIFY_FD( fd ) ) {
     TRACE(streams, 0,
 	  ("streamPutInt( fd=%d, n=%d, width=%d ) -> EINVAL", fd, n, width ));
