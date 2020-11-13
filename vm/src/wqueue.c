@@ -49,13 +49,12 @@ void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at) {
     record = (WQueue) vmMalloc(sizeof(WQueueRecord));
     if (record == NULL) return;
 
-    printf("\n\nINSERTING into wq\n\n");
     record->state = s;
     record->at = at;
     record->next = q->next;
     record->prev = q;
     q->next = record;
-    if (q->prev == q) q->prev = record;
+    record->next->prev = record;
 }
 
 /* kommentar */
