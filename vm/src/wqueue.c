@@ -9,14 +9,14 @@
 #include "wqueue.h"
 #include "vm_i.h"
 
-/* kommentar */
+/* Helper function for removing an element from the queue */
 static WQueueRecord* WQueueRemoveRecord(WQueueRecord *r) {
     r->prev->next = r->next;
     r->next->prev = r->prev;
     vmFree((char *)r);
 }
 
-/* kommentar */
+/* Create a new queue */
 WQueue WQueueCreate(void) {
     WQueue q;
 
@@ -30,7 +30,7 @@ WQueue WQueueCreate(void) {
     return q;
 }
 
-/* kommentar */
+/* Destroy queue */
 void WQueueDestroy(WQueue q) {
     WQueueRecord *record;
 
@@ -42,7 +42,7 @@ void WQueueDestroy(WQueue q) {
     }
 }
 
-/* kommentar */
+/* Create a list element of s and at and insert it into q */
 void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at) {
     WQueueRecord *record;
 
@@ -57,7 +57,11 @@ void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at) {
     record->next->prev = record;
 }
 
-/* kommentar */
+/*
+ * Search for an element with an abstract type conforming to the at parameter
+ * and remove it. The state of the element is returned, or NULL if none was
+ * found.
+ */
 WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at) {
     WQueueRecord *record;
     WQueueDomainType s;
@@ -73,17 +77,17 @@ WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at) {
     return NULL;
 }
 
-/* kommentar */
+/* Print information on the content of the queue (for debugging)  */
 void WQueuePrint(WQueue q) {
     WQueueRecord *record;
     WQueueDomainType s;
     int i;
 
+    /* Find length of q */
     i = 0;
     for (record = q->prev; record != q; record = record->prev) i++;
 
     printf("Printing welcome queue with %d records:\n", i);
-
     for (record = q->prev; record != q; record = record->prev) {
         PRINTF("\t- Object %s is welcoming object of type ", record->state->cp->d.name);
         PRINTF("%s\n", record->at->d.name);

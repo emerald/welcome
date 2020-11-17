@@ -147,7 +147,8 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	Stream reply;  StreamByte *buf;
 	Object o;
 	int wasPresent;
-	void *welcomeState;
+	State *welcomeState;
+	u32 sp;
 
 	anticipateGC(64 * 1024 + 2 * StreamLength(str));
 	TRACE(rinvoke, 3, ("MoveRequest received"));
@@ -211,9 +212,12 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	TRACE(rinvoke, 4, ("Move request done"));
 	inhibit_gc--;
 
-	WQueuePrint(welcome_q);
-	while(welcomeState = WQueueFindAndRemove(welcome_q, ct->d.type)) {
-		makeReady((State*)welcomeState);
+	while(welcomeState = (State *) WQueueFindAndRemove(welcome_q, ct->d.type)) {
+		sp = welcomeState->sp;
+		PUSH(Object, o);
+		PUSH(ConcreteType, CODEPTR(o->flags));
+		welcomeState->sp = sp;
+		makeReady(welcomeState);
 	}
 }
 

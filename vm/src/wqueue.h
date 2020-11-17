@@ -18,29 +18,35 @@ extern int conforms(AbstractType a, AbstractType b);
  */
 typedef struct State *WQueueDomainType;
 
-/* kommentar */
+/*
+ * The welcome queue is a doubly linked list of states waiting for objects
+ * conforming to the specified abstract type to be moved onto the local node.
+ */
  typedef struct WQueueRecord {
      WQueueDomainType state;
      AbstractType at;
      struct WQueueRecord *next, *prev;
  } WQueueRecord, *WQueue;
 
-/* kommentar */
+/* Create a new queue */
 WQueue WQueueCreate(void);
 
-/* kommentar */
+/* Destroy a queue */
 void WQueueDestroy(WQueue q);
 
-/* kommentar */
+/* Insert an element into the queue */
 void WQueueInsert(WQueue q, WQueueDomainType s, AbstractType at);
 
-/* kommentar */
+/*
+ * Search for an element with an abstract type conforming to the at parameter
+ * and remove it
+ */
 WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at);
 
-/* kommentar */
+/* Print information on the content of the queue (for debugging)  */
 void WQueuePrint(WQueue q);
 
-/* Print out String object */
+/* Print out String object (for debugging) */
 #define PRINTF(format, str) { 					\
 		char buf[str->d.items + 1]; 			\
 		buf[str->d.items] = 0; 					\

@@ -108,7 +108,9 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
         elseif s = "syntactictypeof" then
             index <- 0x09
         elseif s = "welcome" then
-            index <- 0x07
+            r <- self$exp.execute
+            if r !== nil then r <- r.asType end if
+            return
         end if
         r <- builtinlit.create[self$ln, index].getInstAT
     end getAT
@@ -175,7 +177,9 @@ const unaryexp <- class Unaryexp (Tree) [xxop : Ident, xxexp : Tree]
             exp.execute.asType.generate[bc]
             bc.popSize
             bc.addCode["WELCOME"]
-            bc.finishExpr[4, 0x1807, 0x1607]
+            if bc$size != 8 then
+                bc.addCode["POOP"]
+            end if
         else
             Environment$env.SemanticError[self$ln, "Illegal unaryexp name (%s)", {s}]
         end if
