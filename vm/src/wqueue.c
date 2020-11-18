@@ -67,7 +67,11 @@ WQueueDomainType WQueueFindAndRemove(WQueue q, AbstractType at) {
     WQueueDomainType s;
 
     for (record = q->prev; record != q; record = record->prev) {
-        if(conforms(at, record->at)) {
+        if (!RESDNT(record->state->firstThing)) {
+                    WQueueRemoveRecord(record);
+                    continue;
+        }
+        if(! ISNIL(at) && ISNIL(record->at) && conforms(at, record->at)) {
             s = record->state;
             WQueueRemoveRecord(record);
             return s;

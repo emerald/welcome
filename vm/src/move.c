@@ -147,7 +147,8 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	Stream reply;  StreamByte *buf;
 	Object o;
 	int wasPresent;
-	State *welcomeState;
+	State *state;
+	AbstractType welcometype;
 	u32 sp;
 
 	anticipateGC(64 * 1024 + 2 * StreamLength(str));
@@ -175,12 +176,28 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		fixHere(o);
 	}
 
+	while(state = (State *) WQueueFindAndRemove(welcome_q, ct->d.type)) {
+		sp = state->sp;
+		PUSH(Object, o);
+		PUSH(ConcreteType, CODEPTR(o->flags));
+		state->sp = sp;
+		makeReady(state);
+	}
+
 	while (1) {
 		buf = ReadStream(str, 4);
 		if (!memcmp(buf, "ACT!", 4)) {
 			/* Suck out an activation record - argh! */
 			TRACE(rinvoke, 6, ("Incoming activation record!!"));
-			(void)extractActivation(o, ct, str, srv);
+			state = extractActivation(o, ct, str, srv);
+			printf("Move: welcstate->...pc: %d\n", *((u8 *)state->pc-1));
+			if(*((u8 *)state->pc-1) == WELCOME) {
+				sp = state->sp;
+				printf("move: sp -sb = %d\n", state->sp - state->sb);
+				TOP(AbstractType, welcometype);
+				// PRINTF("MOVE: new->abstrtype: %s\n", welcometype->d.name);
+				WQueueInsert(welcome_q, state, welcometype);
+			}
 		}
 		else if (!memcmp(buf, "DONE", 4)) {
 			break;
@@ -190,7 +207,6 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		}
 	}
 	if (!isNoOID(h->ss)) {
-		State *state;
 		state = stateFetch(h->ss, h->sslocation);
 		if (!RESDNT(state->firstThing)) {
 			replyh = *h;
@@ -212,13 +228,6 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	TRACE(rinvoke, 4, ("Move request done"));
 	inhibit_gc--;
 
-	while(welcomeState = (State *) WQueueFindAndRemove(welcome_q, ct->d.type)) {
-		sp = welcomeState->sp;
-		PUSH(Object, o);
-		PUSH(ConcreteType, CODEPTR(o->flags));
-		welcomeState->sp = sp;
-		makeReady(welcomeState);
-	}
 }
 
 void findActivationsInObject(Object, Stream);
