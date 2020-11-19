@@ -178,6 +178,8 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 
 	while(state = (State *) WQueueFindAndRemove(welcome_q, ct->d.type)) {
 		sp = state->sp;
+		POP(AbstractType, welcometype);
+		POP(AbstractType, welcometype);
 		PUSH(Object, o);
 		PUSH(ConcreteType, CODEPTR(o->flags));
 		state->sp = sp;
@@ -187,15 +189,14 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	while (1) {
 		buf = ReadStream(str, 4);
 		if (!memcmp(buf, "ACT!", 4)) {
-			/* Suck out an activation record - argh! */
+			/* Suck out an activation record - argh!
+			 * ... and possibly add state to welcome_q - staaph!
+			 */
 			TRACE(rinvoke, 6, ("Incoming activation record!!"));
 			state = extractActivation(o, ct, str, srv);
-			printf("Move: welcstate->...pc: %d\n", *((u8 *)state->pc-1));
 			if(*((u8 *)state->pc-1) == WELCOME) {
 				sp = state->sp;
-				printf("move: sp -sb = %d\n", state->sp - state->sb);
 				TOP(AbstractType, welcometype);
-				// PRINTF("MOVE: new->abstrtype: %s\n", welcometype->d.name);
 				WQueueInsert(welcome_q, state, welcometype);
 			}
 		}

@@ -1863,10 +1863,9 @@ nextInstruction: ;
     case WELCOME:{
         TRACE(process, 3, ("Blocking synchronizing process %#x", state));
         AbstractType welcometype;
-        // PRINTF("vm.c: opp->name %s\n", opp->d.name);
-        // printf("previous bc == WELCOME: %u\n", *((u8 *)pc-1));
-        printf("vm.c: sp - sb = %d\n", sp - sb);
+
         TOP(AbstractType, welcometype);
+        PUSH(AbstractType, welcometype);
         WQueueInsert(welcome_q, state, welcometype);
         SYNCH();
 
