@@ -117,6 +117,7 @@ const env <- view environment as MYENVT
 %token  KRESTRICT /*  "restrict" */
 %token  KRETURN /*  "return" */
 %token  KRETURNANDFAIL /*  "returnandfail" */
+%token  KREWELCOME /*  "rewelcome" */
 %token  KSELF /*  "self" */
 %token  KSIGNAL /*  "signal" */
 %token	KSUCHTHAT /*  "suchthat" */
@@ -128,6 +129,7 @@ const env <- view environment as MYENVT
 %token	KTYPEOF /*  "typeof" */
 %token  KUNFIX /*  "unfix" */
 %token  KUNAVAILABLE /*  "unavailable" */
+%token  KUNWELCOME /*  "unwelcome" */
 %token  KVAR /*  "var" */
 %token  KVIEW /*  "view" */
 %token  KVISIT /*  "visit" */
@@ -537,9 +539,16 @@ declarationsAndStatements :
 	|	declarationsAndStatements statement
 		{ $$ <- $1 $$.rcons[$2] }
 	;
-acceptStatement : KACCEPT expression
-                  { $$ <- acceptstat.create[env$ln, $2 ] }
-        ;
+acceptStatement :
+        KACCEPT expression
+        { $$ <- acceptstat.create[env$ln, $2 ] }
+    ;
+unwelcomeStatement :
+        KUNWELCOME expression
+        { $$ <- unwelcstat.create[env$ln, $2, opname.literal["unwelcome"] ] }
+    |   KREWELCOME expression
+        { $$ <- unwelcstat.create[env$ln, $2, opname.literal["rewelcome"] ] }
+    ;
 statement :
 		ifStatement { $$ <- $1 }
 	|	loopStatement { $$ <- $1 }
@@ -554,7 +563,8 @@ statement :
 	|	signalStatement { $$ <- $1 }
 	|	returnStatement { $$ <- $1 }
 	|	returnAndFailStatement { $$ <- $1 }
-        |       acceptStatement { $$ <- $1 }
+    |   acceptStatement { $$ <- $1 }
+    |   unwelcomeStatement { $$ <- $1 }
 	|	error
 	;
 optDeclaration :

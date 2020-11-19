@@ -265,7 +265,7 @@ extern int interpret(struct State *);
 
 #define prevOP(xx) ((Object)((u32 *)xx)[-3])
 
-#define NINSTRUCTIONS 186
+#define NINSTRUCTIONS 188
 typedef struct State {
 	u32 firstThing;
 	u32 pc;
@@ -282,6 +282,14 @@ typedef struct State {
 	OID psoid;       /* Prev SS OID */
 	u32 psnres;      /* Results to return */
 } State;
+
+#define PRINTF(format, str) { 					\
+		char buf[str->d.items + 1]; 			\
+		buf[str->d.items] = 0; 					\
+		memcpy(buf, str->d.data, str->d.items); \
+		printf(format, buf); 					\
+	}
+
 #define F_SYNCH() ( \
 		state->sp = sp, \
 		state->fp = fp, \
@@ -316,5 +324,3 @@ typedef struct State {
 		cp = state->cp, \
 		pc = state->pc )
 #endif
-
-

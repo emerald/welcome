@@ -49,6 +49,7 @@ typedef struct Forward      *Forward;
 #define VZEROLBIT 0x04000000
 
 /* Bits in the instanceFlags of a CT */
+#define NOTWELCOM 0x10000000
 #define HASODPBIT 0x20000000
 #define ISIMUTBIT 0x40000000
 
@@ -94,6 +95,10 @@ typedef struct Forward      *Forward;
 #define ISIMUT(f)         ((f) &  ISIMUTBIT)
 #define SETISIMUT(f)      ((f) |= ISIMUTBIT)
 #define CLEARISIMUT(f)    ((f) &= ~ISIMUTBIT)
+
+#define ISWELCOME(f)      (!((f) & NOTWELCOM))
+#define SETUNWELCOME(f)   ((f) |= NOTWELCOM)
+#define SETREWELCOME(f)   ((f) &= ~NOTWELCOM)
 
 extern int codeptrextra;
 
@@ -355,11 +360,11 @@ struct LFEVectorRep {
 OBJECTSUBTYPE(LFEVector);
 
 /* The instanceFlags field of the concrete type indicates properties that
- * are true of every instance, currently just HASODP and ISIMUT.  If HASODP
- * is set, it indicates that the object is represented with an object
+ * are true of every instance, currently just HASODP, ISIMUT and NOTWELCOM. If
+ * HASODP is set, it indicates that the object is represented with an object
  * descriptor in the usual way.  If not set, then the object is simply a
  * 32-bit chunk of data.  This allows implementation of some builtin objects
- * like Integer and Boolean.
+ * like Integer and Boolean. If NOTWELCOM is set, the object cannot be welcomed.
  */
 
 struct ConcreteTypeRep {

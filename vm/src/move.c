@@ -176,14 +176,16 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		fixHere(o);
 	}
 
-	while (state = findAndRemoveWelcomingState(ct->d.type)) {
-		sp = state->sp;
-		POP(AbstractType, welcometype);
-		POP(AbstractType, welcometype);
-		PUSH(Object, o);
-		PUSH(ConcreteType, CODEPTR(o->flags));
-		state->sp = sp;
-		makeReady(state);
+	if (ISWELCOME(ct->d.instanceFlags)) {
+		while (state = findAndRemoveWelcomingState(ct->d.type)) {
+			sp = state->sp;
+			POP(AbstractType, welcometype);
+			POP(AbstractType, welcometype);
+			PUSH(Object, o);
+			PUSH(ConcreteType, CODEPTR(o->flags));
+			state->sp = sp;
+			makeReady(state);
+		}
 	}
 
 	while (1) {

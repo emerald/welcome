@@ -98,25 +98,27 @@ const scanner <- immutable object scanner
     const KRESTRICT <- 92
     const KRETURN <- 93
     const KRETURNANDFAIL <- 94
-    const KSELF <- 95
-    const KSIGNAL <- 96
-    const KSUCHTHAT <- 97
-    const KSYNTACTICTYPEOF <- 98
-    const KTHEN <- 99
-    const KTO <- 100
-    const KTRUE <- 101
-    const KTYPEOBJECT <- 102
-    const KTYPEOF <- 103
-    const KUNFIX <- 104
-    const KUNAVAILABLE <- 105
-    const KVAR <- 106
-    const KVIEW <- 107
-    const KVISIT <- 108
-    const KWAIT <- 109
-    const KWELCOME <- 110
-    const KWHEN <- 111
-    const KWHILE <- 112
-    const KWHERE <- 113
+    const KREWELCOME <- 95
+    const KSELF <- 96
+    const KSIGNAL <- 97
+    const KSUCHTHAT <- 98
+    const KSYNTACTICTYPEOF <- 99
+    const KTHEN <- 100
+    const KTO <- 101
+    const KTRUE <- 102
+    const KTYPEOBJECT <- 103
+    const KTYPEOF <- 104
+    const KUNFIX <- 105
+    const KUNAVAILABLE <- 106
+    const KUNWELCOME <- 107
+    const KVAR <- 108
+    const KVIEW <- 109
+    const KVISIT <- 110
+    const KWAIT <- 111
+    const KWELCOME <- 112
+    const KWHEN <- 113
+    const KWHILE <- 114
+    const KWHERE <- 115
     const tokenNameTable <- {
     "end of file",
     "identifier",
@@ -213,6 +215,7 @@ const scanner <- immutable object scanner
     "restrict",
     "return",
     "returnandfail",
+    "rewelcome",
     "self",
     "signal",
     "suchthat",
@@ -224,6 +227,7 @@ const scanner <- immutable object scanner
     "typeof",
     "unfix",
     "unavailable",
+    "unwelcome",
     "var",
     "view",
     "visit",

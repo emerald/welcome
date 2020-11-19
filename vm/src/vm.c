@@ -1870,7 +1870,20 @@ nextInstruction: ;
         SYNCH();
 
         return 1;
+    }
         break;
+    case UNWELCOME:{
+        Object uwo;
+
+        TOP(Object, uwo);
+        SETUNWELCOME(CODEPTR(uwo->flags)->d.instanceFlags);
+    }
+        break;
+    case REWELCOME:{
+        Object rwo;
+
+        TOP(Object, rwo);
+        SETREWELCOME(CODEPTR(rwo->flags)->d.instanceFlags);
     }
         break;
       default:
@@ -2077,6 +2090,8 @@ struct ite {
   { "GETGAGGLEELEMENT", "", 183 } ,
   { "GETGAGGLESIZE", "", 184 } ,
   { "WELCOME", "", 185 } ,
+  { "UNWELCOME", "", 186 } ,
+  { "REWELCOME", "", 187 } ,
 };
 
 void disassemble(unsigned int ptr, int len, FILE *f)
