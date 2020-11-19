@@ -69,7 +69,6 @@ INC = \
 	vm.h \
 	vm_i.h \
 	vm_exp.h \
-	wqueue.h \
 	write.h \
 	$(X11INC) \
 	$(LWPINC)
@@ -114,7 +113,6 @@ REALSRC = \
 	trace.c \
 	upcall.c \
 	vm.c \
-	wqueue.c \
 	write.c \
 	$(X11SRC) \
 	$(LWPSRC)
@@ -165,7 +163,6 @@ OBJ = \
 	timer.o \
 	trace.o \
 	upcall.o \
-	wqueue.o \
 	write.o \
 	$(GCOBJ) \
 	$(CCALLSOBJ) \
@@ -212,7 +209,6 @@ ASSRC = \
 	timer.s \
 	trace.s \
 	upcall.s \
-	wqueue.s \
 	write.s \
 	$(GCASSRC) \
 	$(CCALLSASSRC) \

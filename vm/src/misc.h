@@ -44,6 +44,7 @@ extern int sizeFromTemplate(Template t);
 extern int findLineNumber(unsigned pc, Code code, Template template);
 extern void showProcess(struct State *state, int levelOfDetail);
 extern struct State *findAcceptable(SQueue, AbstractType);
+extern struct State *findAndRemoveWelcomingState(AbstractType);
 int upcall( Object o, int fn, int *fail, int argc, int retc, int *args );
 void WriteOID(struct OID *oid, Stream theStream);
 void ReadOID(struct OID *oid, Stream theStream);

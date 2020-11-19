@@ -1866,7 +1866,7 @@ nextInstruction: ;
 
         TOP(AbstractType, welcometype);
         PUSH(AbstractType, welcometype);
-        WQueueInsert(welcome_q, state, welcometype);
+        SQueueInsert(welcome_q, state);
         SYNCH();
 
         return 1;

@@ -1561,6 +1561,31 @@ State *findAcceptable(SQueue waiting, AbstractType acceptable) {
 	return NULL;
 }
 
+State *findAndRemoveWelcomingState(AbstractType at) {
+	State *s;
+	AbstractType welcomingType;
+	u32 sp;
+
+	SQueueForEach (welcome_q, s) {
+		if (!RESDNT(s->firstThing)) {
+                    SQueueYank(welcome_q, s);
+                    return findAndRemoveWelcomingState(at);
+        }
+
+		sp = s->sp;
+		TOP(AbstractType, welcomingType);
+
+        if(conforms(at, welcomingType)) {
+			int res = SQueueYank(welcome_q, s);
+			if (!res) assert(0);
+			TRACE(process, 4, ("Found a welcoming state"));
+            return s;
+        }
+	} SQueueNext();
+
+	return NULL;
+}
+
 #if defined(WIN32)
 static struct _timeb xx_start;
 

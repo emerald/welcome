@@ -7,7 +7,7 @@
 #include "builtins.h"
 #include "iisc.h"
 #include "types.h"
-#include "wqueue.h"
+#include "squeue.h"
 
 /*
  * The builtin global array manages the following pointers for each builtin:
@@ -19,7 +19,7 @@
  * ConcreteType instanceCt;
  */
 
-extern WQueue welcome_q;
+extern SQueue welcome_q;
 extern Object BuiltinGlobalArray[NUMBUILTINS][NUMTAGS];
 
 #define BuiltinGA(i,tag) (BuiltinGlobalArray[i][(int)tag])

@@ -176,7 +176,7 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		fixHere(o);
 	}
 
-	while(state = (State *) WQueueFindAndRemove(welcome_q, ct->d.type)) {
+	while (state = findAndRemoveWelcomingState(ct->d.type)) {
 		sp = state->sp;
 		POP(AbstractType, welcometype);
 		POP(AbstractType, welcometype);
@@ -196,8 +196,7 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 			state = extractActivation(o, ct, str, srv);
 			if(*((u8 *)state->pc-1) == WELCOME) {
 				sp = state->sp;
-				TOP(AbstractType, welcometype);
-				WQueueInsert(welcome_q, state, welcometype);
+				SQueueInsert(welcome_q, state);
 			}
 		}
 		else if (!memcmp(buf, "DONE", 4)) {
