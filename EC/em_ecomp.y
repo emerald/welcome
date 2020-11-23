@@ -117,7 +117,6 @@ const env <- view environment as MYENVT
 %token  KRESTRICT /*  "restrict" */
 %token  KRETURN /*  "return" */
 %token  KRETURNANDFAIL /*  "returnandfail" */
-%token  KREWELCOME /*  "rewelcome" */
 %token  KSELF /*  "self" */
 %token  KSIGNAL /*  "signal" */
 %token	KSUCHTHAT /*  "suchthat" */
@@ -129,11 +128,11 @@ const env <- view environment as MYENVT
 %token	KTYPEOF /*  "typeof" */
 %token  KUNFIX /*  "unfix" */
 %token  KUNAVAILABLE /*  "unavailable" */
-%token  KUNWELCOME /*  "unwelcome" */
 %token  KVAR /*  "var" */
 %token  KVIEW /*  "view" */
 %token  KVISIT /*  "visit" */
 %token  KWAIT /*  "wait" */
+%token  KWELCOMABLE /*  "welcomable" */
 %token  KWELCOME /*  "welcome" */
 %token  KWHEN /*  "when" */
 %token  KWHILE /*  "while" */
@@ -543,12 +542,6 @@ acceptStatement :
         KACCEPT expression
         { $$ <- acceptstat.create[env$ln, $2 ] }
     ;
-unwelcomeStatement :
-        KUNWELCOME expression
-        { $$ <- unwelcstat.create[env$ln, $2, opname.literal["unwelcome"] ] }
-    |   KREWELCOME expression
-        { $$ <- unwelcstat.create[env$ln, $2, opname.literal["rewelcome"] ] }
-    ;
 statement :
 		ifStatement { $$ <- $1 }
 	|	loopStatement { $$ <- $1 }
@@ -564,7 +557,6 @@ statement :
 	|	returnStatement { $$ <- $1 }
 	|	returnAndFailStatement { $$ <- $1 }
     |   acceptStatement { $$ <- $1 }
-    |   unwelcomeStatement { $$ <- $1 }
 	|	error
 	;
 optDeclaration :
@@ -999,6 +991,25 @@ typeLiteral :
 		  end if
 		  y$isMonitored <- true
 		  $$ <- $2
+		}
+	|	KWELCOMABLE typeRest
+		{
+		  const y <- view $2 as OTree
+		  if nameof $2 = "anatlit" then
+		    env.SemanticError[$2$ln, "Welcomable on immutable object.", nil]
+		  end if
+		  y$isWelcomable <- true
+		  $$ <- $2
+		}
+	|	KWELCOMABLE KMONITOR typeRest
+		{
+		  const y <- view $3 as OTree
+		  if nameof $3 = "anatlit" then
+		    env.SemanticError[$3$ln, "Monitored typeobjects don't make sense", nil]
+		  end if
+		  y$isMonitored <- true
+          y$isWelcomable <- true
+		  $$ <- $3
 		}
 	;
 typeRest :

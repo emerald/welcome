@@ -16,13 +16,13 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
     field vectorBrand : Character
     var instct : ObLit
     var instat : Tree
-    
+
     export operation setBuiltinID [t : Tree]
         const ts <- view t as hasStr
         const thestr : String <- ts.getStr
         const theid <- Integer.Literal[thestr]
         codeOID <- theid + 0x400
-        
+
         if 0x1000 <= theid and theid <= 0x1040 then
             id <- theid
             ObjectTable.Define[id, self]
@@ -100,7 +100,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             ObjectTable.Define[codeOID, self]
         end if
     end setBuiltinID
-    
+
     export function upperbound -> [r : Integer]
         r <- 5
     end upperbound
@@ -145,6 +145,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         newob$isImmutable <- f.getBit[xisImmutable]
         newob$isVector <- f.getBit[xisVector]
         newob$isMonitored <- f.getBit[xisMonitored]
+        newob$isWelcomable <- f.getBit[xIsWelcomable]
         newob$isSynchronized <- f.getBit[xisSynchronized]
         newob$monitorMayBeElided <- f.getBit[xmonitorMayBeElided]
         newob$typesAreAssigned <- false
@@ -153,7 +154,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         newob$queuedForGeneration <- false
         r <- newob
     end copy
-    
+
     export operation flatten [ininvoke : Boolean, indecls : Tree] -> [r : Tree, outdecls : Tree]
         outdecls <- indecls
         if ininvoke then
@@ -170,12 +171,12 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- self
         end if
     end flatten
-    
+
     operation iremoveSugar -> [r : Oblit]
         ops <- sugar.doFields[decls, ops]
         r <- self
     end iremoveSugar
-    
+
     export operation setATType
         if f.getBit[xisVector] then
             var et : Ident <- Environment$env$ITable.Lookup["nv", 999]
@@ -219,19 +220,19 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             else
                 Environment$env.printf["Couldn't find elementtype for a vector", nil]
             end if
-            
+
         end if
     end setATType
-    
+
     export operation doAllocation
         var a, b, c : Integer
         a, b, c <- st.Allocate[0, 0, 0, nil]
     end doAllocation
-    
+
     export operation findOp [itsname : Ident, isSelf : Boolean, nargs : Integer, nress : Integer] -> [r : OpDef, index : Integer]
         const ystring : String <- itsname$name
         const env <- Environment$env
-        
+
         if ops !== nil then
             for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
                 const xop <- view ops[i] as OpDef
@@ -283,7 +284,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end for
         end if
     end needInitially
-    
+
     export operation assignTypes
         if !self$typesAreAssigned then
             const namesym <- (view self$name as Sym)$mysym
@@ -296,7 +297,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             if myat !== nil then myat.assignTypes end if
         end if
     end assignTypes
-    
+
     export operation print [s : OutStream, indent : Integer]
         s.putstring["oblit @"]
         s.putint[ln, 0]
@@ -323,7 +324,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         end if
         FTree.print[s, indent, self]
     end print
-    
+
     export operation printsummary
         var t : Integer
         const env <- Environment$env
@@ -339,7 +340,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         self.printFlags[env$stdout]
         env.printf["\n", nil]
     end printsummary
-    
+
     export operation isAFunction [itsname:Ident, nargs:Integer, nress:Integer] -> [r : Boolean]
         var xop : OpDef
         var index : Integer
@@ -350,7 +351,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- (view xop$sig as OpSig)$isFunction
         end if
     end isAFunction
-    
+
     export operation findInvocResult [itsname:Ident, nargs:Integer, nress:Integer] -> [ans : Tree]
         var xop : OpDef
         var index : Integer
@@ -364,7 +365,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                     const xassign <- view stat as Assignstat
                     const r <- xassign$right
                     const l <- xassign$left
-                    
+
                     if r.upperbound = 0 and l !== nil and l.upperbound = 0 then
                         ans <- r[0]
                     end if
@@ -372,16 +373,16 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end if
         end if
     end findInvocResult
-    
+
     export operation buildSetq [s : Symbol] -> [r : Symbol]
         r <- setq.build[s, self]
     end buildSetq
-    
+
     operation myatid -> [r : Integer]
         const myatashasid <- view myat as hasID
         r <- myatashasid.getId
     end myatid
-    
+
     export operation generate [ct : Printable]
         const sfnameashasStr <- view self$sfname as hasStr
         const nameashasId <- view self$name as hasIdent
@@ -389,12 +390,12 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         if nameof ct = "actcode" then
             const ctasct <- view ct as CTCode
             const temp <- Template.create
-            
+
             if self$instanceSize = 0 then
                 self$instanceSize <- self$st$instanceSize
             end if
             ctasct$instanceSize <- self$instanceSize
-            
+
             % These are the kinds of objects whose data is stored as literal
             % data rather than as a pointer.
             if self$codeOID = 0x1803 or self$codeOID = 0x1804 or self$codeOID = 0x1806 or self$codeOID = 0x180a then
@@ -405,13 +406,20 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             if self$isImmutable then
                 ctasct$instanceFlags <- ctasct$instanceFlags + 0x40000000
             end if
+            if self$isWelcomable then
+                ctasct$instanceFlags <- ctasct$instanceFlags + 0x10000000
+                % if self$isImmutable then
+                % Environment$env.SemanticError[ln,
+                % "Welcomable objects cannot be immutable", nil]
+                % end if
+            end if
             ctasct$name <- nameashasId$id$name
             ctasct$filename <- sfnameashasStr.getStr
-            
+
             Environment$env.tgenerate["Generating oblit name = %s codeOID = %#x\n",
             { nameashasId$id$name, self$codeOID : Any} ]
             ctasct$id <- self$codeOID
-            
+
             if self$isVector then
                 temp.isVector[self$vectorBrand]
             elseif self$instanceSize = 0 and ! self$isImmutable then
@@ -429,7 +437,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             if Environment$env$generateATs and myat !== nil then
                 ctasct$mytype <- RefByID.create[self.myatid]
             end if
-            
+
             % Generate recovery ops[1], process ops[2] and ops
             for i : Integer <- 1 while i <= ops.upperbound by i <- i + 1
                 const theop <- ops[i]
@@ -437,7 +445,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                     theop.generate[ct]
                 end if
             end for
-            
+
             % do the initially
             if self.needInitially then
                 begin
@@ -449,36 +457,36 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                     const returnlabel <- mybc.declareLabel
                     const sq <- self$xsetq
                     const init <- ops[0]
-                    
+
                     mybc.nest[returnlabel]
                     ove$templ <- templ
                     ov[0] <- ove
-                    
-                    
+
+
                     % Generate the template
                     if init !== nil then
                         const hasBody <- typeobject t function getBody -> [Tree] end t
                         const initst <- (view (view init as hasbody)$body as hasst)$st
                         initst.writeTemplate[templ, 'L']
                     end if
-                    
+
                     mybc.lineNumber[0]
-                    
+
                     % Generate the prolog (allocate space for locals)
                     mybc.setLocalSize[st$localSize]
-                    
+
                     % Generate the monitor creation, if necessary
                     if Environment$env$generateconcurrent and f.getBit[xisMonitored] and !f.getBit[xmonitorMayBeElided] then
                         mybc.addCode["MONINIT"]
                     end if
-                    
+
                     if Environment$env$generateconcurrent and f.getBit[xisSynchronized] then
                         mybc.addCode["SYNCHINIT"]
                     end if
-                    
+
                     % Generate the setq (parameter passing) code
                     if sq !== nil then
-                        
+
                         % Count the actual parameters
                         for i : Integer <- 0 while i <= sq.upperbound by i <- i + 1
                             const s <- view sq[i] as Setq
@@ -486,7 +494,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                             const inn  <- view s$inner as Sym
                             const psym <- p$mysym
                             const isym <- inn$mysym
-                            
+
                             if s$isNotManifest then % or if it is a typevariable
                                 nparams <- nparams + 1
                                 % We should do initiallies just like we do invocations, then we don't need a
@@ -507,20 +515,20 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                             end if
                         end for
                     end if
-                    
+
                     ove$nargs <- nparams
-                    
+
                     if self$decls !== nil then self$decls.generate[mybc] end if
                     if ops[0] !== nil then
                         ops[0].generate[mybc]
                     end if
-                    
+
                     % Generate the epilog (return and pop args)
                     mybc.lineNumber[self$ln]
                     mybc.defineLabel[returnlabel]
                     mybc.addCode["QUIT"]
                     mybc.addValue[nparams, 1]
-                    
+
                     ove$code <- mybc.getString
                     ove$others <- mybc$others
                     begin
@@ -542,7 +550,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             const bc <- view ct as BCType
             const sq <- self$xsetq
             % We need to treat this as an expression, and do a creation
-            
+
             bc.addCode["PUSHNIL"]
             if sq !== nil then
                 bc.pushSize[8]
@@ -555,7 +563,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                 end for
                 bc.popSize
             end if
-            
+
             bc.fetchLiteral[self$codeOID]
             if self$isVector then
                 bc.addCode["LDAB"]
@@ -567,20 +575,20 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             bc.finishExpr[4, self$codeOID, self.myatid]
         end if
     end generate
-    
+
     export operation generateSelf [xct : Printable]
         const bc <- view xct as ByteCode
         self.makeMeManifest
         bc.fetchLiteral[self$id]
         bc.finishExpr[4, codeoid, self.myatid]
     end generateSelf
-    
+
     export operation makeMeManifest
         if self$id == nil then
             self$id <- nextOID.nextOID
         end if
     end makeMeManifest
-    
+
     export operation findThingsToGenerate[q : Any]
         if ! self$queuedForGeneration then
             const qt <- view q as aot
@@ -595,7 +603,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             FTree.findThingsToGenerate[q, self]
         end if
     end findThingsToGenerate
-    
+
     export operation areMyImportsManifestOrExported -> [badname : String]
         if self$xsetq !== nil then
             for i : Integer <- 0 while i <= self$xsetq.upperbound by i <- i + 1
@@ -611,7 +619,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end for
         end if
     end areMyImportsManifestOrExported
-    
+
     export operation findManifests -> [changed : Boolean]
         changed <- false
         if self$isNotManifest then
@@ -636,13 +644,13 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         if myat !== nil then changed <- myat.findManifests | changed end if
         changed <- FTree.findManifests[self] | changed
     end findManifests
-    
+
     export operation execute -> [r : Tree]
         if !self$isNotManifest then
             r <- self
         end if
     end execute
-    
+
     export function asType -> [r : Tree]
         %   assert !self$isNotManifest
         if self$isImmutable then
@@ -667,7 +675,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end if
         end if
     end asType
-    
+
     export operation evaluateManifests
         % If I am a closure, then ensure that my setq's are all manifest
         if self$generateOnlyCT then
@@ -700,7 +708,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         if myat !== nil then myat.evaluateManifests end if
         FTree.evaluateManifests[self]
     end evaluateManifests
-    
+
     export operation removeSugar [ob : Tree] -> [r : Oblit]
         var foo : Tree
         if !self$hasBeenDesugared then
@@ -712,7 +720,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- self
         end if
     end removeSugar
-    
+
     export operation defineSymbols[pst : SymbolTable]
         const nst <- SymbolTable.create[pst, CObLit]
         const s <- nst.Define[ln, (view self$name as hasIdent)$id, SConst, false]
@@ -751,6 +759,10 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                 Environment$env.SemanticError[ln,
                 "Immutable objects are not allowed processes", nil]
             end if
+            if self$isWelcomable then
+                Environment$env.SemanticError[ln,
+                "Welcomable objects cannot be immutable", nil]
+            end if
         end if
         if self$isMonitored then
             if ops[2] !== nil then
@@ -759,10 +771,10 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end if
         end if
         FTree.defineSymbols[nst, self]
-        
+
         % Go through and pretend that those symbol tables in the
         % process and recovery are opdefs
-        
+
         for i : Integer <- 1 while i < 3 by i <- i + 1
             const theop <- ops[i]
             if theop !== nil then
@@ -771,13 +783,13 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                 thest$context <- COpDef
             end if
         end for
-        
+
     end defineSymbols
-    
+
     export operation checkBuiltinInstAT
         if id !== nil or codeOID !== nil then
             const myinstct <- view self.getInstCT as Oblit
-            
+
             Environment$env.pass["Check builtin inst AT\n", nil]
             if myinstct !== nil then
                 const myinstid <- myinstct.getCodeOID
@@ -797,7 +809,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end if
         end if
     end checkBuiltinInstAT
-    
+
     export operation resolveSymbols [pst : SymbolTable, nexp : Integer]
         if self$generateOnlyCT and self$xparam !== nil then
             const ps <- self$xparam
@@ -812,10 +824,10 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         FTree.resolveSymbols[self$st, self, 0]
         self.checkBuiltinInstAT
     end resolveSymbols
-    
+
     export operation typeValue -> [r : Any]
     end typeValue
-    
+
     export operation getAT -> [r : Tree]
         if self$myat == nil then
             if self$generateOnlyCT then
@@ -826,7 +838,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                 const newid <- Environment.getEnv.getITable.Lookup[nameid$name||"type", 999]
                 const sigs <- seq.create[self$ln]
                 var theOps : Tree <- self$ops
-                
+
                 Environment$env.tassignTypes["oblit.getAT on %s\n", {self$name.asString}]
                 if theops !== nil then
                     for i : Integer <- 3 while i <= theops.upperbound by i <- i + 1
@@ -835,7 +847,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                         if xop$isExported then
                             %	      Environment$env.pass["  op %d %s is exported\n",
                             %		{i, xsig$name.asString}]
-                            
+
                             % if use copy
                             if Environment$env$doingIdsEarly then
                                 sigs.rcons[xsig.copy[0]]
@@ -885,7 +897,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         end if
         r <- self$myat
     end getAT
-    
+
     export operation getCT -> [r : Tree]
         if self$generateOnlyCT then
             r <- builtinlit.create[self$ln, 0x18].getInstCT
@@ -893,7 +905,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- self
         end if
     end getCT
-    
+
     export function getInstCT -> [r : Tree]
         if !self$knowinstct then
             if self$generateOnlyCT then
@@ -905,7 +917,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         end if
         r <- instct
     end getInstCT
-    
+
     export function getInstAT -> [r : Tree]
         if !self$knowinstat then
             instat <- self.findInvocResult[opname.literal["getsignature"], nil, 1]
@@ -916,7 +928,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
         end if
         r <- instat
     end getInstAT
-    
+
     export function getinstCTOID -> [r : Integer]
         const x <- self$instCT
         if x !== nil and nameof x = "anoblit" then
@@ -924,7 +936,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- y$codeOID
         end if
     end getinstCTOID
-    
+
     export function getinstATOID -> [r : Integer]
         const x <- self$instAT
         if x !== nil then
@@ -932,12 +944,12 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             r <- xx$ID
         end if
     end getinstATOID
-    
+
     export operation getATOID -> [oid : Integer]
         const x <- view self.getAT as hasID
         oid <- x$id
     end getATOID
-    
+
     export operation setATOID [oid : Integer]
         const x <- view self.getAT as typeobject t
             operation setID [Integer]
@@ -948,7 +960,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             x$id <- oid
         end if
     end setATOID
-    
+
     export operation setinstCTOID [oid : Integer]
         const x <- view self$instCT as typeobject t
             operation setCodeOID [Integer]
@@ -959,7 +971,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             x$codeOID <- oid
         end if
     end setinstCTOID
-    
+
     export operation setinstATOID [oid : Integer]
         const x <- view self$instAT as typeobject t
             operation setID [Integer]
@@ -970,7 +982,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             x$ID <- oid
         end if
     end setinstATOID
-    
+
     operation pruneList[list : Tree]
         if list !== nil then
             for i : Integer <- 0 while i <= list.upperbound by i <- i + 1
@@ -978,31 +990,31 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
                 const stype <- p.asType
                 const ttype <- view stype as hasID
                 const typeid <- ttype$id
-                
+
                 list[i] <- globalref.create[p$ln, typeid, 0x1609, nil, nil, nil]
             end for
         end if
     end pruneList
-    
+
     export operation prune
         if self$isPruned then return end if
         self$isPruned <- true
-        
+
         const namesym <- view name as Sym
         namesym.prune
         (view myat as ATlit).prune
         xsetq <- nil
         decls <- nil
-        
+
         if ops !== nil and ops.upperbound >= 0 then
             ops[0] <- nil
             ops[1] <- nil
             ops[2] <- nil
-            
+
             for i : Integer <- 3 while i <= ops.upperbound by i <- i + 1
                 const xdef <- view ops[i] as OpDef
                 const xsig <- view xdef$sig as OpSig
-                
+
                 if xdef$isInlineable then
                     % can't prune anything, really
                 else
@@ -1016,7 +1028,7 @@ const oblit <- class Oblit (OTree) [xxsfname : Tree, xxname : Tree, xxdecls : Tr
             end for
         end if
     end prune
-    
+
     export function asString -> [r : String]
         r <- "oblit"
     end asString

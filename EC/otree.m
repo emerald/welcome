@@ -24,188 +24,196 @@ const otree <- class OTree (Tree) []
     const xknowinstat			<- 22
     const xknowinstct			<- 23
     const xIsSynchronized			<- 24
-    
+    const xIsWelcomable			<- 25
+
     var f : Integer <- 0
-    
+
     export operation setF [x : Integer]
         f <- x
     end setF
-    
+
     export operation setIsImmutable [a : Boolean]
         f <- f.setBit[xisImmutable, a]
     end setIsImmutable
     export function getIsImmutable -> [r : Boolean]
         r <- f.getBit[xisImmutable]
     end getIsImmutable
-    
+
     export operation setisExported [a : Boolean]
         f <- f.setBit[xisExported, a]
     end setisExported
     export function getisExported -> [r : Boolean]
         r <- f.getBit[xisExported]
     end getisExported
-    
+
     export operation setIsNotManifest [a : Boolean]
         f <- f.setBit[xisNotManifest, a]
     end setIsNotManifest
     export function getIsNotManifest -> [r : Boolean]
         r <- f.getBit[xisNotManifest]
     end getIsNotManifest
-    
+
     export operation setCannotBeConformedTo [a : Boolean]
         f <- f.setBit[xcannotBeConformedTo, a]
     end setCannotBeConformedTo
     export function getCannotBeConformedTo -> [r : Boolean]
         r <- f.getBit[xcannotBeConformedTo]
     end getCannotBeConformedTo
-    
+
     export operation setIsVector [a : Boolean]
         f <- f.setBit[xisVector, a]
     end setIsVector
     export function getIsVector -> [r : Boolean]
         r <- f.getBit[xisVector]
     end getIsVector
-    
+
     export operation setIsTypeVariable [a : Boolean]
         f <- f.setBit[xisTypeVariable, a]
     end setIsTypeVariable
     export function getIsTypeVariable -> [r : Boolean]
         r <- f.getBit[xisTypeVariable]
     end getIsTypeVariable
-    
+
     %    export operation setResultsDependOnlyOnArgs [a : Boolean]
     %      f <- f.setBit[xresultsDependOnlyOnArgs, a]
     %    end setResultsDependOnlyOnArgs
     %    export function getResultsDependOnlyOnArgs -> [r : Boolean]
     %      r <- f.getBit[xresultsDependOnlyOnArgs]
     %    end getResultsDependOnlyOnArgs
-    
+
     export operation setInExecutableConstruct [a : Boolean]
         f <- f.setBit[xinExecutableConstruct, a]
     end setInExecutableConstruct
     export function getInExecutableConstruct -> [r : Boolean]
         r <- f.getBit[xinExecutableConstruct]
     end getInExecutableConstruct
-    
+
     export operation setDependsOnTypeVariable [a : Boolean]
         f <- f.setBit[xdependsOnTypeVariable, a]
     end setDependsOnTypeVariable
     export function getDependsOnTypeVariable -> [r : Boolean]
         r <- f.getBit[xdependsOnTypeVariable]
     end getDependsOnTypeVariable
-    
+
     export operation setTypesAreAssigned [a : Boolean]
         f <- f.setBit[xtypesAreAssigned, a]
     end setTypesAreAssigned
     export function getTypesAreAssigned -> [r : Boolean]
         r <- f.getBit[xtypesAreAssigned]
     end getTypesAreAssigned
-    
+
     export operation setTypesHaveBeenChecked [a : Boolean]
         f <- f.setBit[xtypesHaveBeenChecked, a]
     end setTypesHaveBeenChecked
     export function getTypesHaveBeenChecked -> [r : Boolean]
         r <- f.getBit[xtypesHaveBeenChecked]
     end getTypesHaveBeenChecked
-    
+
     %    export operation setDoesNotDuplicateSelf [a : Boolean]
     %      f <- f.setBit[xdoesNotDuplicateSelf, a]
     %    end setDoesNotDuplicateSelf
     %    export function getDoesNotDuplicateSelf -> [r : Boolean]
     %      r <- f.getBit[xdoesNotDuplicateSelf]
     %    end getDoesNotDuplicateSelf
-    
+
     %    export operation setDoesNotMoveArguments [a : Boolean]
     %      f <- f.setBit[xdoesNotMoveArguments, a]
     %    end setDoesNotMoveArguments
     %    export function getDoesNotMoveArguments -> [r : Boolean]
     %      r <- f.getBit[xdoesNotMoveArguments]
     %    end getDoesNotMoveArguments
-    
+
     %    export operation setDoLocalCreate [a : Boolean]
     %      f <- f.setBit[xdoLocalCreate, a]
     %    end setDoLocalCreate
     %    export function getDoLocalCreate -> [r : Boolean]
     %      r <- f.getBit[xdoLocalCreate]
     %    end getDoLocalCreate
-    
+
     export operation sethasBeenDesugared [a : Boolean]
         f <- f.setBit[xhasBeenDesugared, a]
     end sethasBeenDesugared
     export function gethasBeenDesugared -> [r : Boolean]
         r <- f.getBit[xhasBeenDesugared]
     end gethasBeenDesugared
-    
+
     %    export operation setDoesNotMoveSelf [a : Boolean]
     %      f <- f.setBit[xdoesNotMoveSelf, a]
     %    end setDoesNotMoveSelf
     %    export function getDoesNotMoveSelf -> [r : Boolean]
     %      r <- f.getBit[xdoesNotMoveSelf]
     %    end getDoesNotMoveSelf
-    
+
     export operation setAlreadyGenerated [a : Boolean]
         f <- f.setBit[xalreadyGenerated, a]
     end setAlreadyGenerated
     export function getAlreadyGenerated -> [r : Boolean]
         r <- f.getBit[xalreadyGenerated]
     end getAlreadyGenerated
-    
+
     export operation setGenerateOnlyCT [a : Boolean]
         f <- f.setBit[xGenerateOnlyCT, a]
     end setGenerateOnlyCT
     export function getGenerateOnlyCT -> [r : Boolean]
         r <- f.getBit[xGenerateOnlyCT]
     end getGenerateOnlyCT
-    
+
     export operation setQueuedForGeneration [a : Boolean]
         f <- f.setBit[xQueuedForGeneration, a]
     end setQueuedForGeneration
     export function getQueuedForGeneration -> [r : Boolean]
         r <- f.getBit[xQueuedForGeneration]
     end getQueuedForGeneration
-    
+
     export operation setIsMonitored [a : Boolean]
         f <- f.setBit[xIsMonitored, a]
     end setIsMonitored
     export function getIsMonitored -> [r : Boolean]
         r <- f.getBit[xIsMonitored]
     end getIsMonitored
-    
+
     export operation setIsSynchronized [a : Boolean]
         f <- f.setBit[xIsSynchronized, a]
     end setIsSynchronized
     export function getIsSynchronized -> [r : Boolean]
         r <- f.getBit[xIsSynchronized]
     end getIsSynchronized
-    
+
     export operation setMonitorMayBeElided [a : Boolean]
         f <- f.setBit[xMonitorMayBeElided, a]
     end setMonitorMayBeElided
     export function getMonitorMayBeElided -> [r : Boolean]
         r <- f.getBit[xMonitorMayBeElided]
     end getMonitorMayBeElided
-    
+
     export operation setIsPruned [a : Boolean]
         f <- f.setBit[xIsPruned, a]
     end setIsPruned
     export function getIsPruned -> [r : Boolean]
         r <- f.getBit[xIsPruned]
     end getIsPruned
-    
+
     export operation setKnowInstAT [a : Boolean]
         f <- f.setBit[xKnowInstAT, a]
     end setKnowInstAT
     export function getKnowInstAT -> [r : Boolean]
         r <- f.getBit[xKnowInstAT]
     end getKnowInstAT
-    
+
     export operation setKnowInstCT [a : Boolean]
         f <- f.setBit[xKnowInstCT, a]
     end setKnowInstCT
     export function getKnowInstCT -> [r : Boolean]
         r <- f.getBit[xKnowInstCT]
     end getKnowInstCT
-    
+
+    export operation setIsWelcomable [a : Boolean]
+        f <- f.setBit[xIsWelcomable, a]
+    end setIsWelcomable
+    export function getIsWelcomable -> [r : Boolean]
+        r <- f.getBit[xIsWelcomable]
+    end getIsWelcomable
+
     export operation printFlags[s : OutStream]
         for i : Integer <- 0 while i <= xQueuedForGeneration by i <- i + 1
             if f.getBit[i] then
@@ -252,6 +260,8 @@ const otree <- class OTree (Tree) []
                     bitname <- "GenerateOnlyCT"
                 elseif i = xQueuedForGeneration then
                     bitname <- "QueuedForGeneration"
+                elseif i = xIsWelcomable then
+                    bitname <- "isWelcomable"
                 else
                     bitname <- "illegal flag (" || i.asString || ")"
                 end if
@@ -260,7 +270,7 @@ const otree <- class OTree (Tree) []
             end if
         end for
     end printFlags
-    
+
     export operation typeCheck
         if !self$typesHaveBeenChecked then
             self$typesHaveBeenChecked <- true
@@ -277,13 +287,13 @@ const otree <- class OTree (Tree) []
             end loop
         end if
     end typeCheck
-    
+
     export operation flatten [ininvoke : Boolean, indecls : Tree] -> [r : Tree, outdecls : Tree]
-        
+
         r <- self
         outdecls <- indecls
     end flatten
-    
+
 end OTree
 
 export OTree
