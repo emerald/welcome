@@ -14,7 +14,7 @@ are expressions. The form of a constructor shown below
 demonstrates its generality, i.e.,
 all \emd{} objects may be defined using this feature.
 \begin{quote}\it\begin{tabular}{lcl}
-objectConstructor &$::=$& \opt{\kw{immutable}} \opt{\kw{monitor}} \kw{object} identifier \\
+objectConstructor &$::=$& \opt{\kw{immutable}} \opt{\kw{welcomable}} \opt{\kw{monitor}} \kw{object} identifier \\
 & &\hspace{0.5in}\oseq{declaration} \\
 & &\hspace{0.5in}\oseq{operation $|$ initially $|$ process $|$ recovery} \\
 & &\kw{end} identifier \\[1ex]
@@ -37,14 +37,14 @@ execution of an object constructor. The object constructor provides the
 necessary information about the object's implementation, i.e.,
 \begin{itemize}
 \item{} Representation declarations for data and processes that are
-contained in the object. 
+contained in the object.
 \item{} A collection of operation bodies containing both the signature as
 well as the implementation of each operation that the object is capable of
 executing.
 \end{itemize}
 The type of an object constructor expression is determined by including in
 the type the signature of every exported operation in the constructor.  This
-defines the {\it 
+defines the {\it
 best fitting type}, and may be retrieved during execution by the \kw{typeof}
 expression.\label{typeofobjectconstructor}
 
@@ -66,7 +66,7 @@ invocations of the object by itself during initialization are allowed.
 Once initialization is complete, the process defined by the object
 constructor is started and then the execution of the object constructor
 expression terminates.  The value of the expression is a reference to the
-newly created object.  
+newly created object.
 
 \subsubsection{Recovery}
 When an Emerald node on which objects have previously checkpointed recovers,
@@ -86,7 +86,7 @@ see also Section~\ref{classes}.
 \subsection{Objects as Types}
 \label{objectsastypes}
 Type constructors are the basic method for
-constructing abstract types in \emd{} (cf.~Sec\-tion~\ref{abstracttypes}). 
+constructing abstract types in \emd{} (cf.~Sec\-tion~\ref{abstracttypes}).
 Since typing in Emerald is based entirely on the signatures of operations,
 any object which conforms to the type
 
@@ -110,7 +110,7 @@ objects conform to but other objects do not.  However, Emerald does have a
 syntactic construct called a class that provides the functionality normally
 expected of classes.
 \begin{quote}\it\begin{tabular}{lcl}
-class &$::=$& \opt{\kw{immutable}} \opt{\kw{monitor}} \kw{class} identifier \\
+class &$::=$& \opt{\kw{immutable}} \opt{\kw{welcomable}} \opt{\kw{monitor}} \kw{class} identifier \\
 & & \hspace{0.5in} \opt{\terminal{(} baseClass \terminal{)}} \opt{parameterList}\\
 & & \hspace{0.5in} \oseq{classoperation} \\
 & & \hspace{0.5in} \oseq{declaration} \\
@@ -123,14 +123,14 @@ classoperation  &$::=$& \kw{class} operation
 Classes are expanded syntactically into two nested object constructors.  The
 outer object (the class, factory, or creator object) is immutable and
 declares a single constant, a \tn{Signature} which represents the type of
-the instances and 
+the instances and
 whose name is derived from the name of the type with the string ``type''
 appended.  This signature object contains the
 signature of each operation that is exported from the inner object
 constructor (which defines the instances), and is the {\it best fitting}
 type of those instances.
-The class exports operations {\it getSignature} and {\it create} in 
-addition to the class operations defined by the programmer.  
+The class exports operations {\it getSignature} and {\it create} in
+addition to the class operations defined by the programmer.
 The
 {\it getSignature} operation returns the signature constant described above.
 The {\it
@@ -138,13 +138,13 @@ parameterList} specifies the parameter list to the {\it create} operation;
 the body of the create operation is a single assignment statement which
 returns the result of executing the inner object constructor.
 The inner object constructor is given the name of the class prefixed with
-the string ``a'' (or ``an'' as appropriate).  
+the string ``a'' (or ``an'' as appropriate).
 The rest of the components of
 the class construct become the body of the inner object constructor and
 thereby define the class's instances.
 
 This is most easily understood through examples.  Suppose we write the
-following declaration: 
+following declaration:
 
 {\small\it\begin{minipage}{\textwidth}\begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=\+\kill%
@@ -212,7 +212,7 @@ parameters to the
 superclass in order to form the final parameter list for the subclass.
 
 Inheritance of the other three kinds of components is performed by
-considering in turn each component of the 
+considering in turn each component of the
 superclass, and searching for an identically named component of the same
 kind in the subclass.  If the subclass contains the component then the
 superclass component is ignored, otherwise the superclass component is added
@@ -252,7 +252,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=\+\kill%
   \kw{end} getSuperClass\-\\*{}%
 \kw{end} child
 \end{tabbing}\end{minipage}}
-  
+
 
 \subsection{Enumerations}
 \begin{quote}\it\begin{tabular}{lcl}
@@ -285,7 +285,7 @@ Each instance of the class implements the following operations:
   \item{} a function {\it asString} which returns the name of the element as
     a \tn{String}.
 \end{itemize}
-    
+
 All instance of enumeration classes are immutable.
 To be concrete, consider the declaration:
 
@@ -329,7 +329,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=\+\kill%
 
 \subsection{Fields}
 \begin{quote}\it\begin{tabular}{lcl}
-field &$::=$& 
+field &$::=$&
   \opt{\kw{attached}} \kw{const} \kw{field} identifier \terminal{:} type initializer\\
 & $|$ &  \opt{\kw{attached}} \kw{field} identifier \terminal{:} type \opt{initializer}
 \end{tabular}\end{quote}
@@ -341,7 +341,7 @@ only occur within the declaration part of an object constructor.
 Constant field declarations expand to a constant declaration and an operation
 to get the value of the constant.  Variable fields expand to a variable
 declaration and operations to both get and set the value of the variable.
-The expansion of the constant field: 
+The expansion of the constant field:
 
 {\small\it\begin{minipage}{\textwidth}\begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=\+\kill%
@@ -427,7 +427,7 @@ and specified in greater detail in
 Appendix~\ref{builtin objects}.
 
 
-\begin{table} 
+\begin{table}
 \begin{center}
 \it
 \begin{tabular}{||l|p{3.5in}||}
@@ -441,7 +441,7 @@ Predefined Type           & Type Description \\
 \tn{AOpVectorE}		& A single operation signature in a Signature.\\
 \tn{AParamList}		& A list of parameters in an operation Signature.\\
 \tn{BitChunk}		& A container of bits supporting bit-level operations.\\
-\tn{Boolean}		& Logical values with literals \kw{true} 
+\tn{Boolean}		& Logical values with literals \kw{true}
 			  and \kw{false}.\\
 \tn{Character}		& Individual characters with operations such as
 			  $<$, $>$, $=$, ord, etc.\\
