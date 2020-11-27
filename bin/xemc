@@ -1,2 +1,2 @@
 #!/bin/sh
-exec emx $* $EMERALDROOT/EC/execCP
+exec emx -O4m $* $EMERALDROOT/EC/execCP
