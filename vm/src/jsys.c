@@ -47,6 +47,11 @@ Object StdInStream, StdOutStream;
 
 #define sp state->sp
 
+int mergeWith(State *state) {
+	printf("Hei\n");
+	return 0;
+}
+
 /*
  * The get* functions all return various pieces of the system state.
  * They take no parameters.

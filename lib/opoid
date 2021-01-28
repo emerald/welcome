@@ -176,3 +176,5 @@ setisstale@1@0
 getisstale@0@1
 rawread@1@1
 theprocess@0@0
+mergewith@0@2
+mergewith@2@0

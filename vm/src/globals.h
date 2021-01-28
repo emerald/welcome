@@ -54,7 +54,8 @@ junfix(struct State *),
 jrefix(struct State *),
 jlocate(struct State *),
 jgetIncarnationTime(struct State *),
-jgetLoadAverage(struct State *);
+jgetLoadAverage(struct State *),
+mergeWith(struct State *);
 
 extern int(*(sysfuncs[]))(struct State *),
 (*(xfuncs[]))(int *);
