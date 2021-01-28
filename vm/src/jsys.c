@@ -48,7 +48,16 @@ Object StdInStream, StdOutStream;
 #define sp state->sp
 
 int mergeWith(State *state) {
-	printf("Hei\n");
+	ConcreteType ct;
+	Object o;
+	int i;
+
+	o = *(Object *)sp;
+	ct = *(ConcreteType *)(sp + 4);
+
+	String s = (String)o;
+
+	PRINTF("Streng i mergeWith: %s\n", s);
 	return 0;
 }
 
