@@ -47,37 +47,17 @@ struct other {
 	int s;
 } others[MAXOTHERS], cache;
 
-void printIp(u32 ip) {
-	u8 *byte = (u8*)&ip;
-	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
-}
-
-
-void printNode(Node *n) {
-	printf("Node: \n");
-	printf("\tIP:\t");
-	printIp(n->ipaddress);
-	printf("\n\tPort:\t%d", n->port);
-	printf("\n\tEpoch:\t%d", n->epoch);
-}
-
-void printOther(other *o) {
-	printf("******OTHER******\n");
-	printNode(&(o->id));
-}
-
-void printNbo(nbo *n) {
-
-}
-
-void printNoderecord(noderecord *n) {
-
-}
-
-
 /*
  * Forward declarations.
  */
+
+void printNbo(void *n);
+void printNoderecord(noderecord *n);
+void printIp(u32 ip);
+void printNode(Node *n);
+void printOther(struct other *o);
+void printOID(OID *o);
+
 static void setupReader(struct other *ri);
 
 extern int checkSameUser;
@@ -292,6 +272,9 @@ int findsocket(Node *t, int create) {
 	addr.sin_port = htons(t->port);
 	addr.sin_addr.s_addr = t->ipaddress;
 	addrlen = sizeof(addr);
+	printf("findsocket: Trying to connect. Input node:\n");
+	printNode(t);
+
 	TRACE(dist, 1, ("Trying to connect to %08lx.%04x", ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port)));
 	if (connect(s, (struct sockaddr *)&addr, addrlen) < 0) {
 		TRACE(dist, 3, ("Connect failed with errno %d %s", errno, strerror(errno)));
@@ -313,11 +296,15 @@ int findsocket(Node *t, int create) {
 	TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(t->ipaddress), t->port, localcopy.s, nothers));
 	pos = nothers;
 	others[nothers++] = localcopy;
+	printf("findsocket: inserting localcopy to others array:\n");
+	printOther(&localcopy);
 	{
 		nbo.ipaddress = myid.ipaddress;
 		nbo.port = htons(myid.port);
 		nbo.epoch = htons(myid.epoch);
 		nbo.userid = htonl(getuid());
+		printf("findsocket: sending self as nbo:\n");
+		printNbo(&nbo);
 		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo) ||
 		    readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
 			TRACE(dist, 0, ("Couldn't exchange epoch info"));
@@ -331,6 +318,8 @@ int findsocket(Node *t, int create) {
 			nothers--;
 			return -1;
 		}
+		printf("findsocket: nbo answered:\n");
+		printNbo(&nbo);
 		localcopy.id.ipaddress = nbo.ipaddress;
 		localcopy.id.epoch = ntohs(nbo.epoch);
 		assert(localcopy.id.port == ntohs(nbo.port));
@@ -343,6 +332,8 @@ int findsocket(Node *t, int create) {
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
 		TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(cache.id.ipaddress), cache.id.port, cache.s, nothers));
+		printf("findsocket: Adding to others array an additional time:\n");
+		printOther(&cache);
 		others[nothers++] = cache;
 	}
 	checkForStrangeness();
@@ -719,3 +710,75 @@ int InitDist() {
 	return 0;
 }
 
+// For testing
+
+void printIp(u32 ip) {
+	u8 *byte = (u8*)&ip;
+	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
+}
+
+void printSpace(int i) {
+	while (i--) printf("\t");
+}
+
+void printNodeIndent(Node *n, int i) {
+	printSpace(i);
+	printf("Node: \n");
+	printSpace(i);
+	printf("\tIP: \t"); printIp(n->ipaddress);
+	printf("\n");
+	printSpace(i);
+	printf("\tPort:\t%u\n", n->port);
+	printSpace(i);
+	printf("\tEpoch:\t%u\n", n->epoch);
+}
+
+void printNode(Node *n) {
+	printNodeIndent(n, 0);
+}
+
+void printOther(struct other *o) {
+	printf("Other: \n");
+	printf("\ts: %d\n", o->s);
+	printNodeIndent(&(o->id), 1);
+}
+
+void printNbo(void *v) {
+	struct nbo *n = (struct nbo*) v;
+	printf("nbo: \n");
+	printf("\tIP: \t"); printIp(n->ipaddress);
+	printf("\n\tPort:\t%u\n", htons(n->port));
+	printf("\tEpoch:\t%u\n", n->epoch);
+	printf("\tUserid:\t%x\n", n->userid);
+}
+
+void printOIDIndent(OID *o, int i) {
+	printSpace(i);
+	printf("oid:\n");
+	printSpace(i);
+	printf("\tIP: \t"); printIp(o->ipaddress); printf("\n");
+	printSpace(i);
+	printf("\tPort:\t%u\n", o->port);
+	printSpace(i);
+	printf("\tEpoch:\t%u\n", o->epoch);
+	printSpace(i);
+	printf("\tSeq:\t%u\n", o->Seq);
+}
+
+void printOID(OID *o) {
+	printOIDIndent(o, 0);
+}
+
+void printNoderecord(noderecord *n) {
+	printf("noderecord:\n");
+	printf("\tUp: \t%d\n", n->up);
+	printf("\tnode:\n");
+	printOIDIndent(&n->node, 1);
+	printf("\tinctm:\n");
+	printOIDIndent(&n->inctm, 1);
+	printf("\tsrv:\n");
+	printNodeIndent(&n->srv, 1);
+	printf("\tnext:\t%p\n", n->p);
+}
+
+// End for testing
