@@ -20,7 +20,7 @@ const Node <- immutable object Node builtin 0x1008
         function getRootDirectory -> [Directory]
         operation setLocationServer [Any]
         function getLocationServer -> [Any]
-        operation mergeWith -> [String, Integer]
+        operation mergeWith [String, Integer]
     end NodeType
 
     export function getSignature -> [ result : Signature ]
@@ -87,7 +87,7 @@ const Node <- immutable object Node builtin 0x1008
                 primitive "SYS" "GETNAME" 0 [result] <- []
             end getName
             export operation mergeWith [ip : String, port : Integer]
-                primitive "SYS" "MERGEWITH" 2 [] <- [ip, port]
+                primitive var "SYS" "MERGEWITH" 2 [] <- [ip, port]
             end mergeWith
         end aNode
     end create
