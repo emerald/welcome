@@ -47,6 +47,34 @@ struct other {
 	int s;
 } others[MAXOTHERS], cache;
 
+void printIp(u32 ip) {
+	u8 *byte = (u8*)&ip;
+	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
+}
+
+
+void printNode(Node *n) {
+	printf("Node: \n");
+	printf("\tIP:\t");
+	printIp(n->ipaddress);
+	printf("\n\tPort:\t%d", n->port);
+	printf("\n\tEpoch:\t%d", n->epoch);
+}
+
+void printOther(other *o) {
+	printf("******OTHER******\n");
+	printNode(&(o->id));
+}
+
+void printNbo(nbo *n) {
+
+}
+
+void printNoderecord(noderecord *n) {
+
+}
+
+
 /*
  * Forward declarations.
  */
