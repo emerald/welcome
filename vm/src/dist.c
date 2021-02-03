@@ -136,6 +136,10 @@ void DRegisterNotify(NotifyFunction f) {
 	notifyFunction = f;
 }
 
+/*
+ * AKA deleteOther.
+ * Remove all instances of o from others-array. Decrease nothers accordingly.
+ */
 static void nukeother(struct other o) {
 	int from, to;
 	TRACE(dist, 8, ("Nuking %x.%x (%d)", ntohl(o.id.ipaddress), o.id.port, o.s));
@@ -222,6 +226,22 @@ static void checkForStrangeness() {
 	}
 }
 
+/*
+ * In short:
+ * Find socket of node and set cache (global) to it.
+ * If create = 1, and socket doesn't exist:
+ * 			Create the socket
+ *			Connect to node
+ *			Create an other based on node and new socket with empty epoch and
+ *			add it to others.
+ *			Exchange epoch/nbo info with node
+ *			Update Node *t with new info
+ *			Allocate new other and add the node and the socket to it
+ *			Setup ReaderCB as handler for new socket. 
+ *			If new node is unique: Add new other to others[], this time with
+ *			correct epoch.
+ *
+ */
 int findsocket(Node *t, int create) {
 	int i, addrlen, s, pos;
 	struct sockaddr_in addr;

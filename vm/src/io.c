@@ -91,6 +91,16 @@ typedef struct ioinfo {
 	struct ioinfo *prev;
 } ioinfo;
 
+/*
+ * Add a fd to the fd-set specified by the direction. Create a ioinfo with
+ * the h and the state. Add the fd as key and the ioinfo as value to the
+ * searchable collection (IISc) specified by the direction.
+ *
+ * int fd				- file descriptor
+ * IoHandler h			- handler-function
+ * EDirection direction	- read/write/except-mode
+ * void *state 			- Reader/Listener state
+ */
 void setHandler(int fd, IoHandler h, EDirection direction, void *state) {
 	ioinfo *ioi = (ioinfo *)vmMalloc(sizeof (*ioi));
 	FD_SET((unsigned)fd, &io_sets[direction]);
@@ -104,6 +114,10 @@ void setHandler(int fd, IoHandler h, EDirection direction, void *state) {
 	if (fd >= nfds) nfds = fd + 1;
 }
 
+/*
+ * Remove fd from fd-set and searchable collection (IISc) spesified by the
+ * direction.
+ */
 void resetHandler(int fd, EDirection direction) {
 	ioinfo *ioi = (ioinfo *)IIScLookup(io_scs[direction], fd);
 	if (IIScIsNIL(ioi)) return;
@@ -117,6 +131,12 @@ void resetHandler(int fd, EDirection direction) {
 	vmFree(ioi);
 }
 
+/*
+ * Check for IO on any of the fd-sets. For each action, call the handler
+ * function corresponding to that fd.
+ *
+ * int wait 	- if 0, do not wait on select.
+ */
 void checkForIO(int wait) {
 	EDirection d;
 	fd_set local[3];
@@ -194,6 +214,11 @@ void setupReadBuffer(readBuffer *rb, void *buf, int goal, int acceptless,
 	rb->reader = reader;
 }
 
+/*
+ * Read from socket s into rb->buffer. Return total number of bytes read from
+ * that readBuffer if rb->goal is reached. Return 0 if not reached and -1 on
+ * error.
+ */
 int tryReading(readBuffer *rb, int s) {
 	int res;
 	TRACE(dist, 9, ("tryReading on %d goal %d", s, rb->goal));
@@ -219,6 +244,7 @@ int tryReading(readBuffer *rb, int s) {
 }
 
 /*
+ * [Not called from anywhere] 
  * Do a read, but wait until it can be accomplished without blocking.  If it
  * tries to block, then just call processEverything until it is available to
  * read.
