@@ -66,6 +66,9 @@ static void pipeHandler(int signalnumber) {
 	TRACE(dist, 1, ("Got SIGPIPE"));
 }
 
+/*
+ * Send length and message.
+ */
 ssize_t Dwrite2(int fd, void *buf1, size_t n1, void *buf2, size_t n2) {
 	int res;
 	struct iovec v[2];
@@ -237,7 +240,7 @@ static void checkForStrangeness() {
  *			Exchange epoch/nbo info with node
  *			Update Node *t with new info
  *			Allocate new other and add the node and the socket to it
- *			Setup ReaderCB as handler for new socket. 
+ *			Setup ReaderCB as handler for new socket.
  *			If new node is unique: Add new other to others[], this time with
  *			correct epoch.
  *
@@ -370,6 +373,14 @@ typedef struct ReaderState {
 	int readingLength, length;
 } ReaderState;
 
+/*
+ * Read a new message from sock into the ReaderState (state).
+ * Any message consists of two messages: the length of the following message and
+ * the message itself. After reading the length, a buffer is allocated and
+ * the rest of the message is expected. After reading the message, it is
+ * inserted into the incoming MQueue, and any new message is expected to be
+ * a length message.
+ */
 static void ReaderCB(int sock, EDirection d, void *state) {
 	extern long nMessagesReceived, nBytesReceived;
 	ReaderState *rs = state;
@@ -411,6 +422,9 @@ static void ReaderCB(int sock, EDirection d, void *state) {
 	}
 }
 
+/*
+ * Setup handlers for ri and allocate a ReaderState for it.
+ */
 static void setupReader(struct other *ri) {
 	ReaderState *rs = (ReaderState *)vmMalloc(sizeof(*rs));
 	rs->ri = ri;
@@ -437,6 +451,11 @@ static int checkUserOK(int local, int remote) {
 	}
 }
 
+/*
+ * Read a nbo containing information on the sender and store it in the others
+ * array. Set up a reader for future communication, and call the notify function
+ * to alert that a new Emerald node has connected.
+ */
 static void ListenerStage2(int sock, EDirection d, void *arg) {
 	int res;
 	ListenerState *ls = arg;
@@ -461,6 +480,11 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 	vmFree((char *)ls);
 }
 
+/*
+ * Accept incoming connection and set up a new socket. Store information on the
+ * new connection in the others array, and send an nbo back containing our
+ * information. An expected nbo-reply is handled by ListenerStage2.
+ */
 static void ListenerCB(int sock, EDirection d, void *s) {
 	int newsocket;
 	struct sockaddr_in addr;
@@ -506,6 +530,9 @@ static void setupListener(int sock) {
 	setHandler(sock, ListenerCB, EIO_Read, NULL);
 }
 
+/*
+ * Set up initial listening socket, and set ListenerCB as its handler function.
+ */
 int DNetStart(unsigned int ipaddress, unsigned short port, unsigned short epoch) {
 	struct sockaddr_in addr;
 	socklen_t addrlen;
@@ -574,6 +601,9 @@ int DProd(Node *receiver) {
 	return s;
 }
 
+/*
+ * Message abstraction for Dwrite2.
+ */
 int DSend(Node receiver, void *sbuf, int slen) {
 	unsigned int length;
 	int s = -1, res = 1;
