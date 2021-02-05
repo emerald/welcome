@@ -695,7 +695,6 @@ static noderecord *handleupdown(Node id, int up) {
 
 	inctmOID = nodeOID;
 	inctmOID.Seq = 2;
-
 	TRACE(rinvoke, 8, ("Handling updown for %s -> %s", NodeString(id), up ? "up" : "down"));
 	return update_nodeinfo_fromOIDs(nodeOID, inctmOID, up);
 }
@@ -732,6 +731,47 @@ void handleEchoReply(RemoteOpHeader *h, Node srv, Stream str) {
 	TRACE(rinvoke, 4, ("EchoReply received"));
 	update_nodeinfo(str, srv);
 	readyForBusiness = 1;
+}
+
+void doMergeRequest(Node srv) {
+	RemoteOpHeader requesth;
+    Stream request;
+	noderecord *n;
+
+	
+
+	requesth.kind = MergeRequest;
+	requesth.ss = nooid;
+	requesth.sslocation = myid;
+	requesth.target = nooid;
+	requesth.targetct = nooid;
+	requesth.option1 = 1;
+	request = StartMsg(&requesth);
+
+	for (n = allnodes->p; n; n = n->p) {
+		printf("Merge: %d\n", n->srv.epoch);
+		TRACE(rinvoke, 6, ("MergeRequest: sending info on node %s - %s",
+						   OIDString(n->node), n->up ? "up" : "down"));
+		WriteInt(0, request);
+		WriteOID(&n->node, request);
+		TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(n->node)));
+		WriteOID(&n->inctm, request);
+		TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(n->inctm)));
+		WriteInt(n->up, request);
+	}
+	sendGaggleNews(srv, request);
+	sendMsg(srv, request);
+	TRACE(rinvoke, 4, ("mergeRequest sent"));
+}
+
+void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
+	RemoteOpHeader replyh;
+	Stream reply;
+
+	TRACE(rinvoke, 3, ("MergeRequest received"));
+
+	update_nodeinfo(str, srv);
+
 }
 
 void handleEchoRequest(RemoteOpHeader *header, Node srv, Stream str) {
@@ -982,6 +1022,9 @@ void doRequest(Node srv, Stream str) {
 			break;
 		case GaggleUpdate:
 			handler = handleGaggleUpdate;
+			break;
+		case MergeRequest:
+			handler = handleMergeRequest;
 			break;
 #ifdef USEDISTGC
 		case DistGCInfo:

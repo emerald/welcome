@@ -29,7 +29,7 @@ typedef enum {
 	IsFixedRequest, IsFixedReply,
 	GaggleUpdate, DistGCInfo,
 	DistGCDoneRequest, DistGCDoneReply,
-	DistGCDoneReport
+	DistGCDoneReport, MergeRequest
 } MesageType;
 
 #define EMERALDMARKER 0xdeafdeaf
@@ -54,6 +54,9 @@ extern int extractHeader(RemoteOpHeader *h, Stream str);
 extern void ReadNode(Node *srv, Stream theStream);
 extern void InsertNode(Node *t, Bits8 *data);
 extern void WriteNode(Node *srv, Stream theStream);
+extern void parseAddr(char *str, unsigned int *addr, unsigned short *port);
+extern void doMergeRequest(Node srv);
+extern void doEchoRequest(struct noderecord *thisnode, Node srv);
 /*
  * We will report as unavailable any object that we can't get the message
  * to.  Sending either a request or a reply message gets into all kinds of

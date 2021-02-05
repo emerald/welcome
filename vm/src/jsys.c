@@ -47,18 +47,41 @@ Object StdInStream, StdOutStream;
 
 #define sp state->sp
 
+#ifdef DISTRIBUTED
 int mergeWith(State *state) {
-	int port;
-	String ip;
+	int rawport;
+	String ips;
+	unsigned int ip;
+	unsigned short port;
+	Node srv;
 
-	ip = *(String *)(sp);
-	port = *(int *)(sp + 4);
+	ips = *(String *)(sp);
+	rawport = *(int *)(sp + 4);
 
-	// PRINTF("mergeWith IP  : %s\n", ip);
-	// printf("mergeWith Port: %d\n", port);
+	char buf[ips->d.items + 7];
+	buf[ips->d.items] = 0;
+	memcpy(buf, ips->d.data, ips->d.items);
+	sprintf(buf, "%s:%d", buf, rawport);
+
+	parseAddr(buf, &ip, &port);
+	srv.ipaddress = ip;
+	srv.port = port;
+	srv.epoch = 0;
+	if (DProd(&srv) < 0) {
+		printf("Can't contact emerald on %s\n", buf);
+		return 0;
+	}
+
+	doEchoRequest(thisnode, srv);
+	doMergeRequest(srv);
 
 	return 0;
 }
+#else
+int mergeWith(State *state) {
+	printf("Cannot merge. Must be compiled for distrubution\n");
+}
+#endif
 
 /*
  * The get* functions all return various pieces of the system state.
