@@ -738,7 +738,7 @@ void doMergeRequest(Node srv) {
     Stream request;
 	noderecord *n;
 
-	
+
 
 	requesth.kind = MergeRequest;
 	requesth.ss = nooid;
@@ -759,20 +759,59 @@ void doMergeRequest(Node srv) {
 		TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(n->inctm)));
 		WriteInt(n->up, request);
 	}
-	sendGaggleNews(srv, request);
+	// sendGaggleNews(srv, request);
 	sendMsg(srv, request);
 	TRACE(rinvoke, 4, ("mergeRequest sent"));
 }
 
-void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
-	RemoteOpHeader replyh;
-	Stream reply;
+void forwardMergeRequest(RemoteOpHeader *header, Stream str) {
+	OID nodeOID, inctmOID;
+	u32 up;
+	u32 which;
+	Stream forwardstr;
+	noderecord *n;
 
+	header->sslocation = myid;
+	header->option1 = 0;
+
+
+	for (n = allnodes->p; n; n = n->p) {
+
+		forwardstr = StartMsg(header);
+		RewindStream(str);
+		ReadStream(str, sizeof(RemoteOpHeader)); // LEAK?
+
+		while (!AtEOF(str)) {
+			TRACE(rinvoke, 10, ("Looking at another merging node"));
+			ReadInt(&which, str);
+			WriteInt(which, forwardstr);
+			assert(which == 0);
+			ReadOID(&nodeOID, str);
+			WriteOID(&nodeOID, forwardstr);
+			ReadOID(&inctmOID, str);
+			WriteOID(&inctmOID, forwardstr);
+			ReadInt(&up, str);
+			WriteInt(up, forwardstr);
+			TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(nodeOID)));
+			TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(inctmOID)));
+		}
+		sendMsg(n->srv, forwardstr);
+	}
+}
+
+void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	TRACE(rinvoke, 3, ("MergeRequest received"));
 
+	if (header->option1 == 1) {
+		forwardMergeRequest(header, str);
+		RewindStream(str);
+		ReadStream(str, sizeof(RemoteOpHeader));
+	}
 	update_nodeinfo(str, srv);
 
 }
+
+
 
 void handleEchoRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	RemoteOpHeader replyh;
