@@ -624,7 +624,6 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
 	noderecord **nd;
 	Object thenode, inctm;
 	ConcreteType ct;
-
 	TRACE(rinvoke, 8, ("Updating node info for %08x.%04x.%04x -> %s", nodeOID.ipaddress, nodeOID.port, nodeOID.epoch, up ? "up" : "down"));
 	for (nd = &allnodes; *nd; nd = &((*nd)->p)) {
 		if (nodeOID.ipaddress == (*nd)->node.ipaddress &&
@@ -738,7 +737,7 @@ void doMergeRequest(Node srv) {
     Stream request;
 	noderecord *n;
 
-
+	(void)handleupdown(srv, 1);
 
 	requesth.kind = MergeRequest;
 	requesth.ss = nooid;
@@ -749,7 +748,7 @@ void doMergeRequest(Node srv) {
 	request = StartMsg(&requesth);
 
 	for (n = allnodes->p; n; n = n->p) {
-		printf("Merge: %d\n", n->srv.epoch);
+		if(SameNode(srv, n->srv)) continue;
 		TRACE(rinvoke, 6, ("MergeRequest: sending info on node %s - %s",
 						   OIDString(n->node), n->up ? "up" : "down"));
 		WriteInt(0, request);
@@ -759,12 +758,11 @@ void doMergeRequest(Node srv) {
 		TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(n->inctm)));
 		WriteInt(n->up, request);
 	}
-	// sendGaggleNews(srv, request);
 	sendMsg(srv, request);
 	TRACE(rinvoke, 4, ("mergeRequest sent"));
 }
 
-void forwardMergeRequest(RemoteOpHeader *header, Stream str) {
+void forwardMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	OID nodeOID, inctmOID;
 	u32 up;
 	u32 which;
@@ -774,12 +772,11 @@ void forwardMergeRequest(RemoteOpHeader *header, Stream str) {
 	header->sslocation = myid;
 	header->option1 = 0;
 
-
 	for (n = allnodes->p; n; n = n->p) {
-
+		if (SameNode(srv, n->srv)) continue;
 		forwardstr = StartMsg(header);
 		RewindStream(str);
-		ReadStream(str, sizeof(RemoteOpHeader)); // LEAK?
+		(void)ReadStream(str, sizeof(RemoteOpHeader));
 
 		while (!AtEOF(str)) {
 			TRACE(rinvoke, 10, ("Looking at another merging node"));
@@ -801,14 +798,13 @@ void forwardMergeRequest(RemoteOpHeader *header, Stream str) {
 
 void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	TRACE(rinvoke, 3, ("MergeRequest received"));
-
 	if (header->option1 == 1) {
-		forwardMergeRequest(header, str);
+		forwardMergeRequest(header, srv, str);
 		RewindStream(str);
 		ReadStream(str, sizeof(RemoteOpHeader));
 	}
-	update_nodeinfo(str, srv);
 
+	update_nodeinfo(str, srv);
 }
 
 

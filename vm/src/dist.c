@@ -295,8 +295,6 @@ int findsocket(Node *t, int create) {
 	addr.sin_port = htons(t->port);
 	addr.sin_addr.s_addr = t->ipaddress;
 	addrlen = sizeof(addr);
-	// printf("findsocket: Trying to connect. Input node:\n");
-	// printNode(t);
 
 	TRACE(dist, 1, ("Trying to connect to %08lx.%04x", ntohl(addr.sin_addr.s_addr), ntohs(addr.sin_port)));
 	if (connect(s, (struct sockaddr *)&addr, addrlen) < 0) {
@@ -319,15 +317,13 @@ int findsocket(Node *t, int create) {
 	TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(t->ipaddress), t->port, localcopy.s, nothers));
 	pos = nothers;
 	others[nothers++] = localcopy;
-	// printf("findsocket: inserting localcopy to others array:\n");
-	// printOther(&localcopy);
+
 	{
 		nbo.ipaddress = myid.ipaddress;
 		nbo.port = htons(myid.port);
 		nbo.epoch = htons(myid.epoch);
 		nbo.userid = htonl(getuid());
-		// printf("findsocket: sending self as nbo:\n");
-		// printNbo(&nbo);
+
 		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo) ||
 		    readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
 			TRACE(dist, 0, ("Couldn't exchange epoch info"));
@@ -341,8 +337,7 @@ int findsocket(Node *t, int create) {
 			nothers--;
 			return -1;
 		}
-		// printf("findsocket: nbo answered:\n");
-		// printNbo(&nbo);
+
 		localcopy.id.ipaddress = nbo.ipaddress;
 		localcopy.id.epoch = ntohs(nbo.epoch);
 		assert(localcopy.id.port == ntohs(nbo.port));
@@ -355,8 +350,6 @@ int findsocket(Node *t, int create) {
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
 		TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(cache.id.ipaddress), cache.id.port, cache.s, nothers));
-		// printf("findsocket: Adding to others array an additional time:\n");
-		// printOther(&cache);
 		others[nothers++] = cache;
 	}
 	checkForStrangeness();

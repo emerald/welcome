@@ -72,14 +72,13 @@ int mergeWith(State *state) {
 		return 0;
 	}
 
-	doEchoRequest(thisnode, srv);
 	doMergeRequest(srv);
 
 	return 0;
 }
 #else
 int mergeWith(State *state) {
-	printf("Cannot merge. Must be compiled for distrubution\n");
+	printf("Cannot merge. Must be compiled for distribution\n");
 }
 #endif
 
