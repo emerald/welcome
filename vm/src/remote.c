@@ -63,6 +63,35 @@ static char *typenames[] = {
 };
 #endif
 
+// For testing
+extern void printNode(Node *n);
+// void printIp(u32 ip) {
+// 	u8 *byte = (u8*)&ip;
+// 	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
+// }
+//
+// void printSpace(int i) {
+// 	while (i--) printf("\t");
+// }
+//
+// void printNodeIndent(Node *n, int i) {
+// 	printSpace(i);
+// 	printf("Node: \n");
+// 	printSpace(i);
+// 	printf("\tIP: \t"); printIp(n->ipaddress);
+// 	printf("\n");
+// 	printSpace(i);
+// 	printf("\tPort:\t%u\n", n->port);
+// 	printSpace(i);
+// 	printf("\tEpoch:\t%u\n", n->epoch);
+// }
+//
+// void printNode(Node *n) {
+// 	printNodeIndent(n, 0);
+// }
+
+// End for testing
+
 int isLimbo(Node n) {
 	return n.ipaddress == 0 && n.port == 0 && n.epoch == 0;
 }
@@ -736,7 +765,7 @@ void doMergeRequest(Node srv) {
 	RemoteOpHeader requesth;
     Stream request;
 	noderecord *n;
-
+	printf("My ipaddr: %x\n", myid.ipaddress);
 	(void)handleupdown(srv, 1);
 
 	requesth.kind = MergeRequest;
@@ -807,7 +836,19 @@ void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	update_nodeinfo(str, srv);
 }
 
-
+void handleDiscoveredNode(Node srv) {
+	noderecord *nd;
+	// printNode(&srv);
+	for (nd = allnodes; nd; nd = nd->p) {
+		// printNode(&nd->srv);
+		if (SameNode(srv, nd->srv)) {
+			// printf("Discovered old node\n");
+			return;
+		}
+	}
+	printf("Discovered new node!\n");
+	// doUpcallHandlers
+}
 
 void handleEchoRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	RemoteOpHeader replyh;

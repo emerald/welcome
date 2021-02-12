@@ -39,6 +39,10 @@ typedef struct readBuffer {
 	ssize_t (*reader)(int, void *, size_t);
 } readBuffer;
 
+#define DISCOVERY_PORT 16098
+#define DISCOVERYMARKER 0xfeedbeef
+#define DISCOVERY_MSGSIZE (sizeof(int) * 3 + sizeof(short) * 2)
+
 extern void setupReadBuffer(readBuffer *rb, void *buf, int goal, int acceptless,
                             ssize_t (*reader)(int, void *, size_t));
 extern int tryReading(readBuffer *rb, int s);

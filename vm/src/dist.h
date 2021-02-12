@@ -16,6 +16,7 @@
 #define EMERALDFIRSTPORT 0x3ee3
 #define EMERALDPORTSKIP 0x400
 #define EMERALDPORTPROBE(n) ((n) + EMERALDPORTSKIP)
+#define ADVERTISEMENT_INTERVAL 5
 
 char *NodeString(Node);
 extern Node myid;
@@ -32,7 +33,9 @@ int DSend(Node receiver, void *sbuf, int slen);
 int DProd(Node *receiver);
 typedef void (*NotifyFunction)(Node id, int isup);
 void DRegisterNotify(NotifyFunction);
+void advertiseMe();
 
+void init_advertisement();
 int InitDist(void);
 
 #ifndef WIN32

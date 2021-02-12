@@ -27,6 +27,7 @@ extern int traceprocess;
 SQueue ready;
 extern char *gRootNode;
 int doDistribution = 0;
+int beDiscoverable = 0;
 #ifdef PROFILEINVOKES
 IISc invokeprofile, opvectorentry2ct;
 #endif
@@ -134,6 +135,7 @@ void processEverythingOnce(void) {
 	}
 #ifdef DISTRIBUTED
 	if (MQueueSize(incoming) > 0) serveRequest();
+	if (beDiscoverable) advertiseMe();
 #endif
 	if (SQueueSize(ready) > 0 && !inDebugger) {
 		r = SQueueRemove(ready);
@@ -336,6 +338,14 @@ void hack_mainp(void *arg) {
 #if defined(DISTRIBUTED)
 					doDistribution = 1;
 					gRootNode = "search";
+#else
+					fprintf(stderr, "emx: not compiled for distribution (DISTRIBUTED)\n");
+#endif
+					break;
+				case 'D':
+#if defined(DISTRIBUTED)
+					beDiscoverable = 1;
+					init_advertisement();
 #else
 					fprintf(stderr, "emx: not compiled for distribution (DISTRIBUTED)\n");
 #endif

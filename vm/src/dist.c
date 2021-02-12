@@ -9,6 +9,7 @@
 #define E_NEEDS_TCP
 #define E_NEEDS_NETDB
 #define E_NEEDS_ERRNO
+#define E_NEEDS_IFADDRS
 #include "system.h"
 
 #include "assert.h"
@@ -41,6 +42,7 @@ extern int gettimeofday(struct timeval *, void *);
 #endif
 
 #define MAXOTHERS 128
+#define MAXBROADCASTADDRS 10
 static int nothers;
 struct other {
 	Node id;
@@ -60,7 +62,9 @@ void printOID(OID *o);
 
 static void setupReader(struct other *ri);
 
-extern int checkSameUser;
+extern int checkSameUser, beDiscoverable;
+static int brd_socket, last_ad = 0;
+static Bits32 broadcastaddrs[MAXBROADCASTADDRS];
 
 static void pipeHandler(int signalnumber) {
 	TRACE(dist, 1, ("Got SIGPIPE"));
@@ -589,6 +593,86 @@ int DNetStart(unsigned int ipaddress, unsigned short port, unsigned short epoch)
 	return 0;
 }
 
+static void discoveryCB (int sock, EDirection d, void *s) {
+	char msg[DISCOVERY_MSGSIZE + 1];
+	int rc;
+	struct sockaddr_in sender;
+	socklen_t socksize = sizeof(struct sockaddr_in);
+	unsigned int em_sig, disc_sig, ip;
+	unsigned short port, epoch;
+	Node n;
+
+	rc = recvfrom(sock, msg, DISCOVERY_MSGSIZE + 1, 0, (struct sockaddr*)&sender, &socksize);
+	if(rc < 0) {
+		perror("recvfrom in discoveryCB");
+		return;
+	} else if (rc != DISCOVERY_MSGSIZE) {
+		return;
+	}
+
+	memcpy(&em_sig, &msg[0], sizeof(int));
+	memcpy(&disc_sig, &msg[4], sizeof(int));
+	memcpy(&ip, &msg[8], sizeof(int));
+	memcpy(&port, &msg[12], sizeof(short));
+	memcpy(&epoch, &msg[14], sizeof(short));
+
+	em_sig = ntohl(em_sig);
+	disc_sig = ntohl(disc_sig);
+	if(EMERALDMARKER != em_sig || DISCOVERYMARKER != disc_sig) return;
+
+	n.ipaddress = ip;
+	n.port = ntohs(port);
+	n.epoch = ntohs(epoch);
+
+	handleDiscoveredNode(n);
+}
+
+int DDiscoverStart() {
+	struct sockaddr_in broadcast_addr;
+    int rc;
+	int reuse = 1;
+	char loopbackON = 1;
+	int broadcastON = 1;
+
+    broadcast_addr.sin_family = AF_INET;
+    broadcast_addr.sin_port = htons(DISCOVERY_PORT);
+    broadcast_addr.sin_addr.s_addr = INADDR_ANY;
+    // Create the Socket
+    int udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if(udpSocket < 0) {
+		perror("socket");
+		return -1;
+	}
+    // Enable SO_REUSEADDR to allow multiple instances of this application to receive copies of the multicast datagrams.
+    rc = setsockopt(udpSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+    if(rc < 0) {
+		perror("SO_REUSEADDR");
+		close(udpSocket);
+		return -1;
+	}
+    rc = setsockopt(udpSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopbackON, sizeof(loopbackON));
+	if(rc < 0) {
+		perror("IP_MULTICAST_LOOP");
+		close(udpSocket);
+		return -1;
+	}
+
+    rc = setsockopt(udpSocket, SOL_SOCKET, SO_BROADCAST, (char *)&broadcastON, sizeof(broadcastON));
+    if(rc < 0) {
+		perror("SO_BROADCAST");
+		close(udpSocket);
+		return -1;
+	}
+	rc = bind(udpSocket, (struct sockaddr*)&broadcast_addr, sizeof(struct sockaddr_in));
+	if(rc < 0) {
+		perror("bind");
+		close(udpSocket);
+		return -1;
+	}
+
+	setHandler(udpSocket, discoveryCB, EIO_Read, NULL);
+}
+
 int DProd(Node *receiver) {
 	int s = findsocket(receiver, 1);
 	return s;
@@ -638,6 +722,115 @@ int DSend(Node receiver, void *sbuf, int slen) {
 	TRACE(dist, ((res < 0) ? 1 : 5), ("DSend %d to %s on %d returning %d", slen,
 	                                  NodeString(receiver), s, res));
 	return res;
+}
+
+void findBroadcastAddrs() {
+	struct ifaddrs *ifa, *tmp;
+	int rc, i = 0;
+
+	memset(broadcastaddrs, 0, sizeof(Bits32) * MAXBROADCASTADDRS);
+
+	rc = getifaddrs(&ifa);
+    if(rc < 0) {
+		perror("findBroadcastAddrs, getifaddrs");
+		return;
+	}
+
+	for (tmp = ifa; tmp; tmp = tmp->ifa_next) {
+        if (! (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET)) continue;
+        if (! (strcmp(tmp->ifa_name, "lo"))) continue;
+        if (tmp->ifa_flags & IFF_BROADCAST) {
+            if(tmp->ifa_broadaddr) {
+				broadcastaddrs[i++] = ((struct sockaddr_in*)tmp->ifa_broadaddr)->sin_addr.s_addr;
+				if (i == MAXBROADCASTADDRS) break;
+            }
+        }
+    }
+	freeifaddrs(ifa);
+}
+
+void advertiseMe(){
+	int i, rc, cur_time = time(NULL);
+	static int counter = 0;
+	Bits32 em_sig, disc_sig;
+	Bits16 port, epoch;
+	static struct sockaddr_in broadcast_addr = {
+		.sin_family = AF_INET,
+	};
+	broadcast_addr.sin_port = htons(DISCOVERY_PORT);
+
+	if (cur_time - last_ad < ADVERTISEMENT_INTERVAL) return;
+	if (! (counter++ % 5)) findBroadcastAddrs();
+
+	last_ad = cur_time;
+
+	char msg[DISCOVERY_MSGSIZE];
+
+	em_sig = htonl(EMERALDMARKER);
+    disc_sig = htonl(DISCOVERYMARKER);
+    port = htons(MyNode.port);
+    epoch = htons(MyNode.epoch);
+
+    memcpy(&msg[0], &em_sig, sizeof(int));
+    memcpy(&msg[4], &disc_sig, sizeof(int));
+    memcpy(&msg[8], &MyNode.ipaddress, sizeof(Bits32));
+    memcpy(&msg[12], &port, sizeof(Bits16));
+    memcpy(&msg[14], &epoch, sizeof(Bits16));
+
+	for (i = 0; i < MAXBROADCASTADDRS; i++) {
+		if(! broadcastaddrs[i]) break;
+		broadcast_addr.sin_addr.s_addr = broadcastaddrs[i];
+		rc = sendto(brd_socket, msg, DISCOVERY_MSGSIZE, 0,
+			(struct sockaddr*)&broadcast_addr, sizeof(struct sockaddr_in));
+		if (rc < 0) perror("sendto-broadcast");
+	}
+
+}
+
+void init_advertisement(){
+	int reuse, broadcastON, ttl, rc;
+	char loopbackON;
+
+	// Create the Socket
+    brd_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    if(brd_socket < 0) {
+		perror("socket");
+		exit(EXIT_FAILURE);
+	}
+
+    // Enable SO_REUSEADDR to allow multiple instances of this application to receive copies of the multicast datagrams.
+    reuse = 1;
+    rc = setsockopt(brd_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+    if(rc < 0) {
+		perror("SO_REUSEADDR");
+		close(brd_socket);
+		exit(EXIT_FAILURE);
+	}
+    // Disable loopback so you do not receive your own datagrams.
+
+ 	loopbackON = 1;
+    rc = setsockopt(brd_socket, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopbackON, sizeof(loopbackON));
+    if(rc < 0) {
+		perror("IP_MULTICAST_LOOP");
+		close(brd_socket);
+		exit(EXIT_FAILURE);
+	}
+
+    broadcastON = 1;
+    rc = setsockopt(brd_socket, SOL_SOCKET, SO_BROADCAST, (char *)&broadcastON, sizeof(broadcastON));
+    if(rc < 0) {
+		perror("SO_BROADCAST");
+		close(brd_socket);
+		exit(EXIT_FAILURE);
+	}
+
+    ttl = 2;
+    rc = setsockopt(brd_socket, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
+    if(rc < 0)  {
+		perror("IP_TTL");
+		close(brd_socket);
+		exit(EXIT_FAILURE);
+	}
 }
 
 void processMessages(void) {
@@ -738,6 +931,8 @@ int InitDist() {
 		port = EMERALDPORTPROBE(port);
 		if (port > 0x10000) return -1;
 	}
+	if (DDiscoverStart() == -1) printf("Discovery mechanism failed."
+										"Proceeding without discovery.\n");
 #else
 	myid.ipaddress = 0xdeadbeef;
 	myid.port = port;

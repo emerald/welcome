@@ -176,6 +176,7 @@ void checkForIO(int wait) {
 			selectpause = &pause;
 		}
 	}
+	// printf("selectpause sec: %d, usec: %d\n", selectpause->tv_sec, selectpause->tv_usec);
 	TRACE(dist, 4, ("Select delaying for %d.%06d",
 	                selectpause ? selectpause->tv_sec : -1,
 	                selectpause ? selectpause->tv_usec : 0));
@@ -244,7 +245,7 @@ int tryReading(readBuffer *rb, int s) {
 }
 
 /*
- * [Not called from anywhere] 
+ * [Not called from anywhere]
  * Do a read, but wait until it can be accomplished without blocking.  If it
  * tries to block, then just call processEverything until it is available to
  * read.

@@ -116,6 +116,11 @@ extern int errno;
 #  include <signal.h>
 #endif
 
+#if defined(E_NEEDS_IFADDRS)
+#  include <ifaddrs.h>
+#  include <net/if.h>
+#endif
+
 #ifdef E_NEEDS_IOV
 #  if defined(WIN32)
 struct iovec {

@@ -6,7 +6,9 @@
 
 #include "storage.h"
 
+#define ADVERTISEMENT_INTERVAL 5
 int timeAdvanced;
+extern int beDiscoverable;
 
 #ifdef WIN32
 HANDLE alarmWakeup;
@@ -211,5 +213,10 @@ void checkForTimeouts(void) {
 
 struct timeval nextWakeup(void) {
 	static struct timeval zero;
-	return sleepers ? sleepers->when : zero;
+	static struct timeval advertime;
+
+	gettimeofday(&advertime, 0);
+	advertime.tv_sec += ADVERTISEMENT_INTERVAL;
+
+	return sleepers ? sleepers->when : beDiscoverable ? advertime : zero;
 }
