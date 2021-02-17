@@ -178,11 +178,3 @@ rawread@1@1
 theprocess@0@0
 mergewith@0@2
 mergewith@2@0
-setdiscoverednodeeventhandler@1@0
-seteventhandler@2@0
-first@0@1
-last@0@1
-node_event@0@1
-discovered_node_event@0@1
-succ@0@1
-pred@0@1

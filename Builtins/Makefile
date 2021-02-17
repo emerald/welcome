@@ -132,7 +132,7 @@ install:
 	$(EMX) -B -C -b CP
 	rm -f $(EMLIBDIR)/Builtins
 	cp CP $(EMLIBDIR)/Builtins
-	chmod -w $(EMLIBDIR)/Builtins
+	# chmod -w $(EMLIBDIR)/Builtins
 	cp name.opd $(EMLIBDIR)/opoid
 
 embeddedinstall:
@@ -179,5 +179,5 @@ Literal.m:	IVec.m vec-ed
 	csh vec-ed IVec.m LiteralList Integer 27 Literal.m
 
 clean:
-	rm -f *.bak .emacs_[0-9]* *.ckp 
+	rm -f *.bak .emacs_[0-9]* *.ckp name name.* CP CPindex
 

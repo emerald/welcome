@@ -1,4 +1,11 @@
 #!/bin/sh
+cd $EMERALDROOT/lib
+cp Builtins.stable Builtins
+cp opoid.stable opoid
+cd $EMERALDROOT/Builtins
+emmake
+emmake install
+emmake clean
 cd $EMERALDROOT/EC
 emmake fffs
 newversion
