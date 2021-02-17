@@ -17,6 +17,13 @@
 #define EMERALDPORTSKIP 0x400
 #define EMERALDPORTPROBE(n) ((n) + EMERALDPORTSKIP)
 #define ADVERTISEMENT_INTERVAL 5
+#define DISCOVERED_NODE_TIMEOUT 30
+
+typedef struct DiscoveredNode {
+	Node srv;
+	int time;
+	struct DiscoveredNode *next;
+} DiscoveredNode;
 
 char *NodeString(Node);
 extern Node myid;
@@ -33,9 +40,10 @@ int DSend(Node receiver, void *sbuf, int slen);
 int DProd(Node *receiver);
 typedef void (*NotifyFunction)(Node id, int isup);
 void DRegisterNotify(NotifyFunction);
-void advertiseMe();
+void advertiseMe(void);
+extern void updateDiscoveredNodes(void);
 
-void init_advertisement();
+void init_advertisement(void);
 int InitDist(void);
 
 #ifndef WIN32

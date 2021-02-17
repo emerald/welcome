@@ -22,6 +22,7 @@ extern MQueue incoming;
 ISet allProcesses;
 ISet running;
 extern int traceprocess;
+extern DiscoveredNode *discoverednodes;
 
 #include "squeue.h"
 SQueue ready;
@@ -136,6 +137,7 @@ void processEverythingOnce(void) {
 #ifdef DISTRIBUTED
 	if (MQueueSize(incoming) > 0) serveRequest();
 	if (beDiscoverable) advertiseMe();
+	if (discoverednodes) updateDiscoveredNodes();
 #endif
 	if (SQueueSize(ready) > 0 && !inDebugger) {
 		r = SQueueRemove(ready);

@@ -29,6 +29,7 @@
 
 unsigned distGCSeq = 0, lastCompletedDistGCSeq = 0;
 noderecord *allnodes = NULL, *thisnode = NULL, *limbonode = NULL;
+DiscoveredNode *discoverednodes = NULL;
 Node limbo;
 static int nodecount = 0;
 Object rootdir = (Object)JNIL, node = (Object)JNIL, inctm = (Object)JNIL;
@@ -110,6 +111,38 @@ Node getLocFromObj(Object obj) {
 }
 
 #ifdef DISTRIBUTED
+
+void addDiscoveredNode(DiscoveredNode *dn) {
+    dn->next = discoverednodes;
+    discoverednodes = dn;
+}
+
+void removeDiscoveredNode(DiscoveredNode *dn) {
+    DiscoveredNode **tmp;
+
+	for (tmp = &discoverednodes; *tmp; tmp = &((**tmp).next)) {
+        if (*tmp == dn) {
+			printNode(&dn->srv);
+            *tmp = dn->next;
+			vmFree(dn);
+            return;
+        }
+    }
+}
+
+void updateDiscoveredNodes(void) {
+	DiscoveredNode **tmp;
+	int current = time(NULL);
+
+	for (tmp = &discoverednodes; *tmp; tmp = &((**tmp).next)) {
+        if (current - (*tmp)->time >= DISCOVERED_NODE_TIMEOUT) {
+			removeDiscoveredNode(*tmp);
+			updateDiscoveredNodes();
+            return;
+        }
+    }
+}
+
 static noderecord *handleupdown(Node id, int up);
 extern Object createStub(ConcreteType ct, void *stub, OID oid);
 
@@ -838,15 +871,26 @@ void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 
 void handleDiscoveredNode(Node srv) {
 	noderecord *nd;
-	// printNode(&srv);
-	for (nd = allnodes; nd; nd = nd->p) {
-		// printNode(&nd->srv);
-		if (SameNode(srv, nd->srv)) {
-			// printf("Discovered old node\n");
+	DiscoveredNode *dn;
+
+	for (dn = discoverednodes; dn; dn = dn->next) {
+		if (SameNode(srv, dn->srv)) {
+			dn->time = time(NULL);
 			return;
 		}
 	}
+
+	for (nd = allnodes; nd; nd = nd->p) {
+		if (SameNode(srv, nd->srv)) {
+			return;
+		}
+	}
+
 	printf("Discovered new node!\n");
+	dn = vmMalloc(sizeof(DiscoveredNode));
+	dn->time = time(NULL);
+	dn->srv = srv;
+	addDiscoveredNode(dn);
 	// doUpcallHandlers
 }
 

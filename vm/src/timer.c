@@ -9,6 +9,7 @@
 #define ADVERTISEMENT_INTERVAL 5
 int timeAdvanced;
 extern int beDiscoverable;
+extern void *discoverednodes;
 
 #ifdef WIN32
 HANDLE alarmWakeup;
@@ -218,5 +219,5 @@ struct timeval nextWakeup(void) {
 	gettimeofday(&advertime, 0);
 	advertime.tv_sec += ADVERTISEMENT_INTERVAL;
 
-	return sleepers ? sleepers->when : beDiscoverable ? advertime : zero;
+	return sleepers ? sleepers->when : (beDiscoverable || discoverednodes) ? advertime : zero;
 }
