@@ -1,5 +1,6 @@
 # Emerald
 *.x
+lib/Builtins
 EC/bestCP
 EC/execCP
 EC/CP

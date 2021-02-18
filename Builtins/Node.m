@@ -220,7 +220,7 @@ const Node <- immutable object Node builtin 0x1008
             end setLocationServer
 
             export operation mergeWith [ip : String, port : Integer]
-                primitive var "SYS" "JMERGEWITH" 2 [] <- [ip, port]
+                primitive "SYS" "JMERGEWITH" 2 [] <- [ip, port]
             end mergeWith
         end aNode
     end create

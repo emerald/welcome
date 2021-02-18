@@ -798,7 +798,6 @@ void doMergeRequest(Node srv) {
 	RemoteOpHeader requesth;
     Stream request;
 	noderecord *n;
-	printf("My ipaddr: %x\n", myid.ipaddress);
 	(void)handleupdown(srv, 1);
 
 	requesth.kind = MergeRequest;
