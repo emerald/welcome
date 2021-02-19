@@ -1207,11 +1207,11 @@ void doRequest(Node srv, Stream str) {
 
 static int ping(Node srv) {
 	int res;
-	extern int findsocket(Node *t, int create);
+	extern int findsocket(Node *t, int create, int silent);
 	doEchoRequest(thisnode, srv);
-	while (!readyForBusiness && findsocket(&srv, 0) > 0)
+	while (!readyForBusiness && findsocket(&srv, 0, 0) > 0)
 		processMessages();
-	res = findsocket(&srv, 0) > 0 ? 0 : -1;
+	res = findsocket(&srv, 0, 0) > 0 ? 0 : -1;
 	TRACE(rinvoke, 3, ("Ping %s", res < 0 ? "failed" : "succeeded"));
 	return res;
 }

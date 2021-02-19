@@ -245,6 +245,8 @@ int doDiscoveredMoveRequest(Object obj, Node srv, State *state) {
 	ConcreteType ct;
 	RemoteOpHeader h;
 
+	// extern int findsocket(Node, int, int);
+
 	ct = CODEPTR(obj->flags);
 	if (!ISWELCOME(ct->d.instanceFlags)) {
 		TRACE(rinvoke, 2, ("Not moving unwelcome %s to discovered node %s", OIDString(OIDOf(obj)), NodeString(srv)));
@@ -253,6 +255,9 @@ int doDiscoveredMoveRequest(Object obj, Node srv, State *state) {
 		moveDone(state, &h, 1);
 		return 1;
 	}
+
+	printf("Performing findsocket with silent = %x!\n", SILENT_MODE_FLAG);
+	findsocket(&srv, 1, SILENT_MODE_FLAG);
 
 	printf("Performing discovered move request!\n");
 	return 0;

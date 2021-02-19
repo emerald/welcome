@@ -249,7 +249,7 @@ static void checkForStrangeness() {
  *			correct epoch.
  *
  */
-int findsocket(Node *t, int create) {
+int findsocket(Node *t, int create, int silent) {
 	int i, addrlen, s, pos;
 	struct sockaddr_in addr;
 	struct other *o, localcopy;
@@ -326,7 +326,7 @@ int findsocket(Node *t, int create) {
 		nbo.ipaddress = myid.ipaddress;
 		nbo.port = htons(myid.port);
 		nbo.epoch = htons(myid.epoch);
-		nbo.userid = htonl(getuid());
+		nbo.userid = htonl(getuid() | silent);
 
 		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo) ||
 		    readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
@@ -459,7 +459,7 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 	if (!(res = tryReading(&ls->rb, ls->ri->s))) return;
 	resetHandler(sock, EIO_Read);
 	resetHandler(sock, EIO_Except);
-	if (res != sizeof(ls->nbo) || !checkUserOK(getuid(), ntohl(ls->nbo.userid))) {
+	if (res != sizeof(ls->nbo) || !checkUserOK(getuid(), (~SILENT_MODE_FLAG & ntohl(ls->nbo.userid)))) {
 		nukeother(*ls->ri);
 		closesocket(ls->ri->s);
 		vmFree(ls->ri);
@@ -471,7 +471,9 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 		TRACE(dist, 8, ("Inserting %#x.%4x.%4x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->id.epoch, ls->ri->s, nothers));
 		others[nothers++] = *ls->ri;
 		setupReader(ls->ri);
-		if (notifyFunction) callNotifyFunction(ls->ri->id, 1);
+		if (notifyFunction && !(SILENT_MODE_FLAG & ntohl(ls->nbo.userid))) {
+			callNotifyFunction(ls->ri->id, 1);
+		}
 	}
 	checkForStrangeness();
 	vmFree((char *)ls);
@@ -674,7 +676,7 @@ int DDiscoverStart() {
 }
 
 int DProd(Node *receiver) {
-	int s = findsocket(receiver, 1);
+	int s = findsocket(receiver, 1, 0);
 	return s;
 }
 
@@ -704,7 +706,7 @@ int DSend(Node receiver, void *sbuf, int slen) {
 			res = -1;
 		}
 		else {
-			s = findsocket(&receiver, 1);
+			s = findsocket(&receiver, 1, 0);
 			nMessagesSent++;
 			nBytesSent += slen;
 
@@ -806,7 +808,6 @@ void init_advertisement(){
 		close(brd_socket);
 		exit(EXIT_FAILURE);
 	}
-    // Disable loopback so you do not receive your own datagrams.
 
  	loopbackON = 1;
     rc = setsockopt(brd_socket, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopbackON, sizeof(loopbackON));

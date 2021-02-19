@@ -18,6 +18,7 @@
 #define EMERALDPORTPROBE(n) ((n) + EMERALDPORTSKIP)
 #define ADVERTISEMENT_INTERVAL 5
 #define DISCOVERED_NODE_TIMEOUT 30
+#define SILENT_MODE_FLAG (1 << 30)
 
 char *NodeString(Node);
 extern Node myid;
@@ -29,6 +30,7 @@ extern void DInit(void);
 void DStart(void);
 
 extern int getplane(void);
+int findsocket(Node *t, int create, int silent);
 int DNetStart(unsigned int, unsigned short, unsigned short);
 int DSend(Node receiver, void *sbuf, int slen);
 int DProd(Node *receiver);
