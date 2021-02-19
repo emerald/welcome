@@ -44,6 +44,9 @@ const Node <- immutable object Node builtin 0x1008
             const EventType <- enumeration EventType
                 NODE_EVENT, DISCOVERED_NODE_EVENT
             end EventType
+            const Runnable <- typeobject Runnable
+                op run [ Handler ]
+            end Runnable
 
             operation iGetTimeOfDay -> [secs : Integer, usecs : Integer]
                 primitive "SYS" "GETTOD" 0 [ secs, usecs ] <- [ ]
@@ -94,6 +97,22 @@ const Node <- immutable object Node builtin 0x1008
                 tuple[0] <- et
                 tuple[1] <- h
             end setEventHandler
+
+            operation fireEvent [ et : EventType, r : Runnable ]
+                if eventhandlers == nil then return end if
+                const upb : Integer <- eventhandlers.upperbound
+                const len : Integer <- upb + 1
+                for i : Integer <- 0 while i < len by i <- i + 1
+                    const tuple : VectorOfAny <- eventhandlers[i]
+                    const ev : EventType <- tuple[0]
+                    if ev !== nil and ev = et then
+                        const h : Handler <- tuple[1]
+                        if h !== nil then
+                            r.run[h]
+                        end if
+                    end if
+                end for
+            end fireEvent
 
             export operation getTimeOfDay -> [ t : Time ]
                 var secs, usecs : Integer
@@ -152,44 +171,60 @@ const Node <- immutable object Node builtin 0x1008
             end removeNodeEventHandler
 
             export operation nodeUp [n : Node, t : Time]
-                if eventhandlers == nil then return end if
-                const upb : Integer <- eventhandlers.upperbound
-                const len : Integer <- upb + 1
-                for i : Integer <- 0 while i < len by i <- i + 1
-                    const tuple : VectorOfAny <- eventhandlers[i]
-                    const et : EventType <- tuple[0]
-                    if et !== nil and et = EventType.NODE_EVENT then
-                        const h : Handler <- tuple[1]
-                        if h !== nil then
-                            const invokeUp <- object invokeUp
-                                process
-                                    h.nodeUp[n, t]
-                                end process
-                            end invokeUp
-                        end if
-                    end if
-                end for
+                const r <- object r
+                    export operation run[ h : Handler ]
+                        const invokeUp <- object invokeUp
+                            process
+                                h.nodeUp[n, t]
+                            end process
+                        end invokeUp
+                    end run
+                end r
+
+                self.fireEvent[EventType.NODE_EVENT, r]
             end nodeUp
 
             export operation nodeDown [n : Node, t : Time]
-                if eventhandlers == nil then return end if
-                const upb : Integer <- eventhandlers.upperbound
-                const len : Integer <- upb + 1
-                for i : Integer <- 0 while i < len by i <- i + 1
-                    const tuple : VectorOfAny <- eventhandlers[i]
-                    const et : EventType <- tuple[0]
-                    if et !== nil and et = EventType.NODE_EVENT then
-                        const h : Handler <- tuple[1]
-                        if h !== nil then
-                            const invokeDown <- object invokeDown
-                                process
-                                    h.nodeDown[n, t]
-                                end process
-                            end invokeDown
-                        end if
-                    end if
-                end for
+                const r <- object r
+                    export operation run[ h : Handler ]
+                        const invokeUp <- object invokeDown
+                            process
+                                h.nodeDown[n, t]
+                            end process
+                        end invokeDown
+                    end run
+                end r
+
+                self.fireEvent[EventType.NODE_EVENT, r]
             end nodeDown
+
+            export operation discoveredNodeUp [n : Node, t : Time]
+                const r <- object r
+                    export operation run[ h : Handler ]
+                        const invokeUp <- object invokeUp
+                            process
+                                h.nodeUp[n, t]
+                            end process
+                        end invokeUp
+                    end run
+                end r
+
+                self.fireEvent[EventType.DISCOVERED_NODE_EVENT, r]
+            end discoveredNodeUp
+
+            export operation discoveredNodeDown [n : Node, t : Time]
+                const r <- object r
+                    export operation run[ h : Handler ]
+                        const invokeUp <- object invokeDown
+                            process
+                                h.nodeDown[n, t]
+                            end process
+                        end invokeDown
+                    end run
+                end r
+
+                self.fireEvent[EventType.DISCOVERED_NODE_EVENT, r]
+            end discoveredNodeDown
 
             export operation getStdin -> [ result : InStream ]
                 primitive "SYS" "GETSTDIN" 0 [result] <- []

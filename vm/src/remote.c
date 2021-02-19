@@ -29,7 +29,7 @@
 
 unsigned distGCSeq = 0, lastCompletedDistGCSeq = 0;
 noderecord *allnodes = NULL, *thisnode = NULL, *limbonode = NULL;
-DiscoveredNode *discoverednodes = NULL;
+discNoderecord *discoverednodes = NULL;
 Node limbo;
 static int nodecount = 0;
 Object rootdir = (Object)JNIL, node = (Object)JNIL, inctm = (Object)JNIL;
@@ -112,18 +112,19 @@ Node getLocFromObj(Object obj) {
 
 #ifdef DISTRIBUTED
 
-void addDiscoveredNode(DiscoveredNode *dn) {
-    dn->next = discoverednodes;
+void addDiscoveredNode(discNoderecord *dn) {
+    dn->nd.p = (noderecord*)discoverednodes;
     discoverednodes = dn;
 }
 
-void removeDiscoveredNode(DiscoveredNode *dn) {
-    DiscoveredNode **tmp;
+void removeDiscoveredNode(discNoderecord *dn) {
+    discNoderecord **tmp;
 
-	for (tmp = &discoverednodes; *tmp; tmp = &((**tmp).next)) {
+	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
         if (*tmp == dn) {
-			printNode(&dn->srv);
-            *tmp = dn->next;
+			printf("Discovered node no longer available\n");
+			printNode(&dn->nd.srv);
+            *tmp = (discNoderecord*)dn->nd.p;
 			vmFree(dn);
             return;
         }
@@ -131,10 +132,10 @@ void removeDiscoveredNode(DiscoveredNode *dn) {
 }
 
 void updateDiscoveredNodes(void) {
-	DiscoveredNode **tmp;
+	discNoderecord **tmp;
 	int current = time(NULL);
 
-	for (tmp = &discoverednodes; *tmp; tmp = &((**tmp).next)) {
+	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
         if (current - (*tmp)->time >= DISCOVERED_NODE_TIMEOUT) {
 			removeDiscoveredNode(*tmp);
 			updateDiscoveredNodes();
@@ -870,10 +871,13 @@ void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 
 void handleDiscoveredNode(Node srv) {
 	noderecord *nd;
-	DiscoveredNode *dn;
+	discNoderecord *dn;
+	OID oid, inctmOID;
+	Object thenode, inctm;
+	ConcreteType ct;
 
-	for (dn = discoverednodes; dn; dn = dn->next) {
-		if (SameNode(srv, dn->srv)) {
+	for (dn = discoverednodes; dn; dn = (discNoderecord*)dn->nd.p) {
+		if (SameNode(srv, dn->nd.srv)) {
 			dn->time = time(NULL);
 			return;
 		}
@@ -886,11 +890,31 @@ void handleDiscoveredNode(Node srv) {
 	}
 
 	printf("Discovered new node!\n");
-	dn = vmMalloc(sizeof(DiscoveredNode));
+	dn = vmMalloc(sizeof(discNoderecord));
 	dn->time = time(NULL);
-	dn->srv = srv;
+	dn->nd.srv = srv;
 	addDiscoveredNode(dn);
+
+	oid.ipaddress = srv.ipaddress;
+	oid.port = srv.port;
+	oid.epoch = srv.epoch;
+	oid.Seq = 1;
+
+	ct = BuiltinInstCT(NODEI); assert(ct);
+	thenode = createStub(ct, dn, oid);
+
+	// Fake incarnation time
+	int stack[512];
+	ct = BuiltinInstCT(TIMEI); assert(ct);
+	stack[0] = 0;
+	stack[1] = (unsigned int) intct;
+	stack[2] = 0;
+	stack[3] = stack[1];
+	inctm = CreateObjectFromOutside(ct, (u32)stack);
+	OIDInsert(inctmOID, inctm);
+
 	// doUpcallHandlers
+	doUpcallHandlers(thenode, inctm, "discoverednodeup");
 }
 
 void handleEchoRequest(RemoteOpHeader *header, Node srv, Stream str) {

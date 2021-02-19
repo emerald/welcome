@@ -22,7 +22,7 @@ extern MQueue incoming;
 ISet allProcesses;
 ISet running;
 extern int traceprocess;
-extern DiscoveredNode *discoverednodes;
+extern discNoderecord *discoverednodes;
 
 #include "squeue.h"
 SQueue ready;

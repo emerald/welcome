@@ -19,11 +19,11 @@
 #define ADVERTISEMENT_INTERVAL 5
 #define DISCOVERED_NODE_TIMEOUT 30
 
-typedef struct DiscoveredNode {
-	Node srv;
-	int time;
-	struct DiscoveredNode *next;
-} DiscoveredNode;
+// typedef struct DiscoveredNode {
+// 	Node srv;
+// 	int time;
+// 	struct DiscoveredNode *next;
+// } DiscoveredNode;
 
 char *NodeString(Node);
 extern Node myid;

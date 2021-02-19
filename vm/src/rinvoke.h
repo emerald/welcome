@@ -33,6 +33,11 @@ struct noderecord {
 	noderecord *p;
 };
 
+typedef struct discNoderecord {
+	noderecord nd;
+	int time;
+} discNoderecord;
+
 #ifdef DISTRIBUTED
 Object doObjectRequest( Node srv, OID *oid, ConcreteType ct );
 int doMoveRequest( OID *oid, ConcreteType CT, OID *doid );

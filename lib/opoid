@@ -180,6 +180,10 @@ mergewith@0@2
 mergewith@2@0
 setdiscoverednodeeventhandler@1@0
 seteventhandler@2@0
+fireevent@2@0
+run@1@0
+discoverednodeup@2@0
+discoverednodedown@2@0
 first@0@1
 last@0@1
 node_event@0@1
