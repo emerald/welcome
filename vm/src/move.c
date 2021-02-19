@@ -241,14 +241,36 @@ void movecpcallback(Object o) {
 	becomeStub(o, CODEPTR(o->flags), getNodeRecordFromSrv(ctsrv));
 }
 
+int doDiscoveredMoveRequest(Object obj, Node srv, State *state) {
+	ConcreteType ct;
+	RemoteOpHeader h;
+
+	ct = CODEPTR(obj->flags);
+	if (!ISWELCOME(ct->d.instanceFlags)) {
+		TRACE(rinvoke, 2, ("Not moving unwelcome %s to discovered node %s", OIDString(OIDOf(obj)), NodeString(srv)));
+		h.target = OIDOf(obj);
+		h.targetct = OIDOf(CODEPTR(obj->flags));
+		moveDone(state, &h, 1);
+		return 1;
+	}
+
+	printf("Performing discovered move request!\n");
+	return 0;
+}
+
 int move(int option1, Object obj, Node srv, State *state) {
 	Stream str;
 	ConcreteType ct;
 	RemoteOpHeader h;
 	Node currentloc;
+	discNoderecord *dn = NULL;
 	noderecord *nr = getNodeRecordFromSrv(srv);
 
-	if (!nr->up) {
+	if (!nr) {
+		dn = getDiscNodeRecordFromSrv(srv);
+	}
+
+	if ((nr && !nr->up) || (dn && !dn->nd.up)) {
 		RemoteOpHeader h;
 		TRACE(rinvoke, 2, ("Not moving %s to dead node %s", OIDString(OIDOf(obj)), NodeString(srv)));
 		h.target = OIDOf(obj);
@@ -256,6 +278,12 @@ int move(int option1, Object obj, Node srv, State *state) {
 		moveDone(state, &h, 1);
 		return 0;
 	}
+
+	if (dn) {
+		doDiscoveredMoveRequest(obj, srv, state);
+		return 0;
+	}
+
 	regRoot(obj);
 	regRoot(state);
 	anticipateGC(64 * 1024);

@@ -48,6 +48,7 @@ typedef struct {
 } msgrec;
 
 noderecord *getNodeRecordFromSrv(Node srv);
+discNoderecord *getDiscNodeRecordFromSrv(Node srv);
 void updateLocation(Object obj, Node srv);
 Object getNodeFromObj(Object obj);
 Object getNodeFromSrv(Node srv);

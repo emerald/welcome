@@ -117,32 +117,19 @@ void addDiscoveredNode(discNoderecord *dn) {
     discoverednodes = dn;
 }
 
-void removeDiscoveredNode(discNoderecord *dn) {
-    discNoderecord **tmp;
-
-	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
-        if (*tmp == dn) {
-			printf("Discovered node no longer available\n");
-			printNode(&dn->nd.srv);
-            *tmp = (discNoderecord*)dn->nd.p;
-			vmFree(dn);
-            return;
-        }
-    }
-}
-
-void updateDiscoveredNodes(void) {
-	discNoderecord **tmp;
-	int current = time(NULL);
-
-	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
-        if (current - (*tmp)->time >= DISCOVERED_NODE_TIMEOUT) {
-			removeDiscoveredNode(*tmp);
-			updateDiscoveredNodes();
-            return;
-        }
-    }
-}
+// void removeDiscoveredNode(discNoderecord *dn) {
+//     discNoderecord **tmp;
+//
+// 	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
+//         if (*tmp == dn) {
+// 			printf("Discovered node no longer available\n");
+// 			printNode(&dn->nd.srv);
+//             *tmp = (discNoderecord*)dn->nd.p;
+// 			vmFree(dn);
+//             return;
+//         }
+//     }
+// }
 
 static noderecord *handleupdown(Node id, int up);
 extern Object createStub(ConcreteType ct, void *stub, OID oid);
@@ -181,6 +168,13 @@ noderecord *getNodeRecordFromSrv(Node srv) {
 
 	for (nd = allnodes; nd && !SameNode(srv,nd->srv); nd = nd->p);
 	return nd;
+}
+
+discNoderecord *getDiscNodeRecordFromSrv(Node srv) {
+	discNoderecord *dn;
+
+	for (dn = discoverednodes; dn && !SameNode(srv, dn->nd.srv); dn = (discNoderecord*)dn->nd.p);
+	return dn;
 }
 
 void updateNodeRecord(Object obj, noderecord *nd) {
@@ -683,6 +677,22 @@ static void nukeNode(noderecord *nd) {
 	doUpcallHandlers(thenode, theinctm, "nodedown");
 }
 
+void updateDiscoveredNodes(void) {
+	discNoderecord **tmp, *dn;
+	int current = time(NULL);
+	Object thenode, inctm;
+
+	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
+        if ((dn = *tmp), dn->nd.up && current - dn->time >= DISCOVERED_NODE_TIMEOUT) {
+			dn->nd.up = 0;
+
+			thenode = OIDFetch(dn->nd.node);
+			inctm = OIDFetch(dn->nd.inctm);
+			doUpcallHandlers(thenode, inctm, "discoverednodedown");
+        }
+    }
+}
+
 noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
 	noderecord **nd;
 	Object thenode, inctm;
@@ -889,19 +899,22 @@ void handleDiscoveredNode(Node srv) {
 		}
 	}
 
-	printf("Discovered new node!\n");
 	dn = vmMalloc(sizeof(discNoderecord));
 	dn->time = time(NULL);
 	dn->nd.srv = srv;
+	dn->nd.up = 1;
 	addDiscoveredNode(dn);
 
 	oid.ipaddress = srv.ipaddress;
 	oid.port = srv.port;
 	oid.epoch = srv.epoch;
 	oid.Seq = 1;
+	dn->nd.node = oid;
 
 	ct = BuiltinInstCT(NODEI); assert(ct);
 	thenode = createStub(ct, dn, oid);
+
+	NewOID(&inctmOID);
 
 	// Fake incarnation time
 	int stack[512];
@@ -912,8 +925,8 @@ void handleDiscoveredNode(Node srv) {
 	stack[3] = stack[1];
 	inctm = CreateObjectFromOutside(ct, (u32)stack);
 	OIDInsert(inctmOID, inctm);
+	dn->nd.inctm = inctmOID;
 
-	// doUpcallHandlers
 	doUpcallHandlers(thenode, inctm, "discoverednodeup");
 }
 
