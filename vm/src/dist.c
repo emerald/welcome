@@ -234,6 +234,18 @@ static void checkForStrangeness() {
 	}
 }
 
+void unmute(Node srv) {
+	int i;
+
+	for (i = 0; i < nothers; i++) {
+		if (SameNode(srv, others[i].id)) {
+			if (others[i].silent)
+				printf("unmuting node with port %d\n", others[i].id.port);
+			others[i].silent = 0;
+		}
+	}
+}
+
 /*
  * In short:
  * Find socket of node and set cache (global) to it.
@@ -350,15 +362,17 @@ int findsocket(Node *t, int create, int silent) {
 		*t = localcopy.id;
 		localcopy.silent = silent;
 	}
-	o = (struct other *)vmMalloc(sizeof *o);
-	*o = localcopy;
-	setupReader(o);
+	// o = (struct other *)vmMalloc(sizeof *o);
+	// *o = localcopy;
+	o = &others[nothers-1];
 	TRACE(dist, 2, ("find socket returning new %d", localcopy.s));
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
 		TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(cache.id.ipaddress), cache.id.port, cache.s, nothers));
 		others[nothers++] = cache;
+		o = &others[nothers-1];
 	}
+	setupReader(o);
 	checkForStrangeness();
 	return cache.s;
 }
@@ -397,7 +411,6 @@ static void ReaderCB(int sock, EDirection d, void *state) {
 		closesocket(sock);
 		if (notifyFunction && !rs->ri->silent) notifyFunction(rs->ri->id, 0);
 		nukeother(*rs->ri);
-		vmFree(rs->ri);
 		vmFree(rs);
 	}
 	else if (rs->readingLength) {
@@ -465,13 +478,12 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 	if (res != sizeof(ls->nbo) || !checkUserOK(getuid(), (~SILENT_MODE_FLAG & ntohl(ls->nbo.userid)))) {
 		nukeother(*ls->ri);
 		closesocket(ls->ri->s);
-		vmFree(ls->ri);
 	}
 	else {
 		ls->ri->id.port = ntohs(ls->nbo.port);
 		ls->ri->id.ipaddress = ls->nbo.ipaddress;
 		ls->ri->id.epoch = ntohs(ls->nbo.epoch);
-		ls->ri->silent = (SILENT_MODE_FLAG & ntohl(ls->nbo.userid) != 0);
+		ls->ri->silent = ((SILENT_MODE_FLAG & ntohl(ls->nbo.userid)) != 0);
 		TRACE(dist, 8, ("Inserting %#x.%4x.%4x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->id.epoch, ls->ri->s, nothers));
 		others[nothers++] = *ls->ri;
 		setupReader(ls->ri);
@@ -491,6 +503,7 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 static void ListenerCB(int sock, EDirection d, void *s) {
 	int newsocket;
 	struct sockaddr_in addr;
+	struct other localcopy;
 	socklen_t addrlen = sizeof(addr);
 	int on = 1;
 	ListenerState *ls = (ListenerState *)vmMalloc(sizeof(*ls));
@@ -504,16 +517,16 @@ static void ListenerCB(int sock, EDirection d, void *s) {
 		return;
 	}
 	maximizeSocketBuffers(newsocket);
-	ls->ri = (struct other *)vmMalloc(sizeof *ls->ri);
-	ls->ri->s = newsocket;
-	ls->ri->silent = 0;
-	ls->ri->id.ipaddress = addr.sin_addr.s_addr;
-	ls->ri->id.port = ntohs(addr.sin_port);
+	localcopy.s = newsocket;
+	localcopy.silent = 0;
+	localcopy.id.ipaddress = addr.sin_addr.s_addr;
+	localcopy.id.port = ntohs(addr.sin_port);
 
 	TRACE(dist, 1, ("Accepted new connection %d from %#x.%x",
 	                ls->ri->s, ntohl(ls->ri->id.ipaddress), ls->ri->id.port));
 	TRACE(dist, 8, ("Inserting %#x.%x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->s, nothers));
-	others[nothers++] = *ls->ri;
+	others[nothers++] = localcopy;
+	ls->ri = &others[nothers - 1];
 	ls->nbo.ipaddress = myid.ipaddress;
 	ls->nbo.port = htons(myid.port);
 	ls->nbo.epoch = htons(myid.epoch);
@@ -522,7 +535,6 @@ static void ListenerCB(int sock, EDirection d, void *s) {
 	if (send(ls->ri->s, (char *)&ls->nbo, sizeof(ls->nbo), 0) != sizeof(ls->nbo)) {
 		nukeother(*ls->ri);
 		closesocket(ls->ri->s);
-		vmFree(ls->ri);
 		return;
 	}
 	setupReadBuffer(&ls->rb, &ls->nbo, sizeof(ls->nbo), 0, readFromSocket);
@@ -694,7 +706,7 @@ int DSend(Node receiver, void *sbuf, int slen) {
 	extern char *NodeString(Node);
 	extern long nMessagesSent, nBytesSent;
 	noderecord *nr;
-
+	
 
 	if (SameNode(receiver, myid)) {
 		res = -1;

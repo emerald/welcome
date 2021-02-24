@@ -258,7 +258,6 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 
 	h.kind = EmissaryMoveRequest;
 	h.option1 = option1;
-	h.option2 = duringInitialization(obj);
 	h.target = FOIDOf(obj);
 	h.targetct = OIDOf(ct);
 	if (state->op == obj) {
@@ -286,15 +285,10 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 		ctstr = str;
 		ctsrv = srv;
 		Checkpoint(obj, ct, str);
-		// Checkpoint((Object)ct, CODEPTR(((Object) ct)->flags), str);
 		checkpointCallback = 0;
 		ctstr = 0;
 		memset(&ctsrv, 0, sizeof(ctsrv));
 		memmove(WriteStream(str, 4), "DONE", 4);
-
-		// becomeStub(obj, ct, getDiscNodeRecordFromSrv(srv));
-		findActivationsInObject(obj, str);
-		if (duringInitialization(obj)) thaw(obj, RInitially);
 
 		sendMsg(srv, str);
 	}

@@ -66,32 +66,6 @@ static char *typenames[] = {
 
 // For testing
 extern void printNode(Node *n);
-// void printIp(u32 ip) {
-// 	u8 *byte = (u8*)&ip;
-// 	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
-// }
-//
-// void printSpace(int i) {
-// 	while (i--) printf("\t");
-// }
-//
-// void printNodeIndent(Node *n, int i) {
-// 	printSpace(i);
-// 	printf("Node: \n");
-// 	printSpace(i);
-// 	printf("\tIP: \t"); printIp(n->ipaddress);
-// 	printf("\n");
-// 	printSpace(i);
-// 	printf("\tPort:\t%u\n", n->port);
-// 	printSpace(i);
-// 	printf("\tEpoch:\t%u\n", n->epoch);
-// }
-//
-// void printNode(Node *n) {
-// 	printNodeIndent(n, 0);
-// }
-
-// End for testing
 
 int isLimbo(Node n) {
 	return n.ipaddress == 0 && n.port == 0 && n.epoch == 0;
@@ -116,20 +90,6 @@ void addDiscoveredNode(discNoderecord *dn) {
     dn->nd.p = (noderecord*)discoverednodes;
     discoverednodes = dn;
 }
-
-// void removeDiscoveredNode(discNoderecord *dn) {
-//     discNoderecord **tmp;
-//
-// 	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
-//         if (*tmp == dn) {
-// 			printf("Discovered node no longer available\n");
-// 			printNode(&dn->nd.srv);
-//             *tmp = (discNoderecord*)dn->nd.p;
-// 			vmFree(dn);
-//             return;
-//         }
-//     }
-// }
 
 static noderecord *handleupdown(Node id, int up);
 extern Object createStub(ConcreteType ct, void *stub, OID oid);
@@ -726,6 +686,7 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
 
 	thenode = doObjectRequest((*nd)->srv, &(*nd)->node, ct);
 	assert(thenode && !ISNIL(thenode));
+	unmute((*nd)->srv);
 
 	/* retrieve the IncarnationTime object */
 	ct = BuiltinInstCT(TIMEI); assert(ct);
@@ -885,21 +846,34 @@ void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 
 	TRACE(rinvoke, 3, ("EmissaryMoveRequest received"));
 
-	printf("EmissaryMoveRequest received! Silently!\n");
-
 	o = ExtractObjects(str, srv);
 	assert(OIDFetch(h->target) == o);
 	CLEARBROKEN(o->flags);
 	ct = CODEPTR(o->flags);
 
 	if (isWelcome(ct->d.type)) {
-		printf("new object welcome\n");
 		doMergeRequest(srv);
-		// RewindStream(str);
-		// (void)ReadStream(str, sizeof(RemoteOpHeader));
-		// handleMoveRequest(h, srv, str);
+		h->option2 = 1;
 	} else {
-		printf("new object unwelcome\n");
+		h->option2 = 0;
+	}
+
+	h->kind = EmissaryMoveReply;
+	str = StartMsg(h);
+	sendMsg(srv, str);
+}
+
+void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
+	Object o;
+	State *state;
+
+	state = stateFetch(h->ss, h->sslocation);
+	if (h->option2) {
+		o = OIDFetch(h->target);
+		assert(!ISNIL(o));
+		move(h->option1, o, srv, state);
+	} else {
+		moveDone(state, h, 1);
 	}
 }
 
@@ -1208,6 +1182,9 @@ void doRequest(Node srv, Stream str) {
 			break;
 		case EmissaryMoveRequest:
 			handler = handleEmissaryMoveRequest;
+			break;
+		case EmissaryMoveReply:
+			handler = handleEmissaryMoveReply;
 			break;
 #ifdef USEDISTGC
 		case DistGCInfo:

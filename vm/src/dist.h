@@ -31,6 +31,7 @@ void DStart(void);
 
 extern int getplane(void);
 int findsocket(Node *t, int create, int silent);
+void unmute(Node srv);
 int DNetStart(unsigned int, unsigned short, unsigned short);
 int DSend(Node receiver, void *sbuf, int slen);
 int DProd(Node *receiver);
