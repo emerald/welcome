@@ -820,7 +820,7 @@ void doMergeRequest(Node srv) {
 	request = StartMsg(&requesth);
 
 	for (n = allnodes->p; n; n = n->p) {
-		if(SameNode(srv, n->srv)) continue;
+		if (SameNode(srv, n->srv)) continue;
 		TRACE(rinvoke, 6, ("MergeRequest: sending info on node %s - %s",
 						   OIDString(n->node), n->up ? "up" : "down"));
 		WriteInt(0, request);
@@ -877,6 +877,30 @@ void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	}
 
 	update_nodeinfo(str, srv);
+}
+
+void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
+	Object o;
+	ConcreteType ct;
+
+	TRACE(rinvoke, 3, ("EmissaryMoveRequest received"));
+
+	printf("EmissaryMoveRequest received! Silently!\n");
+
+	o = ExtractObjects(str, srv);
+	assert(OIDFetch(h->target) == o);
+	CLEARBROKEN(o->flags);
+	ct = CODEPTR(o->flags);
+
+	if (isWelcome(ct->d.type)) {
+		printf("new object welcome\n");
+		doMergeRequest(srv);
+		// RewindStream(str);
+		// (void)ReadStream(str, sizeof(RemoteOpHeader));
+		// handleMoveRequest(h, srv, str);
+	} else {
+		printf("new object unwelcome\n");
+	}
 }
 
 void handleDiscoveredNode(Node srv) {
@@ -1181,6 +1205,9 @@ void doRequest(Node srv, Stream str) {
 			break;
 		case MergeRequest:
 			handler = handleMergeRequest;
+			break;
+		case EmissaryMoveRequest:
+			handler = handleEmissaryMoveRequest;
 			break;
 #ifdef USEDISTGC
 		case DistGCInfo:

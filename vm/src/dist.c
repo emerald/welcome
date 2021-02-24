@@ -47,6 +47,7 @@ static int nothers;
 struct other {
 	Node id;
 	int s;
+	char silent;
 } others[MAXOTHERS], cache;
 
 /*
@@ -318,6 +319,7 @@ int findsocket(Node *t, int create, int silent) {
 
 	localcopy.id = *t;
 	localcopy.s = s;
+	localcopy.silent = silent;
 	TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(t->ipaddress), t->port, localcopy.s, nothers));
 	pos = nothers;
 	others[nothers++] = localcopy;
@@ -326,7 +328,7 @@ int findsocket(Node *t, int create, int silent) {
 		nbo.ipaddress = myid.ipaddress;
 		nbo.port = htons(myid.port);
 		nbo.epoch = htons(myid.epoch);
-		nbo.userid = htonl(getuid() | silent);
+		nbo.userid = htonl(getuid() | (silent ? SILENT_MODE_FLAG : 0));
 
 		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo) ||
 		    readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
@@ -346,6 +348,7 @@ int findsocket(Node *t, int create, int silent) {
 		localcopy.id.epoch = ntohs(nbo.epoch);
 		assert(localcopy.id.port == ntohs(nbo.port));
 		*t = localcopy.id;
+		localcopy.silent = silent;
 	}
 	o = (struct other *)vmMalloc(sizeof *o);
 	*o = localcopy;
@@ -392,7 +395,7 @@ static void ReaderCB(int sock, EDirection d, void *state) {
 		resetHandler(sock, EIO_Read);
 		resetHandler(sock, EIO_Except);
 		closesocket(sock);
-		if (notifyFunction) notifyFunction(rs->ri->id, 0);
+		if (notifyFunction && !rs->ri->silent) notifyFunction(rs->ri->id, 0);
 		nukeother(*rs->ri);
 		vmFree(rs->ri);
 		vmFree(rs);
@@ -468,10 +471,11 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 		ls->ri->id.port = ntohs(ls->nbo.port);
 		ls->ri->id.ipaddress = ls->nbo.ipaddress;
 		ls->ri->id.epoch = ntohs(ls->nbo.epoch);
+		ls->ri->silent = (SILENT_MODE_FLAG & ntohl(ls->nbo.userid) != 0);
 		TRACE(dist, 8, ("Inserting %#x.%4x.%4x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->id.epoch, ls->ri->s, nothers));
 		others[nothers++] = *ls->ri;
 		setupReader(ls->ri);
-		if (notifyFunction && !(SILENT_MODE_FLAG & ntohl(ls->nbo.userid))) {
+		if (notifyFunction && !ls->ri->silent) {
 			callNotifyFunction(ls->ri->id, 1);
 		}
 	}
@@ -502,6 +506,7 @@ static void ListenerCB(int sock, EDirection d, void *s) {
 	maximizeSocketBuffers(newsocket);
 	ls->ri = (struct other *)vmMalloc(sizeof *ls->ri);
 	ls->ri->s = newsocket;
+	ls->ri->silent = 0;
 	ls->ri->id.ipaddress = addr.sin_addr.s_addr;
 	ls->ri->id.port = ntohs(addr.sin_port);
 

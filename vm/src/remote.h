@@ -29,7 +29,8 @@ typedef enum {
 	IsFixedRequest, IsFixedReply,
 	GaggleUpdate, DistGCInfo,
 	DistGCDoneRequest, DistGCDoneReply,
-	DistGCDoneReport, MergeRequest
+	DistGCDoneReport, MergeRequest,
+	EmissaryMoveRequest, EmissaryMoveReply
 } MesageType;
 
 #define EMERALDMARKER 0xdeafdeaf

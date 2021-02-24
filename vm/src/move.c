@@ -241,11 +241,11 @@ void movecpcallback(Object o) {
 	becomeStub(o, CODEPTR(o->flags), getNodeRecordFromSrv(ctsrv));
 }
 
-int doDiscoveredMoveRequest(Object obj, Node srv, State *state) {
+int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 	ConcreteType ct;
 	RemoteOpHeader h;
-
-	// extern int findsocket(Node, int, int);
+	Stream str;
+	Node currentloc;
 
 	ct = CODEPTR(obj->flags);
 	if (!ISWELCOME(ct->d.instanceFlags)) {
@@ -256,8 +256,64 @@ int doDiscoveredMoveRequest(Object obj, Node srv, State *state) {
 		return 1;
 	}
 
-	printf("Performing findsocket with silent = %x!\n", SILENT_MODE_FLAG);
-	findsocket(&srv, 1, SILENT_MODE_FLAG);
+	h.kind = EmissaryMoveRequest;
+	h.option1 = option1;
+	h.option2 = duringInitialization(obj);
+	h.target = FOIDOf(obj);
+	h.targetct = OIDOf(ct);
+	if (state->op == obj) {
+		h.ss = nooid;
+		h.sslocation = myid;
+	}
+	else {
+		h.ss = FOIDOf((Object)state);
+		h.sslocation = getLocFromObj((Object)state);
+		state->nstoid = h.target;
+	}
+
+	findsocket(&srv, 1, 1);
+
+	if (RESDNT(obj->flags)) {
+		TRACE(rinvoke, 3, ("Moving %#x %s a %.*s from here to %s", obj,
+		                   OIDString(h.target),
+		                   ct->d.name->d.items, ct->d.name->d.data,
+		                   NodeString(srv)); )
+		str = StartMsg(&h);
+
+		checkpointCallback = movecpcallback;
+		checkpointCTCallback = ctcallback;
+		checkpointCTIntermediateCallback = cticallback;
+		ctstr = str;
+		ctsrv = srv;
+		Checkpoint(obj, ct, str);
+		// Checkpoint((Object)ct, CODEPTR(((Object) ct)->flags), str);
+		checkpointCallback = 0;
+		ctstr = 0;
+		memset(&ctsrv, 0, sizeof(ctsrv));
+		memmove(WriteStream(str, 4), "DONE", 4);
+
+		// becomeStub(obj, ct, getDiscNodeRecordFromSrv(srv));
+		findActivationsInObject(obj, str);
+		if (duringInitialization(obj)) thaw(obj, RInitially);
+
+		sendMsg(srv, str);
+	}
+	else {
+		/*
+		 * Send a message to the node holding the object, asking it to send
+		 * the object to the destination.  We'll do this like with invocations,
+		 * where we may get redirections.
+		 */
+		h.kind = Move3rdPartyRequest;
+		currentloc = getLocFromObj(obj);
+		TRACE(rinvoke, 3, ("Asking %s to move %s a %.*s to %s",
+		                   NodeString(currentloc), OIDString(h.target),
+		                   ct->d.name->d.items, ct->d.name->d.data,
+		                   NodeString(srv)));
+		str = StartMsg(&h);
+		WriteNode(&srv, str);
+		sendMsgTo(currentloc, str, h.target);
+	}
 
 	printf("Performing discovered move request!\n");
 	return 0;
@@ -285,7 +341,7 @@ int move(int option1, Object obj, Node srv, State *state) {
 	}
 
 	if (dn) {
-		doDiscoveredMoveRequest(obj, srv, state);
+		doDiscoveredMoveRequest(option1, obj, srv, state);
 		return 0;
 	}
 
