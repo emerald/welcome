@@ -67,6 +67,13 @@ static char *typenames[] = {
 // For testing
 extern void printNode(Node *n);
 
+static char *formatIPAddress(Bits32 addr, char *buffer) {
+	sprintf(buffer, "%d.%d.%d.%d",
+	        (addr & 0xff000000) >> 24, (addr & 0x00ff0000) >> 16,
+	        (addr & 0x0000ff00) >> 8, (addr & 0x000000ff));
+	return buffer;
+}
+
 int isLimbo(Node n) {
 	return n.ipaddress == 0 && n.port == 0 && n.epoch == 0;
 }
@@ -641,11 +648,14 @@ void updateDiscoveredNodes(void) {
 	discNoderecord **tmp, *dn;
 	int current = time(NULL);
 	Object thenode, inctm;
+	char buf[16];
 
 	for (tmp = &discoverednodes; *tmp; tmp = (discNoderecord**)&((**tmp).nd.p)) {
         if ((dn = *tmp), dn->nd.up && current - dn->time >= DISCOVERED_NODE_TIMEOUT) {
 			dn->nd.up = 0;
 
+			TRACE(discovery, 8, ("Discovered node timed out: %s:%u",
+					formatIPAddress(htonl(dn->nd.srv.ipaddress), buf), dn->nd.srv.port));
 			thenode = OIDFetch(dn->nd.node);
 			inctm = OIDFetch(dn->nd.inctm);
 			doUpcallHandlers(thenode, inctm, "discoverednodedown");
@@ -782,17 +792,17 @@ void doMergeRequest(Node srv) {
 
 	for (n = allnodes->p; n; n = n->p) {
 		if (SameNode(srv, n->srv)) continue;
-		TRACE(rinvoke, 6, ("MergeRequest: sending info on node %s - %s",
+		TRACE(merge, 6, ("MergeRequest: sending info on node %s - %s",
 						   OIDString(n->node), n->up ? "up" : "down"));
 		WriteInt(0, request);
 		WriteOID(&n->node, request);
-		TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(n->node)));
+		TRACE(merge, 11, ("nodeoid = %s", OIDString(n->node)));
 		WriteOID(&n->inctm, request);
-		TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(n->inctm)));
+		TRACE(merge, 11, ("inctmoid = %s", OIDString(n->inctm)));
 		WriteInt(n->up, request);
 	}
 	sendMsg(srv, request);
-	TRACE(rinvoke, 4, ("mergeRequest sent"));
+	TRACE(merge, 4, ("mergeRequest sent"));
 }
 
 void forwardMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
@@ -806,13 +816,13 @@ void forwardMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	header->option1 = 0;
 
 	for (n = allnodes->p; n; n = n->p) {
-		if (SameNode(srv, n->srv)) continue;
+		if (SameNode(srv, n->srv) || SameNode(thisnode->srv, n->srv)) continue;
 		forwardstr = StartMsg(header);
 		RewindStream(str);
 		(void)ReadStream(str, sizeof(RemoteOpHeader));
 
 		while (!AtEOF(str)) {
-			TRACE(rinvoke, 10, ("Looking at another merging node"));
+			TRACE(merge, 10, ("Looking at another merging node"));
 			ReadInt(&which, str);
 			WriteInt(which, forwardstr);
 			assert(which == 0);
@@ -822,15 +832,16 @@ void forwardMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 			WriteOID(&inctmOID, forwardstr);
 			ReadInt(&up, str);
 			WriteInt(up, forwardstr);
-			TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(nodeOID)));
-			TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(inctmOID)));
+			TRACE(merge, 11, ("nodeoid = %s", OIDString(nodeOID)));
+			TRACE(merge, 11, ("inctmoid = %s", OIDString(inctmOID)));
 		}
+		TRACE(merge, 6, ("Forwarding merge request to %s", OIDString(n->node)));
 		sendMsg(n->srv, forwardstr);
 	}
 }
 
 void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
-	TRACE(rinvoke, 3, ("MergeRequest received"));
+	TRACE(merge, 4, ("MergeRequest received"));
 	if (header->option1 == 1) {
 		forwardMergeRequest(header, srv, str);
 		RewindStream(str);
@@ -844,7 +855,7 @@ void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	Object o;
 	ConcreteType ct;
 
-	TRACE(rinvoke, 3, ("EmissaryMoveRequest received"));
+	TRACE(merge, 4, ("EmissaryMoveRequest received"));
 
 	o = ExtractObjects(str, srv);
 	assert(OIDFetch(h->target) == o);
@@ -852,27 +863,33 @@ void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	ct = CODEPTR(o->flags);
 
 	if (isWelcome(ct->d.type)) {
+		TRACE(merge, 5, ("Emissary object welcome"));
 		doMergeRequest(srv);
 		h->option2 = 1;
 	} else {
+		TRACE(merge, 5, ("Emissary object unwelcome"));
 		h->option2 = 0;
 	}
 
 	h->kind = EmissaryMoveReply;
 	str = StartMsg(h);
 	sendMsg(srv, str);
+	TRACE(merge, 4, ("EmissaryMoveReply sent"));
 }
 
 void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
 	Object o;
 	State *state;
 
+	TRACE(merge, 4, ("EmissaryMoveReply received"));
 	state = stateFetch(h->ss, h->sslocation);
 	if (h->option2) {
+		TRACE(merge, 5, ("Emissary move accepted"));
 		o = OIDFetch(h->target);
 		assert(!ISNIL(o));
 		move(h->option1, o, srv, state);
 	} else {
+		TRACE(merge, 5, ("Emissary move declined"));
 		moveDone(state, h, 1);
 	}
 }
@@ -883,6 +900,7 @@ void handleDiscoveredNode(Node srv) {
 	OID oid, inctmOID;
 	Object thenode, inctm;
 	ConcreteType ct;
+	char buf[16];
 
 	for (dn = discoverednodes; dn; dn = (discNoderecord*)dn->nd.p) {
 		if (SameNode(srv, dn->nd.srv)) {
@@ -908,6 +926,10 @@ void handleDiscoveredNode(Node srv) {
 	oid.epoch = srv.epoch;
 	oid.Seq = 1;
 	dn->nd.node = oid;
+
+	TRACE(discovery, 4, ("Discovered new node"));
+	TRACE(discovery, 8, ("New discovered node: %s:%u",
+						formatIPAddress(htonl(oid.ipaddress), buf), oid.port));
 
 	ct = BuiltinInstCT(NODEI); assert(ct);
 	thenode = createStub(ct, dn, oid);

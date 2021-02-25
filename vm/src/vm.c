@@ -1861,14 +1861,16 @@ nextInstruction: ;
     }
         break;
     case WELCOME:{
-        TRACE(process, 3, ("Blocking synchronizing process %#x", state));
         AbstractType welcometype;
 
         TOP(AbstractType, welcometype);
         PUSH(AbstractType, welcometype);
+        TRACE(welcome, 1, ("Blocking on welcome expression for '%.*s'",
+                welcometype->d.name->d.items, welcometype->d.name->d.data));
         SQueueInsert(welcome_q, state);
         SYNCH();
 
+        TRACE(welcome, 4, ("Inserting process %#x into welcome queue", state));
         return 1;
     }
         break;

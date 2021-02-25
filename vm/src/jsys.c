@@ -71,7 +71,7 @@ int mergeWith(State *state) {
 		printf("Can't contact emerald on %s\n", buf);
 		return 0;
 	}
-
+	TRACE(merge, 2, ("merging with %s", buf));
 	doMergeRequest(srv);
 
 	return 0;

@@ -72,7 +72,10 @@ int
     traceunavailable,
     tracefailure = 1,
     tracex,
-    traceT
+    traceT,
+    tracediscovery,
+    tracemerge,
+    tracewelcome
 ;
 
 typedef struct {
@@ -111,6 +114,9 @@ flagTable table [] = {
 	{ "failure", &tracefailure },
 	{ "x", &tracex },
 	{ "t", &traceT },
+	{ "discovery", &tracediscovery },
+	{ "merge", &tracemerge },
+	{ "welcome", &tracewelcome },
 	{ NULL, 0 },
 };
 

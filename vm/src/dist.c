@@ -240,7 +240,7 @@ void unmute(Node srv) {
 	for (i = 0; i < nothers; i++) {
 		if (SameNode(srv, others[i].id)) {
 			if (others[i].silent)
-				printf("unmuting node with port %d\n", others[i].id.port);
+				TRACE(merge, 6, ("unmuting node with port %d", others[i].id.port));
 			others[i].silent = 0;
 		}
 	}
@@ -362,9 +362,9 @@ int findsocket(Node *t, int create, int silent) {
 		*t = localcopy.id;
 		localcopy.silent = silent;
 	}
-	// o = (struct other *)vmMalloc(sizeof *o);
-	// *o = localcopy;
+
 	o = &others[nothers-1];
+	if(silent) TRACE(merge, 6, ("connection in silent mode"));
 	TRACE(dist, 2, ("find socket returning new %d", localcopy.s));
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
@@ -706,7 +706,7 @@ int DSend(Node receiver, void *sbuf, int slen) {
 	extern char *NodeString(Node);
 	extern long nMessagesSent, nBytesSent;
 	noderecord *nr;
-	
+
 
 	if (SameNode(receiver, myid)) {
 		res = -1;
@@ -773,17 +773,21 @@ void advertiseMe(){
 	static int counter = 0;
 	Bits32 em_sig, disc_sig;
 	Bits16 port, epoch;
+	char msg[DISCOVERY_MSGSIZE], buf[16];
+
 	static struct sockaddr_in broadcast_addr = {
 		.sin_family = AF_INET,
 	};
 	broadcast_addr.sin_port = htons(DISCOVERY_PORT);
 
 	if (cur_time - last_ad < ADVERTISEMENT_INTERVAL) return;
+
+	TRACE(discovery, 4, ("Broadcasting advertising messages"));
+
 	if (! (counter++ % 5)) findBroadcastAddrs();
 
 	last_ad = cur_time;
 
-	char msg[DISCOVERY_MSGSIZE];
 
 	em_sig = htonl(EMERALDMARKER);
     disc_sig = htonl(DISCOVERYMARKER);
@@ -798,6 +802,7 @@ void advertiseMe(){
 
 	for (i = 0; i < MAXBROADCASTADDRS; i++) {
 		if(! broadcastaddrs[i]) break;
+		TRACE(discovery, 8, ("broadcasting to: %s\n", formatIPAddress(ntohl(broadcastaddrs[i]), buf)));
 		broadcast_addr.sin_addr.s_addr = broadcastaddrs[i];
 		rc = sendto(brd_socket, msg, DISCOVERY_MSGSIZE, 0,
 			(struct sockaddr*)&broadcast_addr, sizeof(struct sockaddr_in));
@@ -809,6 +814,8 @@ void advertiseMe(){
 void init_advertisement(){
 	int reuse, broadcastON, ttl, rc;
 	char loopbackON;
+
+	TRACE(discovery, 1, ("INIT ADVERTISEMENT"));
 
 	// Create the Socket
     brd_socket = socket(AF_INET, SOCK_DGRAM, 0);

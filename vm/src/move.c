@@ -177,7 +177,10 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	}
 
 	if (ISWELCOME(ct->d.instanceFlags)) {
+		TRACE(welcome, 4, ("Welcomable object '%.*s' arrived: ",
+						ct->d.name->d.items, ct->d.name->d.data));
 		while (state = findAndRemoveWelcomingState(ct->d.type)) {
+			TRACE(welcome, 1, ("Welcoming state %#x accepting incoming object", state));
 			sp = state->sp;
 			POP(AbstractType, welcometype);
 			POP(AbstractType, welcometype);
@@ -197,6 +200,7 @@ void handleMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
 			TRACE(rinvoke, 6, ("Incoming activation record!!"));
 			state = extractActivation(o, ct, str, srv);
 			if(*((u8 *)state->pc-1) == WELCOME) {
+				TRACE(welcome, 2, ("Welcoming object arrived. Added to welcome queue"));
 				sp = state->sp;
 				SQueueInsert(welcome_q, state);
 			}
@@ -249,7 +253,7 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 
 	ct = CODEPTR(obj->flags);
 	if (!ISWELCOME(ct->d.instanceFlags)) {
-		TRACE(rinvoke, 2, ("Not moving unwelcome %s to discovered node %s", OIDString(OIDOf(obj)), NodeString(srv)));
+		TRACE(merge, 2, ("Not moving unwelcome %s to discovered node %s", OIDString(OIDOf(obj)), NodeString(srv)));
 		h.target = OIDOf(obj);
 		h.targetct = OIDOf(CODEPTR(obj->flags));
 		moveDone(state, &h, 1);
@@ -273,10 +277,9 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 	findsocket(&srv, 1, 1);
 
 	if (RESDNT(obj->flags)) {
-		TRACE(rinvoke, 3, ("Moving %#x %s a %.*s from here to %s", obj,
-		                   OIDString(h.target),
+		TRACE(merge, 6, ("Sending '%.*s' as emissary object to %s",
 		                   ct->d.name->d.items, ct->d.name->d.data,
-		                   NodeString(srv)); )
+		                   NodeString(srv)) );
 		str = StartMsg(&h);
 
 		checkpointCallback = movecpcallback;
@@ -309,7 +312,7 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 		sendMsgTo(currentloc, str, h.target);
 	}
 
-	printf("Performing discovered move request!\n");
+	TRACE(merge, 4, ("Discovered move request sent"));
 	return 0;
 }
 
@@ -325,9 +328,11 @@ int move(int option1, Object obj, Node srv, State *state) {
 		dn = getDiscNodeRecordFromSrv(srv);
 	}
 
-	if ((nr && !nr->up) || (dn && !dn->nd.up)) {
+	if ((nr && !nr->up) || (dn && !dn->nd.up) || (!nr && ! dn)) {
 		RemoteOpHeader h;
-		TRACE(rinvoke, 2, ("Not moving %s to dead node %s", OIDString(OIDOf(obj)), NodeString(srv)));
+		TRACE(rinvoke, 2, ("Not moving %s to %s node %s", OIDString(OIDOf(obj)),
+												(nr || dn) ? "dead" : "foreign",
+												NodeString(srv)));
 		h.target = OIDOf(obj);
 		h.targetct = OIDOf(CODEPTR(obj->flags));
 		moveDone(state, &h, 1);

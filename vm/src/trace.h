@@ -68,7 +68,10 @@ extern int
     traceunavailable,
     tracefailure,
     tracex,
-    traceT
+    traceT,
+    tracediscovery,
+    tracemerge,
+    tracewelcome
 ;
 
 extern void TraceInit(void);
