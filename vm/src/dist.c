@@ -64,6 +64,7 @@ void printOID(OID *o);
 static void setupReader(struct other *ri);
 
 extern int checkSameUser, beDiscoverable;
+extern struct timeval inc_tm;
 static int brd_socket, last_ad = 0;
 static Bits32 broadcastaddrs[MAXBROADCASTADDRS];
 
@@ -617,7 +618,7 @@ static void discoveryCB (int sock, EDirection d, void *s) {
 	int rc;
 	struct sockaddr_in sender;
 	socklen_t socksize = sizeof(struct sockaddr_in);
-	unsigned int em_sig, disc_sig, ip;
+	unsigned int em_sig, disc_sig, ip, sec, usec;
 	unsigned short port, epoch;
 	Node n;
 
@@ -634,6 +635,8 @@ static void discoveryCB (int sock, EDirection d, void *s) {
 	memcpy(&ip, &msg[8], sizeof(int));
 	memcpy(&port, &msg[12], sizeof(short));
 	memcpy(&epoch, &msg[14], sizeof(short));
+	memcpy(&sec, &msg[16], sizeof(int));
+	memcpy(&usec, &msg[20], sizeof(int));
 
 	em_sig = ntohl(em_sig);
 	disc_sig = ntohl(disc_sig);
@@ -643,7 +646,7 @@ static void discoveryCB (int sock, EDirection d, void *s) {
 	n.port = ntohs(port);
 	n.epoch = ntohs(epoch);
 
-	handleDiscoveredNode(n);
+	handleDiscoveredNode(n, sec, usec);
 }
 
 int DDiscoverStart() {
@@ -799,6 +802,8 @@ void advertiseMe(){
     memcpy(&msg[8], &MyNode.ipaddress, sizeof(Bits32));
     memcpy(&msg[12], &port, sizeof(Bits16));
     memcpy(&msg[14], &epoch, sizeof(Bits16));
+    memcpy(&msg[16], &inc_tm.tv_sec, sizeof(Bits32));
+    memcpy(&msg[20], &inc_tm.tv_usec, sizeof(Bits32));
 
 	for (i = 0; i < MAXBROADCASTADDRS; i++) {
 		if(! broadcastaddrs[i]) break;

@@ -58,7 +58,7 @@ extern void WriteNode(Node *srv, Stream theStream);
 extern void parseAddr(char *str, unsigned int *addr, unsigned short *port);
 extern void doMergeRequest(Node srv);
 extern void doEchoRequest(struct noderecord *thisnode, Node srv);
-extern void handleDiscoveredNode(Node n);
+extern void handleDiscoveredNode(Node, u32, u32);
 /*
  * We will report as unavailable any object that we can't get the message
  * to.  Sending either a request or a reply message gets into all kinds of

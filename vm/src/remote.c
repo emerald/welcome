@@ -38,6 +38,8 @@ Object locsrv = (Object)JNIL, debugger = (Object)JNIL;
 extern int doDistribution;
 void *ctstr;
 Node ctsrv;
+// incarnation time of this node
+struct timeval inc_tm;
 #if !defined(NTRACE)
 static char *typenames[] = {
 	"EchoRequest",
@@ -293,6 +295,7 @@ void init_nodeinfo(void) {
 	TRACE(sys, 3, ("Creating my incarnation time"));
 	inctm = CreateObjectFromOutside(ct, (u32)stack);
 	OIDInsert(thisnode->inctm, inctm);
+	inc_tm = tm;
 
 #ifdef DISTRIBUTED
 	if (doDistribution) {
@@ -894,7 +897,7 @@ void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
 	}
 }
 
-void handleDiscoveredNode(Node srv) {
+void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {
 	noderecord *nd;
 	discNoderecord *dn;
 	OID oid, inctmOID;
@@ -936,12 +939,12 @@ void handleDiscoveredNode(Node srv) {
 
 	NewOID(&inctmOID);
 
-	// Fake incarnation time
+	// Create incarnation of discovered node time
 	int stack[512];
 	ct = BuiltinInstCT(TIMEI); assert(ct);
-	stack[0] = 0;
+	stack[0] = sec;
 	stack[1] = (unsigned int) intct;
-	stack[2] = 0;
+	stack[2] = usec;
 	stack[3] = stack[1];
 	inctm = CreateObjectFromOutside(ct, (u32)stack);
 	OIDInsert(inctmOID, inctm);
