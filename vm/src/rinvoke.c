@@ -316,6 +316,11 @@ int rinvoke(State *state, Object obj, int fn) {
 	Node srv;
 	Stream str;
 	ConcreteType ct;
+	srv = getLocFromObj(obj);
+	if (! getNodeRecordFromSrv(srv)) {
+		TRACE(rinvoke, 5, ("%#x invoked discovered node", state));
+		return unavailable(state, obj);
+	}
 
 	regRoot(obj);
 	regRoot(state);
@@ -326,7 +331,6 @@ int rinvoke(State *state, Object obj, int fn) {
 	/* figure out where we're sending the invocation */
 	ct = CODEPTR(obj->flags);
 	assert(!RESDNT(obj->flags));
-	srv = getLocFromObj(obj);
 
 	/* figure out what object we're invoking on */
 	h.target = OIDOf(obj);

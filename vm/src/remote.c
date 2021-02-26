@@ -924,7 +924,7 @@ void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {
 	dn->nd.up = 1;
 	addDiscoveredNode(dn);
 
-	oid.ipaddress = srv.ipaddress;
+	oid.ipaddress = ntohl(srv.ipaddress);
 	oid.port = srv.port;
 	oid.epoch = srv.epoch;
 	oid.Seq = 1;

@@ -151,6 +151,10 @@ int jisfixed(State *state) {
 		PUSH(ConcreteType, BuiltinInstCT(BOOLEANI));
 		return 0;
 #ifdef DISTRIBUTED
+	} else if (OIDOf(o).Seq == 1) {
+		PUSH(int, 1);
+		PUSH(ConcreteType, BuiltinInstCT(BOOLEANI));
+		return 0;
 	}
 	else {
 		doIsFixed(o, state, 0);
@@ -286,6 +290,8 @@ int junfix(State *state) {
 		unfixHere(o);
 		return 0;
 #ifdef DISTRIBUTED
+	} else if (OIDOf(o).Seq == 1) {
+		return 0;
 	}
 	else {
 		doIsFixed(o, state, 1);
@@ -305,7 +311,7 @@ int jmove(State *state) {
 	d_ct = *(ConcreteType *)(sp + 12);
 
 #ifdef DISTRIBUTED
-	if (ISNIL(obj) || !HASODP(ct->d.instanceFlags) || ISIMUT(ct->d.instanceFlags)) {
+	if (ISNIL(obj) || !HASODP(ct->d.instanceFlags) || ISIMUT(ct->d.instanceFlags) || OIDOf(obj).Seq == 1) {
 		/* do nothing */
 	}
 	else {
