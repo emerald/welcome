@@ -265,6 +265,12 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 		return 1;
 	}
 
+	regRoot(obj);
+	regRoot(state);
+	anticipateGC(64 * 1024);
+	unregRoot();
+	unregRoot();
+
 	h.kind = EmissaryMoveRequest;
 	h.option1 = option1;
 	h.target = FOIDOf(obj);
@@ -319,6 +325,7 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 	}
 
 	TRACE(merge, 4, ("Discovered move request sent"));
+	inhibit_gc--;
 	return 0;
 }
 

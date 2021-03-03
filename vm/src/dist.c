@@ -370,8 +370,7 @@ int findsocket(Node *t, int create, int silent) {
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
 		TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(cache.id.ipaddress), cache.id.port, cache.s, nothers));
-		others[nothers++] = cache;
-		o = &others[nothers-1];
+		others[nothers - 1] = cache;
 	}
 	setupReader(o);
 	checkForStrangeness();
@@ -465,6 +464,16 @@ static int checkUserOK(int local, int remote) {
 	}
 }
 
+static int update_epoch(struct other o) {
+	for (int i = 0; i < nothers; i++) {
+		if (others[i].id.ipaddress == o.id.ipaddress && others[i].id.port == o.id.port) {
+			others[i] = o;
+			return 0;
+		}
+	}
+	return -1;
+}
+
 /*
  * Read a nbo containing information on the sender and store it in the others
  * array. Set up a reader for future communication, and call the notify function
@@ -486,7 +495,7 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 		ls->ri->id.epoch = ntohs(ls->nbo.epoch);
 		ls->ri->silent = ((SILENT_MODE_FLAG & ntohl(ls->nbo.userid)) != 0);
 		TRACE(dist, 8, ("Inserting %#x.%4x.%4x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->id.epoch, ls->ri->s, nothers));
-		others[nothers++] = *ls->ri;
+		if (update_epoch(*ls->ri)) others[nothers++] = *ls->ri;
 		setupReader(ls->ri);
 		if (notifyFunction && !ls->ri->silent) {
 			callNotifyFunction(ls->ri->id, 1);

@@ -937,9 +937,7 @@ void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {
 	ct = BuiltinInstCT(NODEI); assert(ct);
 	thenode = createStub(ct, dn, oid);
 
-	NewOID(&inctmOID);
-
-	// Create incarnation of discovered node time
+	// Create incarnation time object of discovered node
 	int stack[512];
 	ct = BuiltinInstCT(TIMEI); assert(ct);
 	stack[0] = sec;
@@ -947,6 +945,9 @@ void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {
 	stack[2] = usec;
 	stack[3] = stack[1];
 	inctm = CreateObjectFromOutside(ct, (u32)stack);
+
+	inctmOID = oid;
+	inctmOID.Seq = 2;
 	OIDInsert(inctmOID, inctm);
 	dn->nd.inctm = inctmOID;
 
