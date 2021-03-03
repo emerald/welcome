@@ -115,7 +115,12 @@ void handleMove3rdPartyRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		}
 		else {
 			TRACE(rinvoke, 4, ("The object is here, sending it to %s", NodeString(newsrv)));
-			move(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
+			if (h->option2 & THIRD_PARTY_EMISSARY) {
+				h->option2 &= ~THIRD_PARTY_EMISSARY;
+				doDiscoveredMoveRequest(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
+			} else {
+				move(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
+			}
 		}
 	}
 	else if (!ISNIL(o)) {
@@ -302,6 +307,7 @@ int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
 		 * where we may get redirections.
 		 */
 		h.kind = Move3rdPartyRequest;
+		h.option2 |= THIRD_PARTY_EMISSARY;
 		currentloc = getLocFromObj(obj);
 		TRACE(rinvoke, 3, ("Asking %s to move %s a %.*s to %s",
 		                   NodeString(currentloc), OIDString(h.target),

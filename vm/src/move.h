@@ -9,6 +9,8 @@
 #include "remote.h"
 #endif
 
+#define THIRD_PARTY_EMISSARY (1 << 7)
+
 extern void sendNVars(Stream str, int n, int *args, Object ep, ConcreteType et);
 extern void extractNVars(Stream str, int n, int *args, Object *epp, ConcreteType *etp, Node srv);
 extern void findActivationsInObject(Object obj, Stream str);
@@ -19,4 +21,5 @@ extern void doIsFixed(Object o, struct State *state, int option);
 extern void unfixHere(Object o);
 extern int isFixedHere(Object o);
 extern void moveHandleDown(struct noderecord *);
+int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state);
 #endif /* _EMERALD_MOVE_H */
