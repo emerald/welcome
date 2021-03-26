@@ -474,6 +474,28 @@ static int update_epoch(struct other o) {
 	return -1;
 }
 
+static u32 getMyIp() {
+	struct ifaddrs *ifa, *tmp;
+	int rc;
+	u32 ip = 0;
+
+	rc = getifaddrs(&ifa);
+    if(rc < 0) {
+		perror("getMyIp, getifaddrs");
+		return 0;
+	}
+
+	for (tmp = ifa; tmp; tmp = tmp->ifa_next) {
+        if (! (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET)) continue;
+        if (! (strcmp(tmp->ifa_name, "lo"))) continue;
+        ip = ((struct sockaddr_in*)tmp->ifa_addr)->sin_addr.s_addr;
+		break;
+    }
+
+	freeifaddrs(ifa);
+	return ip;
+}
+
 /*
  * Read a nbo containing information on the sender and store it in the others
  * array. Set up a reader for future communication, and call the notify function
@@ -610,7 +632,7 @@ int DNetStart(unsigned int ipaddress, unsigned short port, unsigned short epoch)
 			printf("Can't look up my own host name.\n");
 			printf("Emerald won't work well between machines.\n");
 		}
-		else {
+		else if (*(int*)h->h_addr != htonl(0x7f000101) || (addr.sin_addr.s_addr = getMyIp()) == 0) {
 			memcpy(&addr.sin_addr.s_addr, h->h_addr, sizeof(unsigned int));
 		}
 	}
