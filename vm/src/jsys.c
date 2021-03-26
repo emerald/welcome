@@ -346,6 +346,12 @@ int jlocate(State *state) {
 	obj = *(Object *)sp;
 	ct = *(ConcreteType *)(sp + 4);
 	TRACE(sys, 2, ("locate of %x", obj));
+	if (OIDOf(obj).Seq == 1) {
+		TRACE(sys, 5, ("locate of node object"));
+		PUSH(Object, obj);
+		PUSH(ConcreteType, ct);
+		return 0;
+	}
 #ifdef DISTRIBUTED
 	dn = whereIs(obj, ct);
 	if (ISNIL(dn)) {
