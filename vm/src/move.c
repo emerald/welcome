@@ -117,7 +117,7 @@ void handleMove3rdPartyRequest(RemoteOpHeader *h, Node srv, Stream str) {
 			TRACE(rinvoke, 4, ("The object is here, sending it to %s", NodeString(newsrv)));
 			if (h->option2 & THIRD_PARTY_EMISSARY) {
 				h->option2 &= ~THIRD_PARTY_EMISSARY;
-				doDiscoveredMoveRequest(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
+				doEmissaryMoveRequest(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
 			} else {
 				move(h->option1, o, newsrv, stateFetch(h->ss, h->sslocation));
 			}
@@ -250,7 +250,50 @@ void movecpcallback(Object o) {
 	becomeStub(o, CODEPTR(o->flags), getNodeRecordFromSrv(ctsrv));
 }
 
-int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state) {
+void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
+	Object o;
+	ConcreteType ct;
+
+	TRACE(merge, 4, ("EmissaryMoveRequest received"));
+
+	o = ExtractObjects(str, srv);
+	assert(OIDFetch(h->target) == o);
+	CLEARBROKEN(o->flags);
+	ct = CODEPTR(o->flags);
+
+	if (isWelcome(ct->d.type)) {
+		TRACE(merge, 5, ("Emissary object welcome"));
+		doMergeRequest(srv);
+		h->option2 = 1;
+	} else {
+		TRACE(merge, 5, ("Emissary object unwelcome"));
+		h->option2 = 0;
+	}
+
+	h->kind = EmissaryMoveReply;
+	str = StartMsg(h);
+	sendMsg(srv, str);
+	TRACE(merge, 4, ("EmissaryMoveReply sent"));
+}
+
+void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
+	Object o;
+	State *state;
+
+	TRACE(merge, 4, ("EmissaryMoveReply received"));
+	state = stateFetch(h->ss, h->sslocation);
+	if (h->option2) {
+		TRACE(merge, 5, ("Emissary move accepted"));
+		o = OIDFetch(h->target);
+		assert(!ISNIL(o));
+		move(h->option1, o, srv, state);
+	} else {
+		TRACE(merge, 5, ("Emissary move declined"));
+		moveDone(state, h, 1);
+	}
+}
+
+int doEmissaryMoveRequest(int option1, Object obj, Node srv, State *state) {
 	ConcreteType ct;
 	RemoteOpHeader h;
 	Stream str;
@@ -353,7 +396,7 @@ int move(int option1, Object obj, Node srv, State *state) {
 	}
 
 	if (dn) {
-		doDiscoveredMoveRequest(option1, obj, srv, state);
+		doEmissaryMoveRequest(option1, obj, srv, state);
 		return 0;
 	}
 

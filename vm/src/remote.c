@@ -131,7 +131,6 @@ void ctcallback(Object o) {
 	ctijunk[nextctijunkptr++] = o;
 }
 
-
 noderecord *getNodeRecordFromSrv(Node srv) {
 	noderecord *nd;
 
@@ -189,7 +188,6 @@ void ReadInt(u32 *n, Stream theStream) {
 	theBuffer = ReadStream(theStream, sizeof(u32));
 	ExtractBits32(n, theBuffer);
 }
-
 
 void WriteInt(u32 n, Stream str) {
 	Bits8 *theBuffer;
@@ -390,7 +388,6 @@ void ReadNode(Node *srv, Stream theStream) {
 	ExtractNode(srv, theBuffer);
 }
 
-
 void InsertNode(Node *t, Bits8 *data) {
 	/* no hton desired here */
 	*(Bits32 *)data = t->ipaddress;
@@ -471,7 +468,6 @@ int sendMsg(Node srv, Stream str) {
 	DestroyStream(str);
 	return rval;
 }
-
 
 void findAndSendTo(OID target, Stream str) {
 	Object obj = OIDFetch(target);
@@ -852,49 +848,6 @@ void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	}
 
 	update_nodeinfo(str, srv);
-}
-
-void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str) {
-	Object o;
-	ConcreteType ct;
-
-	TRACE(merge, 4, ("EmissaryMoveRequest received"));
-
-	o = ExtractObjects(str, srv);
-	assert(OIDFetch(h->target) == o);
-	CLEARBROKEN(o->flags);
-	ct = CODEPTR(o->flags);
-
-	if (isWelcome(ct->d.type)) {
-		TRACE(merge, 5, ("Emissary object welcome"));
-		doMergeRequest(srv);
-		h->option2 = 1;
-	} else {
-		TRACE(merge, 5, ("Emissary object unwelcome"));
-		h->option2 = 0;
-	}
-
-	h->kind = EmissaryMoveReply;
-	str = StartMsg(h);
-	sendMsg(srv, str);
-	TRACE(merge, 4, ("EmissaryMoveReply sent"));
-}
-
-void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
-	Object o;
-	State *state;
-
-	TRACE(merge, 4, ("EmissaryMoveReply received"));
-	state = stateFetch(h->ss, h->sslocation);
-	if (h->option2) {
-		TRACE(merge, 5, ("Emissary move accepted"));
-		o = OIDFetch(h->target);
-		assert(!ISNIL(o));
-		move(h->option1, o, srv, state);
-	} else {
-		TRACE(merge, 5, ("Emissary move declined"));
-		moveDone(state, h, 1);
-	}
 }
 
 void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {

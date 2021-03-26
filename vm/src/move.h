@@ -21,5 +21,7 @@ extern void doIsFixed(Object o, struct State *state, int option);
 extern void unfixHere(Object o);
 extern int isFixedHere(Object o);
 extern void moveHandleDown(struct noderecord *);
-int doDiscoveredMoveRequest(int option1, Object obj, Node srv, State *state);
+extern int doEmissaryMoveRequest(int option1, Object obj, Node srv, State *state);
+extern void handleEmissaryMoveRequest(RemoteOpHeader *h, Node srv, Stream str);
+extern void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str);
 #endif /* _EMERALD_MOVE_H */
