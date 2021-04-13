@@ -37,11 +37,12 @@ DIR  =		/usr/em/Language/Report
 
 ${SOURCE}.dvi:	${SOURCES}
 	latex ${SOURCE}
+	dvipdf Report.dvi Report.pdf
 
 spell:		${SOURCES}
 	spell ${SOURCES}
 
-bib:	
+bib:
 	-bibtex ${SOURCE} < /dev/null
 	-@if egrep -s bibitem ${SOURCE}.bbl;then true;else cp /dev/null ${SOURCE}.bbl;fi
 

@@ -510,15 +510,16 @@ locations, and have the following interface:
     nodes come up or do down.
   \item[\kw{operation} removeNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
     Unregister h as a node event handler.
-  \item[\kw{operation} setNearbyNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
+  \item[\kw{operation} setDiscoveredNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
     Register {\it h} as an additional handler to receive notification when
     nearby nodes are discovered.
-  \item[\kw{operation} removeNearbyNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
-    Unregister h as a nearby node event handler. 
   \item[\kw{operation} getStdin \returns{} \/\LB{}InStream\/\RB{}]~\\
     Return an InStream representing the target \tn{Node}'s standard input.
   \item[\kw{operation} getStdout \returns{} \/\LB{}OutStream\/\RB{}]~\\
     Return an OutStream representing the target \tn{Node}'s standard output.
+  \item[\kw{operation} mergeWith \/\LB{}ip \CO{} \tn{String}, port \CO{} \tn{Integer}\/\RB{}]~\\
+    Merge the \tn{Node}'s node graph with the node graph of the \tn{Node} specified
+    by \tn{ip} and \tn{port}.
   \item[\kw{function} getLNN \returns{} \/\LB{}\tn{Integer}\/\RB{}]~\\
     Return the current node's Logical Node Number.  This value is not
     interesting.
