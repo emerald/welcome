@@ -26,10 +26,9 @@ PATH=$PATH:/$EMERALDROOT/bin/$EMERALDARCH:$EMERALDROOT/bin
 - NOTE: If you have previously installed a version of Emerald, make sure that your changes in `.bashrc` has taken effect ( does `type ec/emx` give a path to your new EMERALDROOT folder?).
 
 ## Building the project
-- In the Emerald root directory run `make build`. This will compile the Emerald vm and an experimental version of the compiler. Additionally this copy of Emerald features a stable version of the compiler.
+- In the Emerald root directory run `make build`. This will compile the Emerald vm. This copy of Emerald also features a stable version of the compiler.
 - `emx`: run the Emerald vm
 - `ec`: run a stable compiler
-- `xemc`: run an experimental compiler
 
 To compile single parts of Emerald alone, look at the instructions below.  
 

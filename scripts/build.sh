@@ -30,6 +30,4 @@ emmake
 cd "$EMERALDROOT/bin/$EMERALDARCH"
 ln -s "../../vm/$EMERALDARCH/emx" emx
 
-newcompiler
-
 exit 0
