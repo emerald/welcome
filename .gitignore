@@ -18,6 +18,17 @@ test/*
 vm/src/vm.h.orig
 vm/src/vm_i.h.orig
 ccalls/xsed
+ccalls/bani.h
+ccalls/emstream.h
+ccalls/misk.h
+ccalls/myristream.h
+ccalls/rand.h
+ccalls/regexp.h
+ccalls/string.h
+ccalls/xforms.h
+ccalls/xliba.h
+ccalls/xma.h
+ccalls/xta.h
 
 # Report
 Report/*.aux
