@@ -203,7 +203,6 @@ void handleInvokeRequest(RemoteOpHeader *h, Node srv, Stream str) {
 	int argc = h->option2, retc = h->option1, fn = h->status, i;
 	Object obj;
 	ConcreteType ct = 0;
-	RemoteOpHeader replyh;
 	int *sp;
 	State *state;
 
@@ -230,8 +229,8 @@ void handleInvokeRequest(RemoteOpHeader *h, Node srv, Stream str) {
 		 * First find it, then send it the message.
 		 */
 		TRACE(rinvoke, 1, ("Trying to find the object and send it the message"));
-		ct = (ConcreteType)doObjectRequest(replyh.sslocation, &h->targetct, ctct);
-		obj = createStub(ct, getNodeRecordFromSrv(replyh.sslocation), h->target);
+		ct = (ConcreteType)doObjectRequest(srv, &h->targetct, ctct);
+		obj = createStub(ct, getNodeRecordFromSrv(srv), h->target);
 
 		RewindStream(str);
 		newstr = StealStream(str);
