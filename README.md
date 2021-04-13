@@ -17,10 +17,10 @@ This is an implementation of Emerald with an added `welcome` expression and node
 - The debugging-traces `welcome` and `discovery`   
 
 ## Requirements
-- `bash`
 - `make`
 - `csh`
 - 32-bit version of glibc
+- `ed`, `sed`, `sh`, `awk`
 
 **Tested with:**
 - intel 64 bit and ARMv7l (32 bit) CPU
