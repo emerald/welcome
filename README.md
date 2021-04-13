@@ -7,9 +7,9 @@
 - 32-bit version of glibc
 
 **Tested with:**
-- intel 64 bit CPU
-- Linux (WSL2 with Debian and Ubuntu)
-- EMERALDARCH set to i386linux
+- intel 64 bit and ARMv7l (32 bit) CPU
+- Linux: Debian, Raspbian and WSL2 with Debian and Ubuntu
+- EMERALDARCH set to i386linux (for 32 bit) and x86_64linux (for 64 bit)
 
 ## Project setup
 
@@ -18,19 +18,20 @@ Extract and place your emerald project folder where you want to install it.
 Copy the following to your `~/.bashrc` file.
 ```bash
 EMERALDROOT=PATH/TO/emerald ; export EMERALDROOT
-EMERALDARCH=i386linux ; export EMERALDARCH
+EMERALDARCH=[YOUR ARCH] ; export EMERALDARCH
 PATH=$PATH:/$EMERALDROOT/bin/$EMERALDARCH:$EMERALDROOT/bin
 ```
-- You may want to change the `EMERALDARCH` option to fit your setup. Legal options for `EMERALDARCH`  are equal to the directory names under `bin/` and `lib/`.
-
-
-- If the `XCPFLAGS` in the `lib/$EMERALDARCH/macroMf`-file is not set you may need to set it to:
-```bash
-XCPFLAGS = -Di386linux -DDISTRIBUTED -DUSEDISTGC
-```
-Change the first flag according to your emeraldarch. We do not have a comprehensive list of legal options, but you can peek into other `macroMf`-files with similar arch and let yourself inspire. For both `i386linux` and `i386linuxmt` the flag is set to `-Di386linux`.
+- Valid options for `EMERALDARCH`  are equal to the directory names under `bin/` and `lib/`.
 
 - NOTE: If you have previously installed a version of Emerald, make sure that your changes in `.bashrc` has taken effect ( does `type ec/emx` give a path to your new EMERALDROOT folder?).
+
+## Building the project
+- In the Emerald root directory run `make build`. This will compile the Emerald vm and an experimental version of the compiler. Additionally this copy of Emerald features a stable version of the compiler.
+- `emx`: run the Emerald vm
+- `ec`: run a stable compiler
+- `xemc`: run an experimental compiler
+
+To compile single parts of Emerald alone, look at the instructions below.  
 
 ## Setup links
 - Navigate to `vm/` and and create a new directory with the same name as `$EMERALDARCH`. Navigate to this new directory.
@@ -57,3 +58,5 @@ emmake install
     - `useversion best` - sets the symlink execCP to point to the bestCP version
 
 - To run your new compiler use `xemc`
+
+If it is desired to replace the stable compiler with the experimental, carefully run `make install` in the `EC` directory.  

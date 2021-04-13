@@ -22,7 +22,7 @@ const Node <- immutable object Node builtin 0x1008
         function getLocationServer -> [Any]
         operation mergeWith [String, Integer]
     end NodeType
-
+    
     export function getSignature -> [ result : Signature ]
         result <- NodeType
     end getSignature
@@ -35,7 +35,7 @@ const Node <- immutable object Node builtin 0x1008
     export operation create [rd : Directory, mylnn : Integer] -> [ n : NodeType ]
         n <- object aNode builtin 0x1408
             field rootDirectory : Directory <- rd
-
+            
             operation iGetTimeOfDay -> [secs : Integer, usecs : Integer]
                 primitive "SYS" "GETTOD" 0 [ secs, usecs ] <- [ ]
             end iGetTimeOfDay

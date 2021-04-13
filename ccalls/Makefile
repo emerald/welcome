@@ -7,7 +7,7 @@
 #
 # We list the subdirectories here explicitly, because in order to maintain
 # compatibility with old already compiled code, we need to deal with them in
-# the same order, so that they get the same identifiers.  
+# the same order, so that they get the same identifiers.
 #
 SUBDIRS = \
 	emstream \
@@ -52,7 +52,7 @@ export:
 	done
 	genccdef $(DOTHS)
 
-# need to be able to rebuild everything cleanly; 
+# need to be able to rebuild everything cleanly;
 clean:
 	rm -f $(DOTHS)
 	for i in $(SUBDIRS)* ; do \

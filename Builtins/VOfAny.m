@@ -1,4 +1,4 @@
-const	VectorOfAnyType <-	typeobject VectorOfAnyType builtin 0x1628
+const        VectorOfAnyType <-	typeobject VectorOfAnyType builtin 0x1628
     function  getElement [Integer] -> [Any]
     operation setElement [Integer, Any]
     function  upperbound -> [Integer]
@@ -6,7 +6,7 @@ const	VectorOfAnyType <-	typeobject VectorOfAnyType builtin 0x1628
     function  getElement [Integer, Integer] -> [VectorOfAnyType]
     function  getSlice [Integer, Integer] -> [VectorOfAnyType]
 end VectorOfAnyType
-const VectorOfAny <- 	immutable object VectorOfAny  builtin 0x1028
+const VectorOfAny <-         immutable object VectorOfAny builtin 0x1028
     export function getSignature -> [result : Signature]
         result <- VectorOfAnyType
     end getSignature

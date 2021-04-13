@@ -3,7 +3,7 @@ const RIS <- typeobject RIS
     function  upperbound -> [Integer]
     function  lowerbound -> [Integer]
 end RIS
-const	ImmutableVectorOfIntType <-	immutable typeobject ImmutableVectorOfIntType builtin 0x1623
+const        ImmutableVectorOfIntType <-	immutable typeobject ImmutableVectorOfIntType builtin 0x1623
     function  getElement [Integer] -> [Integer]
     function  upperbound -> [Integer]
     function  lowerbound -> [Integer]
@@ -12,7 +12,7 @@ const	ImmutableVectorOfIntType <-	immutable typeobject ImmutableVectorOfIntType 
     operation catenate [a : ImmutableVectorOfIntType] -> [r : ImmutableVectorOfIntType]
     operation || [a : ImmutableVectorOfIntType] -> [r : ImmutableVectorOfIntType]
 end ImmutableVectorOfIntType
-const ImmutableVectorOfInt <- 	immutable object ImmutableVectorOfInt  builtin 0x1023
+const ImmutableVectorOfInt <-         immutable object ImmutableVectorOfInt builtin 0x1023
     
     export function getSignature -> [result : Signature]
         result <- ImmutableVectorOfIntType

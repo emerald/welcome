@@ -12,7 +12,7 @@ const	ImmutableVectorOfAnyType <-	immutable typeobject ImmutableVectorOfAnyType 
     operation catenate [a : ImmutableVectorOfAnyType] -> [r : ImmutableVectorOfAnyType]
     operation || [a : ImmutableVectorOfAnyType] -> [r : ImmutableVectorOfAnyType]
 end ImmutableVectorOfAnyType
-const ImmutableVectorOfAny <- 	immutable object ImmutableVectorOfAny  builtin 0x1021
+const ImmutableVectorOfAny <- immutable object ImmutableVectorOfAny  builtin 0x1021
     
     export function getSignature -> [result : Signature]
         result <- ImmutableVectorOfAnyType

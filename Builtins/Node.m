@@ -24,19 +24,19 @@ const Node <- immutable object Node builtin 0x1008
         function getLocationServer -> [Any]
         operation mergeWith [String, Integer]
     end NodeType
-
+    
     export function getSignature -> [ result : Signature ]
         result <- NodeType
     end getSignature
-
+    
     export operation getStdin -> [ result : InStream ]
         primitive "SYS" "GETSTDIN" 0 [result] <- []
     end getStdin
-
+    
     export operation getStdout -> [ result : OutStream ]
         primitive "SYS" "GETSTDOUT" 0 [result] <- []
     end getStdout
-
+    
     export operation create [rd : Directory, mylnn : Integer] -> [ n : NodeType ]
         n <- object aNode builtin 0x1408
             field rootDirectory : Directory <- rd
@@ -47,11 +47,11 @@ const Node <- immutable object Node builtin 0x1008
             const Runnable <- typeobject Runnable
                 op run [ Handler ]
             end Runnable
-
+            
             operation iGetTimeOfDay -> [secs : Integer, usecs : Integer]
                 primitive "SYS" "GETTOD" 0 [ secs, usecs ] <- [ ]
             end iGetTimeOfDay
-
+            
             operation setEventHandler [ et : EventType, h : Handler ]
                 if eventhandlers == nil then
                     eventhandlers <- VectorOfAny.create[8]
@@ -87,17 +87,17 @@ const Node <- immutable object Node builtin 0x1008
                     const tuple : VectorOfAny <- oldeventhandlers[i]
                     eventhandlers[i] <- tuple
                 end for
-
+                
                 for i : Integer <- len while i < len * 2 by i <- i + 1
                     var tuple : VectorOfAny <- VectorOfAny.create[2]
                     eventhandlers[i] <- tuple
                 end for
-
+                
                 var tuple : VectorOfAny <- eventhandlers[len]
                 tuple[0] <- et
                 tuple[1] <- h
             end setEventHandler
-
+            
             operation fireEvent [ et : EventType, r : Runnable ]
                 if eventhandlers == nil then return end if
                 const upb : Integer <- eventhandlers.upperbound
@@ -113,48 +113,48 @@ const Node <- immutable object Node builtin 0x1008
                     end if
                 end for
             end fireEvent
-
+            
             export operation getTimeOfDay -> [ t : Time ]
                 var secs, usecs : Integer
                 secs, usecs <- self.iGetTimeOfDay
                 t <- Time.create[secs, usecs]
             end getTimeOfDay
-
+            
             export operation delay [ t : Time ]
                 primitive "SYS" "JDELAY" 1 [ ] <- [ t ]
             end delay
-
+            
             export operation waitUntil [ t : Time ]
                 const sep : Time <- t - self.getTimeOfDay
                 primitive "SYS" "JDELAY" 1 [ ] <- [ sep ]
             end waitUntil
-
+            
             export operation getActiveNodes -> [ r : NodeList ]
                 primitive "SYS" "GETACTIVENODES" 0 [ r ] <- [ ]
             end getActiveNodes
-
+            
             export operation getAllNodes -> [ r : NodeList ]
                 primitive "SYS" "GETALLNODES" 0 [ r ] <- [ ]
             end getAllNodes
-
+            
             export operation getNodeInformation [ n : Node ] -> [ r : NodeListELement ]
                 var incarnationTime : Time
                 primitive "SYS" "JGETINCARNATIONTIME" 0 [incarnationTime] <- []
                 r <- NodeListElement.create[self, true, incarnationTime, mylnn]
             end getNodeInformation
-
+            
             export operation getLoadAverage -> [ r : Real ]
                 primitive "SYS" "JGETLOADAVERAGE" 0 [ r ] <- [ ]
             end getLoadAverage
-
+            
             export operation setDiscoveredNodeEventHandler [ h : Handler ]
                 self.setEventHandler[EventType.DISCOVERED_NODE_EVENT, h]
             end setDiscoveredNodeEventHandler
-
+            
             export operation setNodeEventHandler [ h : Handler ]
                 self.setEventHandler[EventType.NODE_EVENT, h]
             end setNodeEventHandler
-
+            
             export operation removeNodeEventHandler [ h : Handler ]
                 if eventhandlers == nil then return end if
                 const upb : Integer <- eventhandlers.upperbound
@@ -169,7 +169,7 @@ const Node <- immutable object Node builtin 0x1008
                     end if
                 end for
             end removeNodeEventHandler
-
+            
             export operation nodeUp [n : Node, t : Time]
                 const r <- object r
                     export operation run[ h : Handler ]
@@ -180,10 +180,10 @@ const Node <- immutable object Node builtin 0x1008
                         end invokeUp
                     end run
                 end r
-
+                
                 self.fireEvent[EventType.NODE_EVENT, r]
             end nodeUp
-
+            
             export operation nodeDown [n : Node, t : Time]
                 const r <- object r
                     export operation run[ h : Handler ]
@@ -194,10 +194,10 @@ const Node <- immutable object Node builtin 0x1008
                         end invokeDown
                     end run
                 end r
-
+                
                 self.fireEvent[EventType.NODE_EVENT, r]
             end nodeDown
-
+            
             export operation discoveredNodeUp [n : Node, t : Time]
                 const r <- object r
                     export operation run[ h : Handler ]
@@ -208,10 +208,10 @@ const Node <- immutable object Node builtin 0x1008
                         end invokeUp
                     end run
                 end r
-
+                
                 self.fireEvent[EventType.DISCOVERED_NODE_EVENT, r]
             end discoveredNodeUp
-
+            
             export operation discoveredNodeDown [n : Node, t : Time]
                 const r <- object r
                     export operation run[ h : Handler ]
@@ -222,38 +222,38 @@ const Node <- immutable object Node builtin 0x1008
                         end invokeDown
                     end run
                 end r
-
+                
                 self.fireEvent[EventType.DISCOVERED_NODE_EVENT, r]
             end discoveredNodeDown
-
+            
             export operation getStdin -> [ result : InStream ]
                 primitive "SYS" "GETSTDIN" 0 [result] <- []
             end getStdin
-
+            
             export operation getStdout -> [ result : OutStream ]
                 primitive "SYS" "GETSTDOUT" 0 [result] <- []
             end getStdout
-
+            
             export function getLNN -> [result : Integer]
                 result <- mylnn
             end getLNN
-
+            
             export function getName -> [result : String]
                 primitive "SYS" "GETNAME" 0 [result] <- []
             end getName
-
+            
             export function getIncarnationTime -> [result : Time]
                 primitive "SYS" "JGETINCARNATIONTIME" 0 [result] <- []
             end getIncarnationTime
-
+            
             export operation getLocationServer -> [ l : Any ]
                 primitive var "GETLOCSRV" [l] <- []
             end getLocationServer
-
+            
             export operation setLocationServer [ l : Any ]
                 primitive "SETLOCSRV" [] <- [l]
             end setLocationServer
-
+            
             export operation mergeWith [ip : String, port : Integer]
                 primitive "SYS" "JMERGEWITH" 2 [] <- [ip, port]
             end mergeWith

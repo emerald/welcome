@@ -61,7 +61,7 @@ install:
 	$(EMX) -C bestCP
 	rm -f $(EMLIBDIR)/Compiler
 	cp bestCP $(EMLIBDIR)/Compiler
-	chmod -w $(EMLIBDIR)/Compiler
+	chmod a-w $(EMLIBDIR)/Compiler
 
 bestCP:	execCP
 	echo >  xxinput  unset dogeneration

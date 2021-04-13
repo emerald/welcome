@@ -1,4 +1,4 @@
-const	VectorOfIntType <-	typeobject VectorOfIntType builtin 0x161e
+const        VectorOfIntType <-	typeobject VectorOfIntType builtin 0x161e
     function  getElement [Integer] -> [Integer]
     operation setElement [Integer, Integer]
     function  upperbound -> [Integer]
@@ -6,7 +6,7 @@ const	VectorOfIntType <-	typeobject VectorOfIntType builtin 0x161e
     function  getElement [Integer, Integer] -> [VectorOfIntType]
     function  getSlice [Integer, Integer] -> [VectorOfIntType]
 end VectorOfIntType
-const VectorOfInt <- 	immutable object VectorOfInt  builtin 0x101e
+const VectorOfInt <-         immutable object VectorOfInt builtin 0x101e
     export function getSignature -> [result : Signature]
         result <- VectorOfIntType
     end getSignature

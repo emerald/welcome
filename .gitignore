@@ -1,13 +1,13 @@
 # Emerald
 *.x
-lib/Builtins
 EC/bestCP
 EC/execCP
 EC/CP
 EC/CP_*
 EC/CPIndex*
 EC/name*
-vm/i386linux/emx
+vm/i386linux
+vm/x86_64linux
 
 # tests
 test/*

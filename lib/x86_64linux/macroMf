@@ -1,5 +1,5 @@
 #
-# i386mach specific definitions
+# x86_64linux specific definitions
 # of commonly-used macros
 #
 
@@ -21,6 +21,6 @@ CPP = cc -E
 DEPEND = cc -MM
 
 #
-CFLAGSOPT = -g -O3
+CFLAGSOPT = -g -O3 -m32
 OPTCOPT   = $(CFLAGSOPT)
 OPTVMOPT  = $(CFLAGSOPT)
