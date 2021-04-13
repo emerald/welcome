@@ -1,5 +1,21 @@
 <!-- Created 20/10/2020 -->
 
+# W E L C O M E
+
+## About
+This is an implementation of Emerald with an added `welcome` expression and node discovery mechanism.  
+
+- `Report.pdf` is an edited version of the report containing the new language additions.
+- `Welcome_user_guide.pfd` is a detailed document explaining the additions.
+
+## Added features
+- The `welcome` expression
+- The `welcomable` object prefix
+- The `mergeWith`-operation in the builtin `Node`-object
+- The `setDiscoveredNodeEventHandler`-operation in the `Node`-object
+- Run emx with the option `-D` to make a node discoverable
+- The debugging-traces `welcome` and `discovery`   
+
 ## Requirements
 - `bash`
 - `make`
