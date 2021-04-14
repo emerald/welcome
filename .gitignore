@@ -12,6 +12,7 @@ vm/x86_64linux
 # tests
 test/*
 
+emerald-bin-welcome
 
 # C files
 *.o
