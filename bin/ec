@@ -22,6 +22,4 @@ for i do
 	 esac
     fi
 done
-$ECHO "ARGS=$ARGS"
-$ECHO $I | tr '@' '\012' 
 $ECHO $I | tr '@' '\012' | emc $ARGS
