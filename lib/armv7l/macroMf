@@ -1,0 +1,26 @@
+#
+# armv7l (raspberry pi 3b) specific definitions
+# of commonly-used macros
+#
+
+# architecture definition
+ARCH = `arch`
+
+# (ANSI) C compiler
+CC = cc
+
+# definitions to enable common extensions in headers and libraries
+XCPFLAGS = -Di386linux -DDISTRIBUTED -DUSEDISTGC
+
+XLIB =
+
+# C preprocessor
+CPP = cc -E
+
+# dependency generator
+DEPEND = cc -MM
+
+#
+CFLAGSOPT = -g -O3 -fsigned-char
+OPTCOPT   = $(CFLAGSOPT)
+OPTVMOPT  = $(CFLAGSOPT)

@@ -46,7 +46,7 @@ install: export
 # executed every time.
 export:
 	-/bin/rm -f xsed
-	cc -o xsed xsed.c
+	cc -fsigned-char -o xsed xsed.c
 	for i in $(SUBDIRS) ; do \
 		(cd $$i ; echo "making $$i" ; $(EMMAKE) export) ; \
 	done
