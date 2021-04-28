@@ -289,7 +289,7 @@ void handleEmissaryMoveReply(RemoteOpHeader *h, Node srv, Stream str) {
 		move(h->option1, o, srv, state);
 	} else {
 		TRACE(merge, 5, ("Emissary move declined"));
-		moveDone(state, h, 1);
+		moveDone(state, h, 0);
 	}
 }
 
@@ -367,7 +367,7 @@ int doEmissaryMoveRequest(int option1, Object obj, Node srv, State *state) {
 		sendMsgTo(currentloc, str, h.target);
 	}
 
-	TRACE(merge, 4, ("Discovered move request sent"));
+	TRACE(merge, 4, ("Emissary move request sent"));
 	inhibit_gc--;
 	return 0;
 }
