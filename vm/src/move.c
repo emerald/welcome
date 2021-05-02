@@ -841,6 +841,7 @@ void findActivationsInObject(Object obj, Stream str) {
 		if (HASODP(state->cp->d.instanceFlags) && state->op == obj) {
 			TRACE(rinvoke, 8, ("Found one"));
 			if (addActivations(state, str, SQueueYank(ready, state) || ISetMember(running, (int)state))) {
+				SQueueYank(welcome_q, state);
 				processMovedOut(state);
 				/* Because processMovedOut removes the state from allProcesss
 				 * we have to fudge with the index

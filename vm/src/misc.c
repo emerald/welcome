@@ -1567,11 +1567,6 @@ int isWelcome(AbstractType at) {
 	u32 sp;
 
 	SQueueForEach (welcome_q, s) {
-		if (!RESDNT(s->firstThing)) {
-                    SQueueYank(welcome_q, s);
-                    return isWelcome(at);
-        }
-
 		sp = s->sp;
 		TOP(AbstractType, welcomingType);
 
@@ -1589,18 +1584,12 @@ State *findAndRemoveWelcomingState(AbstractType at) {
 	u32 sp;
 
 	SQueueForEach (welcome_q, s) {
-		if (!RESDNT(s->firstThing)) {
-                    SQueueYank(welcome_q, s);
-                    return findAndRemoveWelcomingState(at);
-        }
-
 		sp = s->sp;
 		TOP(AbstractType, welcomingType);
 
         if(conforms(at, welcomingType)) {
 			int res = SQueueYank(welcome_q, s);
 			if (!res) assert(0);
-			TRACE(process, 4, ("Found a welcoming state"));
             return s;
         }
 	} SQueueNext();
