@@ -5,6 +5,8 @@ const main <- object main
     const me <- locate self
 
     process
-        me.mergeWith["uio.no", 1234]
+        stdout.putstring["Attempting to merge with ifi.uio.no:1234 ...\n"]
+        me.mergeWith["ifi.uio.no", 1234]
+        stdout.putstring["Merge attempt complete\n"]
     end process
 end main

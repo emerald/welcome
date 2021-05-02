@@ -1,10 +1,13 @@
-% The intention of this program is to test whether an emissary move with an
-% unwelcome object can merge node graphs.
+% The intention of this program is to test whether an 3rd party emissary move
+% with an unwelcome object can merge node graphs.
 
-% This test requires two nodes in different node graphs on the same local
+% This test requires three nodes in two different node graphs on the same local
 % network, and should be run with the following programs:
-    % node 1:               nodeup.x non_welcomable_thrower.x
-    % discoverable node 2:  nodeup.x catcher.x
+    % graph 1:
+        % node 1:               nodeup.x
+        % node 2:               nodeup.x unwelcome_thrower.x
+    % graph 2
+        % discoverable node 1:  nodeup.x catcher.x
 
 const ambassador <- object ambassador
     export op invokeMe
@@ -14,8 +17,12 @@ end ambassador
 
 const thrower <- object thrower
     const me <- locate self
+    const all <- me$activeNodes
 
     process
+        move ambassador to all[1]$theNode
+        (locate ambassador)$stdout.putstring["Ambassador is here\n"]
+
         me$discoveredNodeEventHandler <- object myHandler
             export operation nodeup[ n : Node, t : Time]
                 me$stdout.putstring["Discovered node up!\n"]

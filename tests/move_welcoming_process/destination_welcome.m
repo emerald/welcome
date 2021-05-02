@@ -6,7 +6,7 @@
 % with the following programs:
     % node 1: no program
     % node 2: destination_welcome.x
-    % node 3: catcher.x
+    % node 3: thrower.x
 
 const mobileCatcher <- object mobileCatcher
     process

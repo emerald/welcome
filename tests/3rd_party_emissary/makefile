@@ -1,7 +1,6 @@
 EMC=emc
 ENV=test_env
-BIN=nodeup catcher thrower non_conforming_thrower unwelcome_thrower \
-	disc_node_invocation
+BIN=nodeup catcher thrower non_conforming_thrower unwelcome_thrower
 
 all: clean $(BIN)
 
