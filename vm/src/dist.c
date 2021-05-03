@@ -54,14 +54,8 @@ struct other {
  * Forward declarations.
  */
 
-void printNbo(void *n);
-void printNoderecord(noderecord *n);
-void printIp(u32 ip);
-void printNode(Node *n);
-void printOther(struct other *o);
-void printOID(OID *o);
-
 static void setupReader(struct other *ri);
+static void ListenerCB(int, EDirection, void *);
 
 extern int checkSameUser, beDiscoverable;
 extern struct timeval inc_tm;
@@ -261,13 +255,16 @@ void unmute(Node srv) {
  *			Setup ReaderCB as handler for new socket.
  *			If new node is unique: Add new other to others[], this time with
  *			correct epoch.
- *
+ * If silent = 1:
+ *			The handshake is performed in silent mode, so that the receiving
+ *			node will not trigger a node-up event.
  */
 int findsocket(Node *t, int create, int silent) {
-	int i, addrlen, s, pos;
+	int i, addrlen, s, pos, res;
 	struct sockaddr_in addr;
 	struct other *o, localcopy;
 	struct nbo nbo;
+	SELECTFD_T set;
 
 	TRACE(dist, 7, ("in find socket for %#x.%4x", ntohl(t->ipaddress), t->port));
 	if (cache.id.ipaddress == t->ipaddress && cache.id.port == t->port && cache.s) {
@@ -343,17 +340,51 @@ int findsocket(Node *t, int create, int silent) {
 		nbo.epoch = htons(myid.epoch);
 		nbo.userid = htonl(getuid() | (silent ? SILENT_MODE_FLAG : 0));
 
-		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo) ||
-		    readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
+		if (writeToSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
+				TRACE(dist, 0, ("Couldn't exchange epoch info"));
+				closesocket(localcopy.s);
+				nothers--;
+				return -1;
+		}
+
+		/*
+		 * Two nodes may try to connect to each other at the same time. To
+		 * avoid infinite blocking, nodes must be able to accept incoming
+		 * connections while waiting for the handshake to complete.
+		 *
+		 * This may lead to duplicate connections. In those cases, only one
+		 * socket will be used by each node.
+		 */
+		while (1) {
+			FD_ZERO(&set);
+			FD_SET(localcopy.s, &set);
+			FD_SET(mysocket, &set);
+
+			res = real_select((localcopy.s > mysocket
+							 ? localcopy.s : mysocket) + 1,
+						 	 &set, NULL, NULL, NULL);
+			if (res < 0) {
+				perror("findsocket.real_select");
+				closesocket(localcopy.s);
+				nukeother(localcopy);
+				return -1;
+			}
+			if (FD_ISSET(localcopy.s, &set)) break;
+			ListenerCB(mysocket, EIO_Read, NULL);
+		}
+
+		if (readFromSocketN(localcopy.s, &nbo, sizeof(nbo)) != sizeof(nbo)) {
 			TRACE(dist, 0, ("Couldn't exchange epoch info"));
 			closesocket(localcopy.s);
-			nothers--;
+			nukeother(localcopy);
 			return -1;
 		}
-		else if (checkSameUser && getuid() != (int)ntohl(nbo.userid)) {
-			printf("Permission denied - user mismatch local %d != remote %d\n", (int)getuid(), (int)ntohl(nbo.userid));
+
+		if (checkSameUser && getuid() != (int)ntohl(nbo.userid)) {
+			printf("Permission denied - user mismatch local %d != remote %d\n",
+					(int)getuid(), (int)ntohl(nbo.userid));
 			closesocket(localcopy.s);
-			nothers--;
+			nukeother(localcopy);
 			return -1;
 		}
 
@@ -364,15 +395,17 @@ int findsocket(Node *t, int create, int silent) {
 		localcopy.silent = silent;
 	}
 
-	o = &others[nothers-1];
-	if(silent) TRACE(merge, 6, ("connection in silent mode"));
+	o = (struct other *)vmMalloc(sizeof *o);
+	*o = localcopy;
+	setupReader(o);
+
+	if (silent) TRACE(merge, 6, ("connection in silent mode"));
 	TRACE(dist, 2, ("find socket returning new %d", localcopy.s));
 	cache = localcopy;
 	if (!SameNode(others[pos].id, cache.id)) {
 		TRACE(dist, 9, ("Inserting %#x.%d -> %d in others[%d]", ntohl(cache.id.ipaddress), cache.id.port, cache.s, nothers));
-		others[nothers - 1] = cache;
+		others[nothers++] = cache;
 	}
-	setupReader(o);
 	checkForStrangeness();
 	return cache.s;
 }
@@ -411,6 +444,7 @@ static void ReaderCB(int sock, EDirection d, void *state) {
 		closesocket(sock);
 		if (notifyFunction && !rs->ri->silent) notifyFunction(rs->ri->id, 0);
 		nukeother(*rs->ri);
+		vmFree(rs->ri);
 		vmFree(rs);
 	}
 	else if (rs->readingLength) {
@@ -510,6 +544,7 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 	if (res != sizeof(ls->nbo) || !checkUserOK(getuid(), (~SILENT_MODE_FLAG & ntohl(ls->nbo.userid)))) {
 		nukeother(*ls->ri);
 		closesocket(ls->ri->s);
+		vmFree(ls->ri);
 	}
 	else {
 		ls->ri->id.port = ntohs(ls->nbo.port);
@@ -535,7 +570,6 @@ static void ListenerStage2(int sock, EDirection d, void *arg) {
 static void ListenerCB(int sock, EDirection d, void *s) {
 	int newsocket;
 	struct sockaddr_in addr;
-	struct other localcopy;
 	socklen_t addrlen = sizeof(addr);
 	int on = 1;
 	ListenerState *ls = (ListenerState *)vmMalloc(sizeof(*ls));
@@ -549,16 +583,15 @@ static void ListenerCB(int sock, EDirection d, void *s) {
 		return;
 	}
 	maximizeSocketBuffers(newsocket);
-	localcopy.s = newsocket;
-	localcopy.silent = 0;
-	localcopy.id.ipaddress = addr.sin_addr.s_addr;
-	localcopy.id.port = ntohs(addr.sin_port);
+	ls->ri = (struct other *)vmMalloc(sizeof *ls->ri);
+	ls->ri->s = newsocket;
+	ls->ri->id.ipaddress = addr.sin_addr.s_addr;
+	ls->ri->id.port = ntohs(addr.sin_port);
 
 	TRACE(dist, 1, ("Accepted new connection %d from %#x.%x",
-	                ls->ri->s, ntohl(ls->ri->id.ipaddress), ls->ri->id.port));
-	TRACE(dist, 8, ("Inserting %#x.%x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->s, nothers));
-	others[nothers++] = localcopy;
-	ls->ri = &others[nothers - 1];
+  		  ls->ri->s, ntohl(ls->ri->id.ipaddress), ls->ri->id.port));
+    TRACE(dist, 8, ("Inserting %#x.%x -> %d in others[%d]", ntohl(ls->ri->id.ipaddress), ls->ri->id.port, ls->ri->s, nothers));
+	others[nothers++] = *ls->ri;
 	ls->nbo.ipaddress = myid.ipaddress;
 	ls->nbo.port = htons(myid.port);
 	ls->nbo.epoch = htons(myid.epoch);
@@ -567,6 +600,7 @@ static void ListenerCB(int sock, EDirection d, void *s) {
 	if (send(ls->ri->s, (char *)&ls->nbo, sizeof(ls->nbo), 0) != sizeof(ls->nbo)) {
 		nukeother(*ls->ri);
 		closesocket(ls->ri->s);
+		vmFree(ls->ri);
 		return;
 	}
 	setupReadBuffer(&ls->rb, &ls->nbo, sizeof(ls->nbo), 0, readFromSocket);
@@ -1008,76 +1042,3 @@ int InitDist() {
 
 	return 0;
 }
-
-// For testing
-
-void printIp(u32 ip) {
-	u8 *byte = (u8*)&ip;
-	printf("%d.%d.%d.%d", byte[0], byte[1], byte[2], byte[3]);
-}
-
-void printSpace(int i) {
-	while (i--) printf("\t");
-}
-
-void printNodeIndent(Node *n, int i) {
-	printSpace(i);
-	printf("Node: \n");
-	printSpace(i);
-	printf("\tIP: \t"); printIp(n->ipaddress);
-	printf("\n");
-	printSpace(i);
-	printf("\tPort:\t%u\n", n->port);
-	printSpace(i);
-	printf("\tEpoch:\t%u\n", n->epoch);
-}
-
-void printNode(Node *n) {
-	printNodeIndent(n, 0);
-}
-
-void printOther(struct other *o) {
-	printf("Other: \n");
-	printf("\ts: %d\n", o->s);
-	printNodeIndent(&(o->id), 1);
-}
-
-void printNbo(void *v) {
-	struct nbo *n = (struct nbo*) v;
-	printf("nbo: \n");
-	printf("\tIP: \t"); printIp(n->ipaddress);
-	printf("\n\tPort:\t%u\n", htons(n->port));
-	printf("\tEpoch:\t%u\n", n->epoch);
-	printf("\tUserid:\t%x\n", n->userid);
-}
-
-void printOIDIndent(OID *o, int i) {
-	printSpace(i);
-	printf("oid:\n");
-	printSpace(i);
-	printf("\tIP: \t"); printIp(o->ipaddress); printf("\n");
-	printSpace(i);
-	printf("\tPort:\t%u\n", o->port);
-	printSpace(i);
-	printf("\tEpoch:\t%u\n", o->epoch);
-	printSpace(i);
-	printf("\tSeq:\t%u\n", o->Seq);
-}
-
-void printOID(OID *o) {
-	printOIDIndent(o, 0);
-}
-
-void printNoderecord(noderecord *n) {
-	printf("noderecord:\n");
-	printf("\tUp: \t%d\n", n->up);
-	printf("\tnode:\n");
-	printOIDIndent(&n->node, 1);
-	printf("\tinctm:\n");
-	printOIDIndent(&n->inctm, 1);
-	printf("\tsrv:\n");
-	printNodeIndent(&n->srv, 1);
-	printf("\tnext:\t%p\n", n->p);
-}
-
-// End for testing

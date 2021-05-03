@@ -563,6 +563,46 @@ void doEchoRequest(struct noderecord *thisnode, Node srv) {
 	}
 }
 
+
+void sendSingleNetworkSync(Node srv) {
+	Stream str;
+	noderecord *n;
+	RemoteOpHeader header;
+
+	TRACE(merge, 4, ("Sending NetworkSync to %s", NodeString(srv)));
+
+	memset(&header, 0, sizeof(header));
+	header.kind = NetworkSync;
+	header.ss = nooid;
+	header.sslocation = myid;
+	header.target = nooid;
+	header.targetct = nooid;
+	str = StartMsg(&header);
+
+	WriteInt(nodecount, str);
+	for (n = allnodes->p; n; n = n->p) {
+		TRACE(merge, 8, ("NetworkSync: sending info on node %s - %s",
+						   OIDString(n->node), n->up ? "up" : "down"));
+		WriteInt(0, str);
+		WriteOID(&n->node, str);
+		TRACE(merge, 11, ("nodeoid = %s", OIDString(n->node)));
+		WriteOID(&n->inctm, str);
+		TRACE(merge, 11, ("inctmoid = %s", OIDString(n->inctm)));
+		WriteInt(n->up, str);
+	}
+
+	sendMsg(srv, str);
+}
+
+void doNetworkSync(void) {
+	noderecord *n;
+
+	for (n = allnodes->p; n; n = n->p) {
+		if (SameNode(thisnode->srv, n->srv)) continue;
+		sendSingleNetworkSync(n->srv);
+	}
+}
+
 void unavailableState(State *state) {
 	State *otherstate;
 	Object target;
@@ -662,7 +702,7 @@ void updateDiscoveredNodes(void) {
     }
 }
 
-noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
+noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up, int doSync) {
 	noderecord **nd;
 	Object thenode, inctm;
 	ConcreteType ct;
@@ -672,10 +712,10 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
 		    nodeOID.port == (*nd)->node.port &&
 		    nodeOID.epoch == (*nd)->node.epoch) {
 			TRACE(rinvoke, 9, ("Already had one"));
-			(*nd)->up = up;
-			if (!up) {
+			if ((*nd)->up && !up) {
 				nukeNode(*nd);
 			}
+			(*nd)->up = up;
 			return *nd;
 		}
 	}
@@ -705,6 +745,9 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up) {
 		if (ISNIL(inctm)) {
 			TRACE(rinvoke, 0, ("update_nodeinfo: failed to retrieve inctm"));
 			*nd = (*nd)->p; nodecount--; return NULL;
+		}
+		if (doSync) {
+			sendSingleNetworkSync((*nd)->srv);
 		}
 	}
 	else if (!ISNIL((inctm = OIDFetch((*nd)->inctm)))) {
@@ -738,10 +781,10 @@ static noderecord *handleupdown(Node id, int up) {
 	inctmOID = nodeOID;
 	inctmOID.Seq = 2;
 	TRACE(rinvoke, 8, ("Handling updown for %s -> %s", NodeString(id), up ? "up" : "down"));
-	return update_nodeinfo_fromOIDs(nodeOID, inctmOID, up);
+	return update_nodeinfo_fromOIDs(nodeOID, inctmOID, up, 0);
 }
 
-void update_nodeinfo(Stream str, Node srv) {
+void update_nodeinfo(Stream str, Node srv, int doSync) {
 	OID nodeOID, inctmOID;
 	u32 up;
 	u32 which;
@@ -755,7 +798,7 @@ void update_nodeinfo(Stream str, Node srv) {
 			ReadInt(&up, str);
 			TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(nodeOID)));
 			TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(inctmOID)));
-			(void)update_nodeinfo_fromOIDs(nodeOID, inctmOID, up);
+			(void)update_nodeinfo_fromOIDs(nodeOID, inctmOID, up, doSync);
 		}
 		else if (which == 1) {
 			handleGaggleUpdate(NULL, srv, str);
@@ -771,7 +814,7 @@ static int readyForBusiness;
 void handleEchoReply(RemoteOpHeader *h, Node srv, Stream str) {
 	TRACE(rinvoke, 10, ("EchoReply: %d bytes", BufferLength(str)));
 	TRACE(rinvoke, 4, ("EchoReply received"));
-	update_nodeinfo(str, srv);
+	update_nodeinfo(str, srv, 0);
 	readyForBusiness = 1;
 }
 
@@ -781,17 +824,18 @@ void doMergeRequest(Node srv) {
 	noderecord *n;
 	(void)handleupdown(srv, 1);
 
+	TRACE(merge, 4, ("Sending MergeRequest to %s", NodeString(srv)));
+
 	requesth.kind = MergeRequest;
 	requesth.ss = nooid;
 	requesth.sslocation = myid;
 	requesth.target = nooid;
 	requesth.targetct = nooid;
-	requesth.option1 = 1;
 	request = StartMsg(&requesth);
 
 	for (n = allnodes->p; n; n = n->p) {
 		if (SameNode(srv, n->srv)) continue;
-		TRACE(merge, 6, ("MergeRequest: sending info on node %s - %s",
+		TRACE(merge, 8, ("MergeRequest: sending info on node %s - %s",
 						   OIDString(n->node), n->up ? "up" : "down"));
 		WriteInt(0, request);
 		WriteOID(&n->node, request);
@@ -801,53 +845,26 @@ void doMergeRequest(Node srv) {
 		WriteInt(n->up, request);
 	}
 	sendMsg(srv, request);
-	TRACE(merge, 4, ("mergeRequest sent"));
 }
 
-void forwardMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
-	OID nodeOID, inctmOID;
-	u32 up;
-	u32 which;
-	Stream forwardstr;
-	noderecord *n;
+void handleNetworkSync(RemoteOpHeader *h, Node srv, Stream str) {
+	int recv_nodecount;
 
-	header->sslocation = myid;
-	header->option1 = 0;
+	ReadInt(&recv_nodecount, str);
+	TRACE(merge, 6, ("NetworkSync received from: %s", NodeString(srv)));
 
-	for (n = allnodes->p; n; n = n->p) {
-		if (SameNode(srv, n->srv) || SameNode(thisnode->srv, n->srv)) continue;
-		forwardstr = StartMsg(header);
-		RewindStream(str);
-		(void)ReadStream(str, sizeof(RemoteOpHeader));
-
-		while (!AtEOF(str)) {
-			TRACE(merge, 10, ("Looking at another merging node"));
-			ReadInt(&which, str);
-			WriteInt(which, forwardstr);
-			assert(which == 0);
-			ReadOID(&nodeOID, str);
-			WriteOID(&nodeOID, forwardstr);
-			ReadOID(&inctmOID, str);
-			WriteOID(&inctmOID, forwardstr);
-			ReadInt(&up, str);
-			WriteInt(up, forwardstr);
-			TRACE(merge, 11, ("nodeoid = %s", OIDString(nodeOID)));
-			TRACE(merge, 11, ("inctmoid = %s", OIDString(inctmOID)));
-		}
-		TRACE(merge, 6, ("Forwarding merge request to %s", OIDString(n->node)));
-		sendMsg(n->srv, forwardstr);
+	update_nodeinfo(str, srv, 1);
+	if (recv_nodecount != nodecount) {
+		TRACE(merge, 7, ("Different node count: received %d, current %d",
+						 recv_nodecount, nodecount));
+		sendSingleNetworkSync(srv);
 	}
 }
 
 void handleMergeRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	TRACE(merge, 4, ("MergeRequest received"));
-	if (header->option1 == 1) {
-		forwardMergeRequest(header, srv, str);
-		RewindStream(str);
-		ReadStream(str, sizeof(RemoteOpHeader));
-	}
-
-	update_nodeinfo(str, srv);
+	update_nodeinfo(str, srv, 0);
+	doNetworkSync();
 }
 
 void handleDiscoveredNode(Node srv, u32 sec, u32 usec) {
@@ -917,7 +934,7 @@ void handleEchoRequest(RemoteOpHeader *header, Node srv, Stream str) {
 	}
 	else {
 		noderecord *n;
-		update_nodeinfo(str, srv);
+		update_nodeinfo(str, srv, 0);
 		replyh.kind = EchoReply;
 		replyh.ss = nooid;
 		replyh.sslocation = myid;
@@ -1164,6 +1181,9 @@ void doRequest(Node srv, Stream str) {
 			break;
 		case EmissaryMoveReply:
 			handler = handleEmissaryMoveReply;
+			break;
+		case NetworkSync:
+			handler = handleNetworkSync;
 			break;
 #ifdef USEDISTGC
 		case DistGCInfo:

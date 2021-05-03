@@ -29,7 +29,9 @@ typedef enum {
 	IsFixedRequest, IsFixedReply,
 	GaggleUpdate, DistGCInfo,
 	DistGCDoneRequest, DistGCDoneReply,
-	DistGCDoneReport, MergeRequest,
+	DistGCDoneReport,
+	MergeRequest,
+	NetworkSync,
 	EmissaryMoveRequest, EmissaryMoveReply
 } MesageType;
 

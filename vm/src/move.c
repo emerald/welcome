@@ -328,9 +328,9 @@ int doEmissaryMoveRequest(int option1, Object obj, Node srv, State *state) {
 		state->nstoid = h.target;
 	}
 
-	findsocket(&srv, 1, 1);
-
 	if (RESDNT(obj->flags)) {
+		findsocket(&srv, 1, 1);
+		
 		TRACE(merge, 6, ("Sending '%.*s' as emissary object to %s",
 		                   ct->d.name->d.items, ct->d.name->d.data,
 		                   NodeString(srv)) );
