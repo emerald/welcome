@@ -56,4 +56,5 @@ extern ssize_t writeToSocketN(int, void *, size_t);
 extern void setHandler(int fd, IoHandler h, EDirection direction, void *state);
 extern void resetHandler(int fd, EDirection direction);
 extern ssize_t io_read(int, void *, size_t);
+extern void *getReaderStateBySocket(int sock);
 #endif

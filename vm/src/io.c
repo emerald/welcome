@@ -217,6 +217,16 @@ void checkForIO(int wait) {
 	}
 }
 
+void *getReaderStateBySocket(int sock) {
+	ioinfo *ioi;
+
+	ioi = (ioinfo *)IIScLookup(io_scs[EIO_Read], sock);
+	if(!IIScIsNIL(ioi)) {
+		return ioi->state;
+	}
+	return NULL;
+}
+
 void setupReadBuffer(readBuffer *rb, void *buf, int goal, int acceptless,
                      ssize_t (*reader)(int, void *, size_t)) {
 	rb->buffer = buf;

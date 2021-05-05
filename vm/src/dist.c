@@ -229,18 +229,6 @@ static void checkForStrangeness() {
 	}
 }
 
-void unmute(Node srv) {
-	int i;
-
-	for (i = 0; i < nothers; i++) {
-		if (SameNode(srv, others[i].id)) {
-			if (others[i].silent)
-				TRACE(merge, 6, ("unmuting node with port %d", others[i].id.port));
-			others[i].silent = 0;
-		}
-	}
-}
-
 /*
  * In short:
  * Find socket of node and set cache (global) to it.
@@ -712,6 +700,21 @@ static void discoveryCB (int sock, EDirection d, void *s) {
 	n.epoch = ntohs(epoch);
 
 	handleDiscoveredNode(n, sec, usec);
+}
+
+void unmute(Node srv) {
+	int i;
+	ReaderState *rs;
+
+	for (i = 0; i < nothers; i++) {
+		if (SameNode(srv, others[i].id)) {
+			if (others[i].silent)
+				TRACE(merge, 6, ("unmuting node %s", NodeString(others[i].id)));
+			others[i].silent = 0;
+			rs = (ReaderState*)getReaderStateBySocket(others[i].s);
+			if (rs) rs->ri->silent = 0;
+		}
+	}
 }
 
 int DDiscoverStart() {
