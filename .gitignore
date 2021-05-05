@@ -11,6 +11,8 @@ vm/x86_64linux
 
 # tests
 test/*
+tests/*/*.oid
+tests/*/*.opd
 
 emerald-bin-welcome
 

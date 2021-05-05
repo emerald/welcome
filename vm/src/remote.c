@@ -702,7 +702,7 @@ void updateDiscoveredNodes(void) {
     }
 }
 
-noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up, int doSync) {
+noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up, int flags) {
 	noderecord **nd;
 	Object thenode, inctm;
 	ConcreteType ct;
@@ -728,6 +728,7 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up, int doSy
 	(*nd)->srv.ipaddress =  htonl(nodeOID.ipaddress);
 	(*nd)->srv.port = nodeOID.port;
 	(*nd)->srv.epoch = nodeOID.epoch;
+	(*nd)->flags = flags;
 
 	/* create the node object */
 	ct = BuiltinInstCT(NODEI); assert(ct);
@@ -745,9 +746,6 @@ noderecord *update_nodeinfo_fromOIDs(OID nodeOID, OID inctmOID, int up, int doSy
 		if (ISNIL(inctm)) {
 			TRACE(rinvoke, 0, ("update_nodeinfo: failed to retrieve inctm"));
 			*nd = (*nd)->p; nodecount--; return NULL;
-		}
-		if (doSync) {
-			sendSingleNetworkSync((*nd)->srv);
 		}
 	}
 	else if (!ISNIL((inctm = OIDFetch((*nd)->inctm)))) {
@@ -784,7 +782,7 @@ static noderecord *handleupdown(Node id, int up) {
 	return update_nodeinfo_fromOIDs(nodeOID, inctmOID, up, 0);
 }
 
-void update_nodeinfo(Stream str, Node srv, int doSync) {
+void update_nodeinfo(Stream str, Node srv, int flags) {
 	OID nodeOID, inctmOID;
 	u32 up;
 	u32 which;
@@ -798,7 +796,7 @@ void update_nodeinfo(Stream str, Node srv, int doSync) {
 			ReadInt(&up, str);
 			TRACE(rinvoke, 11, ("nodeoid = %s", OIDString(nodeOID)));
 			TRACE(rinvoke, 11, ("inctmoid = %s", OIDString(inctmOID)));
-			(void)update_nodeinfo_fromOIDs(nodeOID, inctmOID, up, doSync);
+			(void)update_nodeinfo_fromOIDs(nodeOID, inctmOID, up, flags);
 		}
 		else if (which == 1) {
 			handleGaggleUpdate(NULL, srv, str);
@@ -849,15 +847,24 @@ void doMergeRequest(Node srv) {
 
 void handleNetworkSync(RemoteOpHeader *h, Node srv, Stream str) {
 	int recv_nodecount;
+	noderecord *nd;
 
 	ReadInt(&recv_nodecount, str);
-	TRACE(merge, 6, ("NetworkSync received from: %s", NodeString(srv)));
+	TRACE(merge, 6, ("NetworkSync received from: %s, %d nodes",
+					 NodeString(srv), recv_nodecount - 1));
 
-	update_nodeinfo(str, srv, 1);
+	update_nodeinfo(str, srv, IS_UNSYNCED);
 	if (recv_nodecount != nodecount) {
 		TRACE(merge, 7, ("Different node count: received %d, current %d",
-						 recv_nodecount, nodecount));
+						 recv_nodecount - 1, nodecount - 1));
 		sendSingleNetworkSync(srv);
+	}
+	for (nd = allnodes->p; nd; nd = nd->p) {
+		if (nd->flags & IS_UNSYNCED) {
+			TRACE(merge, 7, ("New node to synch with: %s", NodeString(nd->srv)));
+			sendSingleNetworkSync(nd->srv);
+			nd->flags &= ~IS_UNSYNCED;
+		}
 	}
 }
 

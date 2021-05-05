@@ -25,9 +25,11 @@ extern char *gRootNode;
 
 void init_nodeinfo(void);
 
+#define IS_UNSYNCED 1
+
 typedef struct noderecord noderecord;
 struct noderecord {
-	int up;
+	int up, flags;
 	OID node, inctm;
 	Node srv;
 	noderecord *p;

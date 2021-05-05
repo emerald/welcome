@@ -142,8 +142,9 @@ void checkForIO(int wait) {
 	fd_set local[3];
 	int i, res;
 	struct timeval *selectpause;
-	struct timeval pause, then;
+	struct timeval pause, then, dontblock;
 
+	memset(&dontblock, 0, sizeof dontblock);
 	local[EIO_Read] = io_sets[EIO_Read];
 	local[EIO_Write] = io_sets[EIO_Write];
 	local[EIO_Except] = io_sets[EIO_Except];
@@ -176,7 +177,6 @@ void checkForIO(int wait) {
 			selectpause = &pause;
 		}
 	}
-	// printf("selectpause sec: %d, usec: %d\n", selectpause->tv_sec, selectpause->tv_usec);
 	TRACE(dist, 4, ("Select delaying for %d.%06d",
 	                selectpause ? selectpause->tv_sec : -1,
 	                selectpause ? selectpause->tv_usec : 0));
@@ -199,7 +199,18 @@ void checkForIO(int wait) {
 					TRACE(dist, 13, ("Calling back %s on %d",
 					                 EIONames[d], i));
 					ioi->h(i, d, ioi->state);
-					res--;
+
+					/*
+						Handlers may indirectly call processMessages() again
+						which may read some of the messages we expect to find
+						here. By selecting again after calling the handler, we
+						know that only sockets with messages are set.
+					*/
+					res = real_select(nfds,
+										S_A(local[EIO_Read]),
+										S_A(local[EIO_Write]),
+					                  	S_A(local[EIO_Except]),
+										&dontblock);
 				}
 			}
 		}
