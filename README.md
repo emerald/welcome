@@ -24,7 +24,7 @@ This is an implementation of Emerald with an added `welcome` expression and node
 
 **Tested with:**
 - intel 64 bit and ARMv7l (32 bit) CPU
-- Linux: Debian, Raspbian and WSL2 with Debian and Ubuntu
+- Linux: Debian, Raspbian and WSL2 with Debian and Ubuntu. Also tested on PlanetLab with computers running Fedora 25.  
 - EMERALDARCH set to i386linux (for 32 bit), x86_64linux (for 64 bit) and armv7l (Raspberry Pi)
 
 ## Project setup
