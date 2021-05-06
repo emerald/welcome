@@ -1,10 +1,9 @@
-% The intention of this program is to test whether a reference obtained using
-% the welcome expression can be used to invoke the object.
+% This program throws three different welcomable objects to another node.
 
 % This test requires at least two nodes in the node graph, and should be run
 % with the following programs:
-    % node 1: catcher.x
-    % node 2: thrower.x
+    % node 1: monitor_catchers.x
+    % node 2: throwers.x
 
 const Throwable <- welcomable class Throwable[name : String]
     export op invokeMe

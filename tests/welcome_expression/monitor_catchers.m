@@ -3,8 +3,8 @@
 
 % This test requires at least two nodes in the node graph, and should be run
 % with the following programs:
-% node 1: catchers.x
-% node 2: monitor_throw.x
+    % node 1: monitor_catchers.x
+    % node 2: throwers.x
 
 const WelcomableType <- typeobject WelcomableType
     op invokeMe
