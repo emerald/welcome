@@ -1,7 +1,7 @@
 EMC=emc
 ENV=test_env
 BIN=block catcher thrower nonconforming_throw unwelcome_throw attached \
-	catchers monitor_throw
+	catchers monitor_throw monitor_catchers throwers
 
 all: clean $(BIN)
 
