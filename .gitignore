@@ -13,6 +13,8 @@ vm/x86_64linux
 test/*
 tests/*/*.oid
 tests/*/*.opd
+tests/*/*.idb
+tests/*/*.ats
 
 emerald-bin-welcome
 
