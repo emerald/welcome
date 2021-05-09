@@ -329,8 +329,14 @@ int doEmissaryMoveRequest(int option1, Object obj, Node srv, State *state) {
 	}
 
 	if (RESDNT(obj->flags)) {
-		findsocket(&srv, 1, 1);
-		
+		if ( findsocket(&srv, 1, 1) == -1) {
+			TRACE(merge, 2, ("Can't connect to discovered node %s", NodeString(srv)));
+			h.target = OIDOf(obj);
+			h.targetct = OIDOf(CODEPTR(obj->flags));
+			moveDone(state, &h, 1);
+			return 1;
+		}
+
 		TRACE(merge, 6, ("Sending '%.*s' as emissary object to %s",
 		                   ct->d.name->d.items, ct->d.name->d.data,
 		                   NodeString(srv)) );
