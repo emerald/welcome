@@ -1,6 +1,6 @@
 EMC=emc
 ENV=test_env
-BIN=event_handlers event_handler_parameters
+BIN=event_handlers event_handler_parameters disc_node_list
 
 all: clean $(BIN)
 
