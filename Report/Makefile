@@ -37,7 +37,6 @@ DIR  =		/usr/em/Language/Report
 
 ${SOURCE}.dvi:	${SOURCES}
 	latex ${SOURCE}
-	dvipdf Report.dvi Report.pdf
 
 spell:		${SOURCES}
 	spell ${SOURCES}

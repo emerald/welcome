@@ -64,7 +64,7 @@ Node getLocFromObj(Object obj);
 int rinvoke(struct State *state, Object obj, int fn);
 void ReadInt(u32 *n, Stream theStream);
 void WriteInt( u32 n, Stream str);
-Vector getnodes(int onlyactive);
+Vector getnodes(int onlyactive, int discovered);
 extern void invokeHandleDown(struct noderecord *);
 void performReturn(struct State *state);
 #endif

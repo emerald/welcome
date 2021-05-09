@@ -190,3 +190,5 @@ node_event@0@1
 discovered_node_event@0@1
 succ@0@1
 pred@0@1
+getdiscoverednodes@0@1
+getalldiscoverednodes@0@1

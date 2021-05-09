@@ -55,7 +55,9 @@ jrefix(struct State *),
 jlocate(struct State *),
 jgetIncarnationTime(struct State *),
 jgetLoadAverage(struct State *),
-mergeWith(struct State *);
+mergeWith(struct State *),
+getdiscoverednodes(struct State *),
+getalldiscoverednodes(struct State *);
 
 extern int(*(sysfuncs[]))(struct State *),
 (*(xfuncs[]))(int *);

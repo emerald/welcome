@@ -181,13 +181,25 @@ int jislocal(State *state) {
 }
 
 int getallnodes(State *state) {
-	Vector ans = getnodes(0);
+	Vector ans = getnodes(0, 0);
 	PUSH(Vector, ans);
 	return 0;
 }
 
 int getactivenodes(State *state) {
-	Vector ans = getnodes(1);
+	Vector ans = getnodes(1, 0);
+	PUSH(Vector, ans);
+	return 0;
+}
+
+int getalldiscoverednodes(State *state) {
+	Vector ans = getnodes(0, 1);
+	PUSH(Vector, ans);
+	return 0;
+}
+
+int getdiscoverednodes(State *state) {
+	Vector ans = getnodes(1, 1);
 	PUSH(Vector, ans);
 	return 0;
 }

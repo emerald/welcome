@@ -103,6 +103,7 @@ extern void serveRequest(void);
 extern void doRequest(Node srv, Stream str);
 extern void processMessages(void);
 extern noderecord *allnodes, *thisnode;
+extern discNoderecord *discoverednodes;
 extern Object rootdir, rootdirg, node, inctm;
 extern void ctcallback(Object);
 extern void cticallback(int (*)(IISc, Object), IISc);

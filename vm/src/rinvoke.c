@@ -376,7 +376,7 @@ int rinvoke(State *state, Object obj, int fn) {
 }
 #endif
 
-Vector getnodes(int onlyactive) {
+Vector getnodes(int onlyactive, int discovered) {
 	ConcreteType nle = BuiltinInstCT(NODELISTELEMENTI);
 	ConcreteType nl = BuiltinInstCT(NODELISTI);
 	ConcreteType ct;
@@ -385,8 +385,11 @@ Vector getnodes(int onlyactive) {
 	unsigned int stack[32];
 	int i, howmany = 0;
 	noderecord **nd;
+	noderecord *used_nodes = discovered
+				? (noderecord*)discoverednodes
+				: allnodes->p;
 
-	for (nd = &allnodes->p; *nd; nd = &(*nd)->p) {
+	for (nd = &used_nodes; *nd; nd = &(*nd)->p) {
 		/* Ignore not yet filled out entries */
 		if (ISNIL(OIDFetch((*nd)->node))) continue;
 		if (onlyactive && !(*nd)->up) continue;
@@ -394,7 +397,7 @@ Vector getnodes(int onlyactive) {
 	}
 	anticipateGC(64 * 1024 + howmany * 6 * sizeof(u32));
 	thenl = CreateVector(nl, howmany);
-	for (i = 0, nd = &allnodes->p; *nd; nd = &(*nd)->p) {
+	for (i = 0, nd = &used_nodes; *nd; nd = &(*nd)->p) {
 
 		/* Ignore not yet filled out entries */
 		if (ISNIL(OIDFetch((*nd)->node))) continue;
@@ -424,7 +427,12 @@ Vector getnodes(int onlyactive) {
 	}
 	inhibit_gc--;
 
-	TRACE(rinvoke, 5, ("getactivenodes() got %d nodes", i));
+	TRACE(rinvoke, 5, ("get%sNodes() got %d nodes",
+				onlyactive ?
+					discovered ? "Discovered"
+					:            "Active"
+				: discovered ? "AllDiscovered"
+				: 			   "All", i));
 	return thenl;
 }
 

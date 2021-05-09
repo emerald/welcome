@@ -2,7 +2,7 @@
 \label{compiler appendix}
 
 This appendix presents a sample \emd{} program, and shows how
-Emerald programs are compiled and executed.  
+Emerald programs are compiled and executed.
 Examples of the Emerald style of programming can be found
 in \cite{Raj90spe}.
 
@@ -17,7 +17,7 @@ interest are:
     \begin{description}
       \item[{\bf load} filename]{} ~\\
 	Define the environment in which this compilation is to be executed.
-	Environments are stored in Unix files in the working directory.  
+	Environments are stored in Unix files in the working directory.
 	Exported identifiers are made known in the environment
 	in order to facilitate separate compilation.  A compilation
 	environment consists of two files:  {\it filename\/} and {\it
@@ -41,10 +41,53 @@ interest are:
 	and functions.
       \item[-v]{} ~\\
 	Generate summary statistics on program termination.
+      \item[-R]{} ~\\
+	Leave the node running after all processes are terminated.
+    Always used when connecting multiple nodes. To connect to a node at
+    launch, specify the IP address or hostname and port.
+    E.g. emx -Rmy.hostname.domain:4321 filename.x
+      \item[-U]{} ~\\
+    Avoid validating userID of connecting nodes.
+      \item[-S]{} ~\\
+    Find and connect to other nodes on the loopback interface.
+      \item[-D]{} ~\\
+    Make the node discoverable.
+      \item[-T$<$category$>$=$<$level$>$]{} ~\\
+    Print debugging traces for a given category. Multiple categories can be
+    specified using a comma ({\tt ,}) as a delimitator. E.g. emx -Tdist=2,rinvoke=1.
+    Possible options and their maximum trace level are:
+    \begin{itemize}
+        \item index - 4
+        \item templ - 3
+        \item trans - 4
+        \item map - 2
+        \item passes - 1
+        \item call - 2
+        \item fold - 5
+        \item sys - 5
+        \item memory - 10
+        \item process - 6
+        \item initiallies - 1
+        \item checkpoint - 11
+        \item debug - 1
+        \item conform - 4
+        \item relocation - 2
+        \item oid - 8
+        \item rinvoke - 16
+        \item gaggle - 5
+        \item distgc - 11
+        \item locate - 5
+        \item dist - 14
+        \item unavailable - 9
+        \item failure - 1
+        \item discovery - 8
+        \item merge - 11
+        \item welcome - 4
+    \end{itemize}
     \end{description}
 \end{description}
 
-The environment mechanism 
+The environment mechanism
 permits the sharing of object
 definitions between compilations.  Objects (actually, identifiers) exported
 from one compilation unit that are to be used in another must be exported to
@@ -90,7 +133,7 @@ accepts $create$ invocations and returns a new stack-like object
 \cite{Hutchinson87,Raj90spe} for a better understanding of this
 program.  Note that the name Stack is exported to the compilation
 environment using the export directive.
-    
+
 \subsection*{The file {\tt tester.m}}
 \begin{figure}
 \input{teststack-prog}
@@ -98,7 +141,7 @@ environment using the export directive.
 \label{TEST STACK PROG}
 \end{figure}
 This file (see~Figure~\ref{TEST STACK PROG}) contains a simple object that
-can be used to 
+can be used to
 test the $Stack$ object defined in Figure~\ref{STACK PROG}.
 This object invokes the stack-creator object $Stack$
 to create the new stack named $myStack$; the rest of the program is fairly

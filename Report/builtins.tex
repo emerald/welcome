@@ -513,6 +513,12 @@ locations, and have the following interface:
   \item[\kw{operation} setDiscoveredNodeEventHandler\/\LB{}h \CO{} HandlerType\/\RB{}]~\\
     Register {\it h} as an additional handler to receive notification when
     nearby nodes are discovered.
+  \item[\kw{operation} getDiscoveredNodes \returns{} \/\LB{}NodeList\/\RB{}]~\\
+    Return a list containing information about all discovered nodes in the Emerald
+    environment that are known to be functioning.
+  \item[\kw{operation} getAllDiscoveredNodes \returns{} \/\LB{}NodeList\/\RB{}]~\\
+    Return a list containing information about all discovered nodes in the Emerald
+    environment, whether they are functioning or not.
   \item[\kw{operation} getStdin \returns{} \/\LB{}InStream\/\RB{}]~\\
     Return an InStream representing the target \tn{Node}'s standard input.
   \item[\kw{operation} getStdout \returns{} \/\LB{}OutStream\/\RB{}]~\\

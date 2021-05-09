@@ -63,7 +63,9 @@ int (*sysfuncs[JSYS_OPS])(struct State *) = {
 	jisfixed,
 	jgetIncarnationTime,
 	jgetLoadAverage,
-	mergeWith
+	mergeWith,
+	getdiscoverednodes,
+	getalldiscoverednodes
 };
 
 void initGlobals() {
