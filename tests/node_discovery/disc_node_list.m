@@ -1,3 +1,9 @@
+% The intention of this program is to test that all discovered nodes are
+% avaliable at all times.
+
+% This test requires at least two nodes in the local network, where one is
+% discoverable.
+
 const PollDiscList <- object PollDiscList
     const me <- locate self
     var list : NodeList
