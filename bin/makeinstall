@@ -6,4 +6,4 @@ mkdir $EMERALDROOT/emerald-bin-welcome/bin
 cp $EMERALDROOT/vm/$EMERALDARCH/emx $EMERALDROOT/emerald-bin-welcome/bin/
 cp $EMERALDROOT/bin/{emc,ec} $EMERALDROOT/emerald-bin-welcome/bin/
 cp $EMERALDROOT/lib/{opoid,??def,Compiler,Builtins} $EMERALDROOT/emerald-bin-welcome/lib/
-tar -cvzf emerald-bin-welcome.tar.gz emerald-bin-welcome
+cd $EMERALDROOT ; tar -cvzf emerald-bin-welcome.tar.gz emerald-bin-welcome
