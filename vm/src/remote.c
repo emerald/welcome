@@ -820,6 +820,16 @@ void doMergeRequest(Node srv) {
 	RemoteOpHeader requesth;
     Stream request;
 	noderecord *n;
+
+	for (n = allnodes->p; n; n = n->p) {
+		if (n->up &&
+			n->srv.ipaddress == srv.ipaddress &&
+			n->srv.port == srv.port) {
+			TRACE(merge, 4, ("Not merging with known node %s", NodeString(srv)));
+			return;
+		}
+	}
+
 	(void)handleupdown(srv, 1);
 
 	TRACE(merge, 4, ("Sending MergeRequest to %s", NodeString(srv)));
