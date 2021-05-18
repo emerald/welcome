@@ -13,6 +13,8 @@ This is an implementation of Emerald with an added `welcome` expression and node
 - The `welcomable` object prefix
 - The `mergeWith`-operation in the builtin `Node`-object
 - The `setDiscoveredNodeEventHandler`-operation in the `Node`-object
+- The `getDiscoveredNodes`-operation in the `Node`-object
+- The `getAllDiscoveredNodes`-operation in the `Node`-object
 - Run emx with the option `-D` to make a node discoverable
 - The debugging-traces `welcome` and `discovery`   
 
@@ -66,11 +68,13 @@ emmake install
 
 ## Compiling a new compiler
 - Navigate to EC and run `newcompiler`. This will run the following commands:
-    - `emmake fffs`     - Compile compiler without builtins.
-    - `newversion`      - creates CP_qXX
-    - `useversion`      - sets the symlink execCP to point to that version
-    - `emmake bestCP`   - builds a version that understands the builtin types, called bestCP
-    - `useversion best` - sets the symlink execCP to point to the bestCP version
+    - `emmake` (Builtins)           - Compile builtins
+    - `emmake install` (Builtins)   - Update lib/Builtins and lib/opoid
+    - `emmake fffs`                 - Compile compiler without builtins.
+    - `newversion`                  - creates CP_qXX
+    - `useversion`                  - sets the symlink execCP to point to that version
+    - `emmake bestCP`               - builds a version that understands the builtin types, called bestCP
+    - `useversion best`             - sets the symlink execCP to point to the bestCP version
 
 - To run your new compiler use `xemc`
 
